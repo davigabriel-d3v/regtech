@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
   Award,
   Building2,
   Camera,
+  ChevronDown,
   Globe,
   Headset,
+  LayoutGrid,
   MapPin,
   MonitorSmartphone,
   Rocket,
@@ -45,55 +48,124 @@ export const Route = createFileRoute("/")({
 const services = [
   {
     icon: MonitorSmartphone,
+    slug: "assistencia-tecnica",
     title: "Assistência Técnica",
     description:
       "Manutenção de computadores e notebooks com diagnóstico honesto e garantia.",
   },
   {
     icon: Wifi,
+    slug: "redes-e-internet",
     title: "Redes e Internet",
     description:
       "Instalação e configuração de redes Wi-Fi para casa e empresa, sem sinal fraco.",
   },
   {
     icon: Camera,
+    slug: "cameras-e-seguranca",
     title: "Câmeras e Segurança",
     description:
       "Projetos de segurança eletrônica com instalação e monitoramento pelo celular.",
   },
   {
     icon: Globe,
+    slug: "sites-e-sistemas",
     title: "Sites e Sistemas",
     description:
       "Presença digital e sistemas sob medida para o seu negócio crescer.",
   },
   {
     icon: Building2,
+    slug: "suporte-empresarial",
     title: "Suporte Empresarial",
     description:
       "Planos de suporte de TI para empresas, com atendimento ágil na região.",
   },
   {
     icon: Headset,
+    slug: "atendimento-local",
     title: "Atendimento Local",
     description:
       "Equipe presente em Tucumã-PA e Ourilândia-PA, perto de você.",
   },
 ];
 
+const quickLinks = [
+  { label: "Início", href: "#inicio" },
+  { label: "Quem somos", href: "#quem-somos" },
+  { label: "Serviços", href: "#servicos" },
+  { label: "Contato", href: "#contato" },
+];
+
 function Index() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <a href="#" className="flex items-center gap-3">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:gap-4 sm:px-6">
+          {/* Categorias (canto superior esquerdo) */}
+          <div className="relative">
+            <button
+              type="button"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((open) => !open)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary sm:px-4"
+            >
+              <LayoutGrid className="h-4 w-4 text-accent" />
+              <span className="hidden sm:inline">Categorias</span>
+              <ChevronDown
+                className={`h-4 w-4 text-muted-foreground transition-transform ${menuOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {menuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setMenuOpen(false)}
+                />
+                <nav className="absolute left-0 top-full z-50 mt-2 w-60 rounded-2xl border border-border bg-card p-2 shadow-xl shadow-primary/10">
+                  <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Links rápidos
+                  </p>
+                  {quickLinks.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="block rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                  <p className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Categorias
+                  </p>
+                  {services.map((service) => (
+                    <a
+                      key={service.slug}
+                      href={`#${service.slug}`}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+                    >
+                      <service.icon className="h-4 w-4 text-primary" />
+                      {service.title}
+                    </a>
+                  ))}
+                </nav>
+              </>
+            )}
+          </div>
+
+          <a href="#" className="flex items-center gap-2 sm:gap-3">
             <img src={logo} alt="Logo da RegTech" className="h-9 w-9 rounded-full" />
             <span className="font-display text-lg font-bold tracking-tight">
               Reg<span className="text-primary">Tech</span>
             </span>
           </a>
-          <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
+          <nav className="ml-auto hidden items-center gap-8 text-sm text-muted-foreground md:flex">
             <a href="#inicio" className="transition-colors hover:text-foreground">
               Início
             </a>
@@ -111,7 +183,7 @@ function Index() {
             href={WHATSAPP_URL}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent"
+            className="ml-auto inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent md:ml-0"
           >
             Fale conosco
             <ArrowRight className="h-4 w-4" />
