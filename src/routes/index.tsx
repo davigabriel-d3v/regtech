@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
   Award,
   Building2,
   Camera,
+  ChevronDown,
   Globe,
   Headset,
+  LayoutGrid,
   MapPin,
   MonitorSmartphone,
   Rocket,
