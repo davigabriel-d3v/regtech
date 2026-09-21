@@ -139,7 +139,7 @@ function Index() {
 
           <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-1.5 text-sm font-medium text-foreground">
             <Award className="h-4 w-4 text-accent" />
-            🏅 Referência em Tecnologia há +14 anos!
+            Referência em Tecnologia há +14 anos!
           </span>
 
           <h1 className="font-display text-4xl font-bold leading-tight tracking-tight sm:text-6xl">
@@ -156,7 +156,7 @@ function Index() {
 
           <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-1.5 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 text-accent" />
-            📍 Tucumã-PA / Ourilândia-PA
+            Tucumã-PA / Ourilândia-PA
           </span>
 
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
@@ -167,7 +167,7 @@ function Index() {
               className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 hover:bg-accent"
             >
               <Rocket className="h-5 w-5" />
-              🚀 Seu upgrade começa aqui!
+              Seu upgrade começa aqui!
             </a>
             <a
               href="#servicos"
@@ -258,11 +258,11 @@ function Index() {
             className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 hover:bg-accent"
           >
             <Rocket className="h-5 w-5" />
-            🚀 Seu upgrade começa aqui!
+            Seu upgrade começa aqui!
           </a>
           <p className="mt-5 inline-flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4" />
-            📍 Tucumã-PA / Ourilândia-PA
+            Tucumã-PA / Ourilândia-PA
           </p>
         </div>
       </section>
@@ -276,8 +276,9 @@ function Index() {
               Reg<span className="text-primary">Tech</span>
             </span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            📍 Tucumã-PA / Ourilândia-PA · Referência em Tecnologia há +14 anos
+          <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+            <MapPin className="h-4 w-4" />
+            Tucumã-PA / Ourilândia-PA · Referência em Tecnologia há +14 anos
           </p>
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} RegTech. Todos os direitos reservados.
