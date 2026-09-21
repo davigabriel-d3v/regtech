@@ -9,6 +9,7 @@ import {
   MapPin,
   MonitorSmartphone,
   Rocket,
+  Smartphone,
   Wifi,
 } from "lucide-react";
 import logo from "@/assets/regtech-logo.png";
@@ -95,6 +96,9 @@ function Index() {
           <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
             <a href="#inicio" className="transition-colors hover:text-foreground">
               Início
+            </a>
+            <a href="#quem-somos" className="transition-colors hover:text-foreground">
+              Quem somos
             </a>
             <a href="#servicos" className="transition-colors hover:text-foreground">
               Serviços
