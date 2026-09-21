@@ -207,6 +207,59 @@ function Index() {
         </div>
       </section>
 
+      {/* Quem somos */}
+      <section
+        id="quem-somos"
+        className="mx-auto max-w-6xl px-4 py-20 sm:px-6"
+      >
+        <div className="mb-10 text-center">
+          <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            Quem <span className="text-primary">somos?</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+            A RegTech nasceu da paixão por tecnologia e do desejo de levar
+            soluções de verdade para Tucumã-PA e Ourilândia-PA. De uma pequena
+            assistência técnica a referência regional: são mais de 14 anos
+            transformando desafios em inovação, sempre com atendimento perto de
+            você.
+          </p>
+        </div>
+
+        <div className="mx-auto w-full max-w-[380px]">
+          <div
+            className="overflow-hidden rounded-2xl border border-border shadow-lg shadow-primary/10"
+            style={{ padding: "177.78% 0 0 0", position: "relative" }}
+          >
+            <iframe
+              src="https://player.vimeo.com/video/1228819663?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              title="A História por trás da Regtech Cell Shop"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="mx-auto mt-10 max-w-2xl text-center">
+          <h3 className="inline-flex items-center gap-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">
+            <Smartphone className="h-6 w-6 text-accent sm:h-7 sm:w-7" />
+            A História por trás da Regtech Cell Shop!
+          </h3>
+          <p className="mt-4 leading-relaxed text-muted-foreground">
+            Toda grande história começa pequena. Assista e descubra como tudo
+            começou — uma jornada feita de esforço, aprendizado e amor pela
+            tecnologia, que hoje faz da RegTech a referência que é na região.
+          </p>
+        </div>
+      </section>
+
       {/* Serviços */}
       <section id="servicos" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="mb-12 text-center">
