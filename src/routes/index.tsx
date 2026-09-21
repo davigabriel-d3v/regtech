@@ -48,40 +48,53 @@ export const Route = createFileRoute("/")({
 const services = [
   {
     icon: MonitorSmartphone,
+    slug: "assistencia-tecnica",
     title: "Assistência Técnica",
     description:
       "Manutenção de computadores e notebooks com diagnóstico honesto e garantia.",
   },
   {
     icon: Wifi,
+    slug: "redes-e-internet",
     title: "Redes e Internet",
     description:
       "Instalação e configuração de redes Wi-Fi para casa e empresa, sem sinal fraco.",
   },
   {
     icon: Camera,
+    slug: "cameras-e-seguranca",
     title: "Câmeras e Segurança",
     description:
       "Projetos de segurança eletrônica com instalação e monitoramento pelo celular.",
   },
   {
     icon: Globe,
+    slug: "sites-e-sistemas",
     title: "Sites e Sistemas",
     description:
       "Presença digital e sistemas sob medida para o seu negócio crescer.",
   },
   {
     icon: Building2,
+    slug: "suporte-empresarial",
     title: "Suporte Empresarial",
     description:
       "Planos de suporte de TI para empresas, com atendimento ágil na região.",
   },
   {
     icon: Headset,
+    slug: "atendimento-local",
     title: "Atendimento Local",
     description:
       "Equipe presente em Tucumã-PA e Ourilândia-PA, perto de você.",
   },
+];
+
+const quickLinks = [
+  { label: "Início", href: "#inicio" },
+  { label: "Quem somos", href: "#quem-somos" },
+  { label: "Serviços", href: "#servicos" },
+  { label: "Contato", href: "#contato" },
 ];
 
 function Index() {
