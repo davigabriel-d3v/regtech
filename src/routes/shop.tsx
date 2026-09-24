@@ -27,7 +27,7 @@ export const lojaProdutosQueryOptions = queryOptions({
   queryFn: () => listarProdutos(),
 });
 
-export const Route = createFileRoute("/loja")({
+export const Route = createFileRoute("/shop")({
   loader: async ({ context: { queryClient } }) => {
     await queryClient.ensureQueryData(lojaProdutosQueryOptions);
   },
@@ -107,15 +107,15 @@ function Loja() {
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:gap-4 sm:px-6">
           <Link
-            to="/loja"
+            to="/shop"
             className="flex items-center gap-2 sm:gap-3"
-            aria-label="Loja RegTech"
+            aria-label="Shop RegTech"
           >
             <img src={logo} alt="Logo da RegTech" className="h-9 w-9 rounded-full" />
             <span className="font-display text-lg font-bold tracking-tight">
               Reg<span className="text-primary">Tech</span>
               <span className="ml-2 rounded-full bg-primary/15 px-2.5 py-1 align-middle text-xs font-semibold text-primary">
-                Loja
+                Shop
               </span>
             </span>
           </Link>
