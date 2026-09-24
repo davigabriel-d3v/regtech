@@ -33,7 +33,7 @@ export const Route = createFileRoute("/shop")({
   },
   head: () => ({
     meta: [
-      { title: "Loja RegTech — Motos Elétricas, Starlink, Apple, Xiaomi e mais" },
+      { title: "Shop RegTech — Motos Elétricas, Starlink, Apple, Xiaomi e mais" },
       {
         name: "description",
         content:
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/shop")({
       },
       {
         property: "og:title",
-        content: "Loja RegTech — Motos Elétricas, Starlink, Apple, Xiaomi e mais",
+        content: "Shop RegTech — Motos Elétricas, Starlink, Apple, Xiaomi e mais",
       },
       {
         property: "og:description",
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/shop")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Loja,
+  component: Shop,
 });
 
 const categorias = [
@@ -82,7 +82,7 @@ function precoTexto(preco: number | null): string {
   }).format(preco);
 }
 
-function Loja() {
+function Shop() {
   const { data: produtos } = useSuspenseQuery(lojaProdutosQueryOptions);
   const [filtro, setFiltro] = useState<string>("todas");
   const [busca, setBusca] = useState("");
