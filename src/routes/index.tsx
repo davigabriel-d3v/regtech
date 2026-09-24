@@ -14,7 +14,6 @@ import {
   MapPin,
   MonitorSmartphone,
   Plane,
-  Rocket,
   SatelliteDish,
   Smartphone,
   Tv,
@@ -23,6 +22,8 @@ import {
 } from "lucide-react";
 import logo from "@/assets/regtech-logo.png";
 
+// TODO: trocar pelo endereço real do site da RegTech
+const SITE_URL = "#";
 // TODO: trocar pelo número real do WhatsApp da RegTech
 const WHATSAPP_URL = "https://wa.me/5594999999999";
 
@@ -309,13 +310,13 @@ function Index() {
 
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
             <a
-              href={WHATSAPP_URL}
+              href={SITE_URL}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 hover:bg-accent"
             >
-              <Rocket className="h-5 w-5" />
-              Seu upgrade começa aqui!
+              <Globe className="h-5 w-5" />
+              Acesse o Nosso Site
             </a>
             <a
               href="#servicos"
@@ -486,13 +487,13 @@ function Index() {
             Tucumã-PA e Ourilândia-PA.
           </p>
           <a
-            href={WHATSAPP_URL}
+            href={SITE_URL}
             target="_blank"
             rel="noreferrer"
             className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 hover:bg-accent"
           >
-            <Rocket className="h-5 w-5" />
-            Seu upgrade começa aqui!
+            <Globe className="h-5 w-5" />
+            Acesse o Nosso Site
           </a>
           <p className="mt-5 inline-flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4" />
