@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Apple,
   ArrowRight,
@@ -16,16 +16,13 @@ import {
   Plane,
   SatelliteDish,
   Smartphone,
+  Store,
   Tv,
   Watch,
   Wifi,
 } from "lucide-react";
 import logo from "@/assets/regtech-logo.png";
-
-// TODO: trocar pelo endereço real do site da RegTech
-const SITE_URL = "#";
-// TODO: trocar pelo número real do WhatsApp da RegTech
-const WHATSAPP_URL = "https://wa.me/5594999999999";
+import { WHATSAPP_URL } from "@/lib/contato";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -199,6 +196,14 @@ function Index() {
                       {link.label}
                     </a>
                   ))}
+                  <Link
+                    to="/loja"
+                    onClick={() => setMenuOpen(false)}
+                    className="mt-1 flex items-center gap-2.5 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+                  >
+                    <Store className="h-4 w-4" />
+                    Loja RegTech
+                  </Link>
                   <p className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Categorias
                   </p>
@@ -309,15 +314,13 @@ function Index() {
           </span>
 
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
-            <a
-              href={SITE_URL}
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              to="/loja"
               className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 hover:bg-accent"
             >
               <Globe className="h-5 w-5" />
               Acesse o Nosso Site
-            </a>
+            </Link>
             <a
               href="#servicos"
               className="inline-flex items-center gap-2 rounded-full border border-border px-7 py-3.5 text-base font-semibold text-foreground transition-colors hover:bg-secondary"
@@ -486,15 +489,13 @@ function Index() {
             Chame a RegTech no WhatsApp e conte o que você precisa. Atendemos
             Tucumã-PA e Ourilândia-PA.
           </p>
-          <a
-            href={SITE_URL}
-            target="_blank"
-            rel="noreferrer"
+          <Link
+            to="/loja"
             className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 hover:bg-accent"
           >
             <Globe className="h-5 w-5" />
             Acesse o Nosso Site
-          </a>
+          </Link>
           <p className="mt-5 inline-flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4" />
             Tucumã-PA / Ourilândia-PA
