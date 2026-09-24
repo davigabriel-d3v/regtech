@@ -184,7 +184,7 @@ function Index() {
                   className="fixed inset-0 z-40"
                   onClick={() => setMenuOpen(false)}
                 />
-                <nav className="absolute left-0 top-full z-50 mt-2 w-60 rounded-2xl border border-border bg-card p-2 shadow-xl shadow-primary/10">
+                <nav className="absolute left-0 top-full z-50 mt-2 max-h-[70vh] w-60 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-xl shadow-primary/10">
                   <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Links rápidos
                   </p>
@@ -420,7 +420,8 @@ function Index() {
           {services.map((service) => (
             <div
               key={service.title}
-              className="group rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10"
+              id={service.slug}
+              className="group scroll-mt-24 rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10"
             >
               <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                 <service.icon className="h-6 w-6" />
@@ -430,6 +431,38 @@ function Index() {
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {service.description}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Marcas e produtos */}
+        <div className="mt-20 text-center">
+          <h3 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+            Marcas e produtos que a <span className="text-primary">RegTech</span>{" "}
+            trabalha
+          </h3>
+          <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+            Você escolhe a marca, a RegTech cuida do resto: instalação,
+            configuração e suporte de quem é da região.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {products.map((product) => (
+            <div
+              key={product.title}
+              id={product.slug}
+              className="group scroll-mt-24 rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10"
+            >
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                <product.icon className="h-6 w-6" />
+              </div>
+              <h4 className="font-display text-lg font-semibold">
+                {product.title}
+              </h4>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {product.description}
               </p>
             </div>
           ))}
