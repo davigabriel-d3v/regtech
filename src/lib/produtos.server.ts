@@ -16,11 +16,6 @@ export type ProdutoLoja = {
   imagemUrl: string | null;
 };
 
-export type CategoriaLoja = {
-  slug: string;
-  nome: string;
-  total: number;
-};
 
 type ProdutoRow = Database["public"]["Tables"]["produtos"]["Row"];
 
@@ -102,21 +97,3 @@ export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> 
   return (data ?? []).map(toProduto);
 }
 
-export async function fetchCategorias(): Promise<CategoriaLoja[]> {
-  const supabase = createReader();
-
-  const { data, error } = await supabase
-    .from("produtos")
-    .select("categoria, marca")
-    .eq("publicado", true);
-  if (error) throw error;
-
-  const totals = new Map<string, number>();
-  for (const row of data ?? []) {
-    totals.set(row.categoria, (totals.get(row.categoria) ?? 0) + 1);
-  }
-
-  return [...totals.entries()]
-    .map(([slug, total]) => ({ slug, nome: slug, total }))
-    .sort((a, b) => a.slug.localeCompare(b.slug, "pt-BR"));
-}
