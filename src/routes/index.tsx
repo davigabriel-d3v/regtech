@@ -16,6 +16,7 @@ import {
   Plane,
   SatelliteDish,
   Smartphone,
+  Store,
   Tv,
   Watch,
   Wifi,
@@ -195,6 +196,14 @@ function Index() {
                       {link.label}
                     </a>
                   ))}
+                  <Link
+                    to="/loja"
+                    onClick={() => setMenuOpen(false)}
+                    className="mt-1 flex items-center gap-2.5 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+                  >
+                    <Store className="h-4 w-4" />
+                    Loja RegTech
+                  </Link>
                   <p className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Categorias
                   </p>
