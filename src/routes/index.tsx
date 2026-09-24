@@ -197,12 +197,12 @@ function Index() {
                     </a>
                   ))}
                   <Link
-                    to="/loja"
+                    to="/shop"
                     onClick={() => setMenuOpen(false)}
                     className="mt-1 flex items-center gap-2.5 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
                   >
                     <Store className="h-4 w-4" />
-                    Loja RegTech
+                    Shop RegTech
                   </Link>
                   <p className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Categorias
@@ -315,7 +315,7 @@ function Index() {
 
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
             <Link
-              to="/loja"
+              to="/shop"
               className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 hover:bg-accent"
             >
               <Globe className="h-5 w-5" />
@@ -490,7 +490,7 @@ function Index() {
             Tucumã-PA e Ourilândia-PA.
           </p>
           <Link
-            to="/loja"
+            to="/shop"
             className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 hover:bg-accent"
           >
             <Globe className="h-5 w-5" />
