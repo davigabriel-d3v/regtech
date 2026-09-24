@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -8,7 +8,10 @@ import {
   Award,
   Bike,
   Check,
+  ChevronDown,
+  LayoutGrid,
   MapPin,
+  Menu,
   Package,
   Plane,
   SatelliteDish,
@@ -86,6 +89,18 @@ function Shop() {
   const { data: produtos } = useSuspenseQuery(lojaProdutosQueryOptions);
   const [filtro, setFiltro] = useState<string>("todas");
   const [busca, setBusca] = useState("");
+  const [menuAberto, setMenuAberto] = useState(false);
+
+  const escolherCategoria = (slug: string) => {
+    setFiltro(slug);
+    setBusca("");
+    setMenuAberto(false);
+    requestAnimationFrame(() => {
+      document
+        .getElementById("produtos")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   const visiveis = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -119,6 +134,12 @@ function Shop() {
               </span>
             </span>
           </Link>
+
+          <CategoriasMenu
+            aberto={menuAberto}
+            setAberto={setMenuAberto}
+            onCategoria={escolherCategoria}
+          />
 
           <nav className="ml-auto hidden items-center gap-7 text-sm text-muted-foreground md:flex">
             <Link to="/" className="transition-colors hover:text-foreground">
@@ -229,7 +250,7 @@ function Shop() {
       </div>
 
       {/* Grade de produtos */}
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <main id="produtos" className="mx-auto max-w-6xl scroll-mt-40 px-4 py-10 sm:px-6">
         {visiveis.length === 0 ? (
           <div className="rounded-3xl border border-border bg-card/60 px-6 py-16 text-center">
             <p className="font-display text-xl font-bold">
