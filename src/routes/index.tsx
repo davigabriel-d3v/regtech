@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  Apple,
   ArrowRight,
   Award,
+  Bike,
   Building2,
   Camera,
   ChevronDown,
@@ -11,8 +13,12 @@ import {
   LayoutGrid,
   MapPin,
   MonitorSmartphone,
+  Plane,
   Rocket,
+  SatelliteDish,
   Smartphone,
+  Tv,
+  Watch,
   Wifi,
 } from "lucide-react";
 import logo from "@/assets/regtech-logo.png";
@@ -90,6 +96,58 @@ const services = [
   },
 ];
 
+const products = [
+  {
+    icon: Bike,
+    slug: "motos-eletricas",
+    title: "Motos Elétricas",
+    description:
+      "Motos elétricas para o dia a dia, com orientação na escolha e suporte para rodar sem preocupação.",
+  },
+  {
+    icon: SatelliteDish,
+    slug: "starlink",
+    title: "Starlink",
+    description:
+      "Internet via satélite Starlink com instalação e configuração para onde a fibra não chega.",
+  },
+  {
+    icon: Apple,
+    slug: "apple",
+    title: "Apple",
+    description:
+      "Produtos Apple com configuração, transferência de dados e suporte de quem entende.",
+  },
+  {
+    icon: Smartphone,
+    slug: "realme",
+    title: "Realme",
+    description:
+      "Smartphones Realme com configuração completa, proteção e acompanhamento da nossa equipe.",
+  },
+  {
+    icon: Plane,
+    slug: "dji",
+    title: "DJI",
+    description:
+      "Drones e câmeras DJI com ajuste, calibração e orientação para usar desde o primeiro voo.",
+  },
+  {
+    icon: Watch,
+    slug: "xiaomi",
+    title: "Xiaomi",
+    description:
+      "Smartphones, relógios e smart devices Xiaomi com configuração e suporte no dia a dia.",
+  },
+  {
+    icon: Tv,
+    slug: "samsung",
+    title: "Samsung",
+    description:
+      "Smartphones, TVs e eletrodomésticos Samsung com instalação, configuração e suporte local.",
+  },
+];
+
 const quickLinks = [
   { label: "Início", href: "#inicio" },
   { label: "Quem somos", href: "#quem-somos" },
@@ -152,6 +210,20 @@ function Index() {
                     >
                       <service.icon className="h-4 w-4 text-primary" />
                       {service.title}
+                    </a>
+                  ))}
+                  <p className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Produtos e marcas
+                  </p>
+                  {products.map((product) => (
+                    <a
+                      key={product.slug}
+                      href={`#${product.slug}`}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+                    >
+                      <product.icon className="h-4 w-4 text-primary" />
+                      {product.title}
                     </a>
                   ))}
                 </nav>
