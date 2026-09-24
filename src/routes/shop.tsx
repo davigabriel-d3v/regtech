@@ -27,13 +27,13 @@ export const lojaProdutosQueryOptions = queryOptions({
   queryFn: () => listarProdutos(),
 });
 
-export const Route = createFileRoute("/loja")({
+export const Route = createFileRoute("/shop")({
   loader: async ({ context: { queryClient } }) => {
     await queryClient.ensureQueryData(lojaProdutosQueryOptions);
   },
   head: () => ({
     meta: [
-      { title: "Loja RegTech — Motos Elétricas, Starlink, Apple, Xiaomi e mais" },
+      { title: "Shop RegTech — Motos Elétricas, Starlink, Apple, Xiaomi e mais" },
       {
         name: "description",
         content:
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/loja")({
       },
       {
         property: "og:title",
-        content: "Loja RegTech — Motos Elétricas, Starlink, Apple, Xiaomi e mais",
+        content: "Shop RegTech — Motos Elétricas, Starlink, Apple, Xiaomi e mais",
       },
       {
         property: "og:description",
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/loja")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Loja,
+  component: Shop,
 });
 
 const categorias = [
@@ -82,7 +82,7 @@ function precoTexto(preco: number | null): string {
   }).format(preco);
 }
 
-function Loja() {
+function Shop() {
   const { data: produtos } = useSuspenseQuery(lojaProdutosQueryOptions);
   const [filtro, setFiltro] = useState<string>("todas");
   const [busca, setBusca] = useState("");
@@ -107,15 +107,15 @@ function Loja() {
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:gap-4 sm:px-6">
           <Link
-            to="/loja"
+            to="/shop"
             className="flex items-center gap-2 sm:gap-3"
-            aria-label="Loja RegTech"
+            aria-label="Shop RegTech"
           >
             <img src={logo} alt="Logo da RegTech" className="h-9 w-9 rounded-full" />
             <span className="font-display text-lg font-bold tracking-tight">
               Reg<span className="text-primary">Tech</span>
               <span className="ml-2 rounded-full bg-primary/15 px-2.5 py-1 align-middle text-xs font-semibold text-primary">
-                Loja
+                Shop
               </span>
             </span>
           </Link>
