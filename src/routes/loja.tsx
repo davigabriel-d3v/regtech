@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
+  Apple,
   ArrowLeft,
   ArrowRight,
   Award,
@@ -13,12 +14,10 @@ import {
   SatelliteDish,
   Search,
   Smartphone,
-  Store,
   Tv,
   Watch,
   X,
 } from "lucide-react";
-import { queryOptions } from "@tanstack/react-query";
 import logo from "@/assets/regtech-logo.png";
 import { listarProdutos, type ProdutoLoja } from "@/lib/produtos.functions";
 import { whatsappComMensagem } from "@/lib/contato";
@@ -59,7 +58,7 @@ export const Route = createFileRoute("/loja")({
 const categorias = [
   { slug: "motos-eletricas", nome: "Motos Elétricas", icon: Bike },
   { slug: "starlink", nome: "Starlink", icon: SatelliteDish },
-  { slug: "apple", nome: "Apple", icon: Store },
+  { slug: "apple", nome: "Apple", icon: Apple },
   { slug: "realme", nome: "Realme", icon: Smartphone },
   { slug: "dji", nome: "DJI", icon: Plane },
   { slug: "xiaomi", nome: "Xiaomi", icon: Watch },
