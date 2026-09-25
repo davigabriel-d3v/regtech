@@ -21,6 +21,7 @@ import {
   Watch,
   X,
 } from "lucide-react";
+import { ContaBotao } from "@/components/ContaBotao";
 import logo from "@/assets/regtech-logo.png";
 import { listarProdutos, type ProdutoLoja } from "@/lib/produtos.functions";
 import { whatsappComMensagem } from "@/lib/contato";
@@ -157,6 +158,8 @@ function Shop() {
             </Link>
           </nav>
 
+          <div className="ml-auto flex items-center gap-2 md:ml-0">
+            <ContaBotao />
           <Link
             to="/"
             className="ml-auto inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary md:ml-0"
