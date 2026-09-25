@@ -334,6 +334,106 @@ function Shop() {
   );
 }
 
+function CategoriasMenu({
+  aberto,
+  setAberto,
+  onCategoria,
+}: {
+  aberto: boolean;
+  setAberto: (valor: boolean) => void;
+  onCategoria: (slug: string) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!aberto) return;
+    const fora = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setAberto(false);
+      }
+    };
+    const esc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAberto(false);
+    };
+    document.addEventListener("mousedown", fora);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", fora);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [aberto, setAberto]);
+
+  const links = [
+    { nome: "Início", hash: undefined },
+    { nome: "Quem somos", hash: "quem-somos" },
+    { nome: "Serviços", hash: "servicos" },
+    { nome: "Contato", hash: "contato" },
+  ];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setAberto(!aberto)}
+        aria-expanded={aberto}
+        aria-label="Categorias"
+        className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+      >
+        {aberto ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        <span className="hidden sm:inline">Categorias</span>
+        <ChevronDown
+          className={`hidden h-4 w-4 transition-transform sm:inline ${aberto ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {aberto && (
+        <nav className="absolute left-0 top-full mt-2 max-h-[70vh] w-64 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-xl">
+          <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Categorias
+          </p>
+          <button
+            type="button"
+            onClick={() => onCategoria("todas")}
+            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-secondary"
+          >
+            <LayoutGrid className="h-4 w-4 text-primary" />
+            Todas
+          </button>
+          {categorias.map((categoria) => {
+            const Icone = categoria.icon;
+            return (
+              <button
+                key={categoria.slug}
+                type="button"
+                onClick={() => onCategoria(categoria.slug)}
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-secondary"
+              >
+                <Icone className="h-4 w-4 text-primary" />
+                {categoria.nome}
+              </button>
+            );
+          })}
+
+          <p className="mt-2 border-t border-border px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Links rápidos
+          </p>
+          {links.map((link) => (
+            <Link
+              key={link.nome}
+              to="/"
+              hash={link.hash}
+              onClick={() => setAberto(false)}
+              className="block rounded-xl px-3 py-2 text-sm transition-colors hover:bg-secondary"
+            >
+              {link.nome}
+            </Link>
+          ))}
+        </nav>
+      )}
+    </div>
+  );
+}
+
 function ProdutoCard({ produto }: { produto: ProdutoLoja }) {
   const Icone = iconeCategoria(produto.categoria);
 
