@@ -121,6 +121,12 @@ function Shop() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:gap-4 sm:px-6">
+          <CategoriasMenu
+            aberto={menuAberto}
+            setAberto={setMenuAberto}
+            onCategoria={escolherCategoria}
+          />
+
           <Link
             to="/shop"
             className="flex items-center gap-2 sm:gap-3"
@@ -135,11 +141,6 @@ function Shop() {
             </span>
           </Link>
 
-          <CategoriasMenu
-            aberto={menuAberto}
-            setAberto={setMenuAberto}
-            onCategoria={escolherCategoria}
-          />
 
           <nav className="ml-auto hidden items-center gap-7 text-sm text-muted-foreground md:flex">
             <Link to="/" className="transition-colors hover:text-foreground">
