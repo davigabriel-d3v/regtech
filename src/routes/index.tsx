@@ -21,6 +21,7 @@ import {
   Watch,
   Wifi,
 } from "lucide-react";
+import { ContaBotao } from "@/components/ContaBotao";
 import logo from "@/assets/regtech-logo.png";
 import { WHATSAPP_URL } from "@/lib/contato";
 
@@ -257,6 +258,8 @@ function Index() {
               Contato
             </a>
           </nav>
+          <div className="ml-auto flex items-center gap-2 md:ml-0">
+            <ContaBotao />
           <a
             href={WHATSAPP_URL}
             target="_blank"
