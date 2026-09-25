@@ -421,7 +421,7 @@ function CategoriasMenu({
             <Link
               key={link.nome}
               to="/"
-              hash={link.hash}
+              {...(link.hash ? { hash: link.hash } : {})}
               onClick={() => setAberto(false)}
               className="block rounded-xl px-3 py-2 text-sm transition-colors hover:bg-secondary"
             >
