@@ -13,6 +13,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { CarrinhoProvider } from "@/components/loja/CarrinhoContext";
+import { FavoritosProvider } from "@/components/loja/FavoritosContext";
 
 function NotFoundComponent() {
   return (
@@ -146,9 +148,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-      <Toaster />
+      <CarrinhoProvider>
+        <FavoritosProvider>
+          <Outlet />
+          <Toaster />
+        </FavoritosProvider>
+      </CarrinhoProvider>
     </QueryClientProvider>
   );
 }

@@ -1,53 +1,66 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
-  Apple,
   ArrowRight,
-  Award,
-  Bike,
-  Building2,
-  Camera,
-  ChevronDown,
-  Globe,
-  Headset,
-  LayoutGrid,
   MapPin,
-  MonitorSmartphone,
-  Plane,
+  Package,
+  Bike,
   SatelliteDish,
+  Apple,
   Smartphone,
-  Store,
-  Tv,
-  Watch,
+  MonitorSmartphone,
   Wifi,
+  Camera,
+  Globe,
+  Building2,
+  Headset,
 } from "lucide-react";
-import { ContaBotao } from "@/components/ContaBotao";
+import { toast } from "sonner";
 import logo from "@/assets/regtech-logo.png";
-import { WHATSAPP_URL } from "@/lib/contato";
+import { Header } from "@/components/loja/Header";
+import {
+  BannerPrincipal,
+  BannersSecundarios,
+  Beneficios,
+  CompreCategoria,
+  MarcasSecao,
+  NavCategorias,
+  Newsletter,
+  OfertasDoDia,
+  ProdutoCarrossel,
+  grupos,
+  ProdutoCardLoja,
+} from "@/components/loja/Secoes";
+import { listarMarcas, listarProdutos, type ProdutoLoja } from "@/lib/produtos.functions";
+
+export const lojaProdutosQueryOptions = queryOptions({
+  queryKey: ["loja", "produtos"],
+  queryFn: () => listarProdutos(),
+});
+
+export const lojaMarcasQueryOptions = queryOptions({
+  queryKey: ["loja", "marcas"],
+  queryFn: () => listarMarcas(),
+});
 
 export const Route = createFileRoute("/")({
+  loader: async ({ context: { queryClient } }) => {
+    await Promise.all([
+      queryClient.ensureQueryData(lojaProdutosQueryOptions),
+      queryClient.ensureQueryData(lojaMarcasQueryOptions),
+    ]);
+  },
   head: () => ({
     meta: [
-      { title: "RegTech — Referência em Tecnologia há +14 anos" },
-      {
-        name: "description",
-        content:
-          "Soluções em tecnologia para residências e empresas em Tucumã-PA e Ourilândia-PA. Seu upgrade começa aqui!",
-      },
-      {
-        property: "og:title",
-        content: "RegTech — Referência em Tecnologia há +14 anos",
-      },
-      {
-        property: "og:description",
-        content:
-          "Tecnologia e soluções digitais em Tucumã-PA e Ourilândia-PA. Seu upgrade começa aqui!",
-      },
+      { title: "RegTech — Sua Loja de Tecnologia Online" },
+      { name: "description", content: "Os melhores produtos de tecnologia: celulares, notebooks, eletrônicos, e muito mais com os melhores preços." },
+      { property: "og:title", content: "RegTech — Sua Loja de Tecnologia Online" },
+      { property: "og:description", content: "Descubra os melhores produtos de tecnologia com preços imperdíveis." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Index,
+  component: Home,
 });
 
 const services = [
