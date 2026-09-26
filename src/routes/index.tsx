@@ -15,6 +15,9 @@ import {
   Globe,
   Building2,
   Headset,
+  Plane,
+  Watch,
+  Tv,
 } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/regtech-logo.png";
