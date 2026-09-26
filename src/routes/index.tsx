@@ -15,10 +15,18 @@ import {
   Globe,
   Building2,
   Headset,
+  Plane,
+  Watch,
+  Tv,
+  LayoutGrid,
+  ChevronDown,
+  Store,
+  Award,
 } from "lucide-react";
+import { ContaBotao } from "@/components/ContaBotao";
+import { WHATSAPP_URL } from "@/lib/contato";
 import { toast } from "sonner";
 import logo from "@/assets/regtech-logo.png";
-import { Header } from "@/components/loja/Header";
 import {
   BannerPrincipal,
   BannersSecundarios,
@@ -60,7 +68,7 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
     ],
   }),
-  component: Home,
+  component: Index,
 });
 
 const services = [
