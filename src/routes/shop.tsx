@@ -123,7 +123,7 @@ function Shop() {
         { chave: "informatica", titulo: "Informática e conectividade" },
         { chave: "acessorios", titulo: "Acessórios" },
         { chave: "eletronicos", titulo: "Casa e Eletrônicos" },
-      ].map((b) => ({ ...b, produtos: produtos.filter((p) => grupos[b.chave].includes(p.categoria)).slice(0, 6) })),
+      ].map((b) => ({ ...b, produtos: produtos.filter((p) => (grupos[b.chave] ?? []).includes(p.categoria)).slice(0, 6) })),
     [produtos],
   );
   const [filtro, setFiltro] = useState<string>("todas");
