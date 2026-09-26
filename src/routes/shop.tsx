@@ -147,12 +147,6 @@ function Shop() {
             <Link to="/" className="transition-colors hover:text-foreground">
               Início
             </Link>
-            <Link to="/" hash="quem-somos" className="transition-colors hover:text-foreground">
-              Quem somos
-            </Link>
-            <Link to="/" hash="servicos" className="transition-colors hover:text-foreground">
-              Serviços
-            </Link>
             <Link to="/" hash="contato" className="transition-colors hover:text-foreground">
               Contato
             </Link>
@@ -368,12 +362,6 @@ function CategoriasMenu({
     };
   }, [aberto, setAberto]);
 
-  const links = [
-    { nome: "Início", hash: undefined },
-    { nome: "Quem somos", hash: "quem-somos" },
-    { nome: "Serviços", hash: "servicos" },
-    { nome: "Contato", hash: "contato" },
-  ];
 
   return (
     <div ref={ref} className="relative">
@@ -418,21 +406,6 @@ function CategoriasMenu({
               </button>
             );
           })}
-
-          <p className="mt-2 border-t border-border px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Links rápidos
-          </p>
-          {links.map((link) => (
-            <Link
-              key={link.nome}
-              to="/"
-              {...(link.hash ? { hash: link.hash } : {})}
-              onClick={() => setAberto(false)}
-              className="block rounded-xl px-3 py-2 text-sm transition-colors hover:bg-secondary"
-            >
-              {link.nome}
-            </Link>
-          ))}
         </nav>
       )}
     </div>
