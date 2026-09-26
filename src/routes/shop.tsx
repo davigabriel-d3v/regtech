@@ -167,6 +167,7 @@ function Shop() {
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Voltar ao site</span>
           </Link>
+          </div>
         </div>
       </header>
 
