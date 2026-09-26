@@ -22,13 +22,13 @@ function createBackendFetch(backendKey: string): typeof fetch {
     return fetch(input, { ...init, headers });
   };
 }
-function createReader(): SupabaseClient<Database> {
+function createReader(): SupabaseClient<any> {
   const url = process.env["SUPABASE_URL"];
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
   if (!url || !key) throw new Error("Missing env vars for admin.");
-  return createClient<Database>(url, key, { global: { fetch: createBackendFetch(key) }, auth: { persistSession: false, autoRefreshToken: false } });
+  return createClient<any>(url, key, { global: { fetch: createBackendFetch(key) }, auth: { persistSession: false, autoRefreshToken: false } });
 }
-async function safeFetch<T>(fn: () => Promise<{ data: T[] | null; error: any }>): Promise<T[]> {
+async function safeFetch<T>(fn: () => PromiseLike<{ data: any; error: any }>): Promise<T[]> {
   try { const { data, error } = await fn(); if (error) return []; return (data ?? []) as T[]; } catch { return []; }
 }
 
