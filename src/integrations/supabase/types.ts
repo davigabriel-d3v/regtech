@@ -14,9 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      marcas: {
+        Row: {
+          ativo: boolean
+          criado_em: string
+          id: string
+          logo_url: string | null
+          nome: string
+          ordem: number
+        }
+        Insert: {
+          ativo?: boolean
+          criado_em?: string
+          id?: string
+          logo_url?: string | null
+          nome: string
+          ordem?: number
+        }
+        Update: {
+          ativo?: boolean
+          criado_em?: string
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          ordem?: number
+        }
+        Relationships: []
+      }
+      newsletter: {
+        Row: {
+          criado_em: string
+          email: string
+          id: string
+        }
+        Insert: {
+          criado_em?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          criado_em?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       produtos: {
         Row: {
           atualizado_em: string
+          avaliacao: number
+          avaliacoes: number
           categoria: string
           criado_em: string
           descricao: string
@@ -27,12 +74,15 @@ export type Database = {
           marca: string
           ordem: number
           preco: number | null
+          preco_antigo: number | null
           publicado: boolean
           slug: string
           titulo: string
         }
         Insert: {
           atualizado_em?: string
+          avaliacao?: number
+          avaliacoes?: number
           categoria: string
           criado_em?: string
           descricao?: string
@@ -43,12 +93,15 @@ export type Database = {
           marca: string
           ordem?: number
           preco?: number | null
+          preco_antigo?: number | null
           publicado?: boolean
           slug: string
           titulo: string
         }
         Update: {
           atualizado_em?: string
+          avaliacao?: number
+          avaliacoes?: number
           categoria?: string
           criado_em?: string
           descricao?: string
@@ -59,6 +112,7 @@ export type Database = {
           marca?: string
           ordem?: number
           preco?: number | null
+          preco_antigo?: number | null
           publicado?: boolean
           slug?: string
           titulo?: string
