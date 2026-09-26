@@ -106,7 +106,7 @@ function Admin() {
   const dadosGrafico = useMemo(() => {
     const lista = pedidos ?? [];
     const agora = new Date();
-    const filtro: Record<string, boolean> = {
+    const filtro: Record<string, (d: Date) => boolean> = {
       hoje: (d: Date) => d.toDateString() === agora.toDateString(),
       "7d": (d: Date) => Math.abs(Math.ceil((agora.getTime() - d.getTime()) / 864e5)) <= 7,
       "30d": (d: Date) => Math.abs(Math.ceil((agora.getTime() - d.getTime()) / 864e5)) <= 30,
@@ -131,7 +131,7 @@ function Admin() {
   /* ---------- navegação ---------- */
   const navegar = useNavigate();
   function handleVerLoja() {
-    navegar("/shop");
+    navegar({ to: "/shop" });
   }
   const [form, setForm] = useState(vazio);
   const [editId, setEditId] = useState<string | null>(null);
