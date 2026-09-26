@@ -14,7 +14,12 @@ export type ProdutoLoja = {
   emEstoque: boolean;
   destaque: boolean;
   imagemUrl: string | null;
+  precoAntigo: number | null;
+  avaliacao: number;
+  avaliacoes: number;
 };
+
+export type MarcaLoja = { id: string; nome: string; logoUrl: string | null };
 
 
 type ProdutoRow = Database["public"]["Tables"]["produtos"]["Row"];
@@ -74,6 +79,9 @@ function toProduto(row: ProdutoRow): ProdutoLoja {
     emEstoque: row.em_estoque,
     destaque: row.destaque,
     imagemUrl: row.imagem_url,
+    precoAntigo: row.preco_antigo === null ? null : Number(row.preco_antigo),
+    avaliacao: Number(row.avaliacao),
+    avaliacoes: row.avaliacoes,
   };
 }
 
@@ -97,3 +105,13 @@ export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> 
   return (data ?? []).map(toProduto);
 }
 
+
+export async function fetchMarcas(): Promise<MarcaLoja[]> {
+  const { data, error } = await createReader()
+    .from("marcas")
+    .select("id, nome, logo_url")
+    .eq("ativo", true)
+    .order("ordem", { ascending: true });
+  if (error) throw error;
+  return (data ?? []).map((m) => ({ id: m.id, nome: m.nome, logoUrl: m.logo_url }));
+}

@@ -22,8 +22,21 @@ import {
   X,
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
+import {
+  BannerPrincipal,
+  BannersSecundarios,
+  Beneficios,
+  CompreCategoria,
+  MarcasSecao,
+  NavCategorias,
+  Newsletter,
+  OfertasDoDia,
+  ProdutoCarrossel,
+  grupos,
+  ProdutoCardLoja,
+} from "@/components/loja/Secoes";
 import logo from "@/assets/regtech-logo.png";
-import { listarProdutos, type ProdutoLoja } from "@/lib/produtos.functions";
+import { listarMarcas, listarProdutos, type ProdutoLoja } from "@/lib/produtos.functions";
 import { whatsappComMensagem } from "@/lib/contato";
 
 export const lojaProdutosQueryOptions = queryOptions({
@@ -31,9 +44,17 @@ export const lojaProdutosQueryOptions = queryOptions({
   queryFn: () => listarProdutos(),
 });
 
+export const lojaMarcasQueryOptions = queryOptions({
+  queryKey: ["loja", "marcas"],
+  queryFn: () => listarMarcas(),
+});
+
 export const Route = createFileRoute("/shop")({
   loader: async ({ context: { queryClient } }) => {
-    await queryClient.ensureQueryData(lojaProdutosQueryOptions);
+    await Promise.all([
+      queryClient.ensureQueryData(lojaProdutosQueryOptions),
+      queryClient.ensureQueryData(lojaMarcasQueryOptions),
+    ]);
   },
   head: () => ({
     meta: [
@@ -88,6 +109,23 @@ function precoTexto(preco: number | null): string {
 
 function Shop() {
   const { data: produtos } = useSuspenseQuery(lojaProdutosQueryOptions);
+  const { data: marcas } = useSuspenseQuery(lojaMarcasQueryOptions);
+  const ofertas = useMemo(() => {
+    const d = produtos.filter((p) => p.destaque);
+    return d.length >= 4 ? d : [...d, ...produtos.filter((p) => !p.destaque)];
+  }, [produtos]);
+  const maisVendidos = useMemo(() => [...produtos].sort((a, b) => b.avaliacoes - a.avaliacoes).slice(0, 10), [produtos]);
+  const amar = useMemo(() => [...produtos].sort((a, b) => a.avaliacoes - b.avaliacoes).slice(0, 10), [produtos]);
+  const blocos = useMemo(
+    () =>
+      [
+        { chave: "celulares", titulo: "Smartphones" },
+        { chave: "informatica", titulo: "Informática e conectividade" },
+        { chave: "acessorios", titulo: "Acessórios" },
+        { chave: "eletronicos", titulo: "Casa e Eletrônicos" },
+      ].map((b) => ({ ...b, produtos: produtos.filter((p) => grupos[b.chave].includes(p.categoria)).slice(0, 6) })),
+    [produtos],
+  );
   const [filtro, setFiltro] = useState<string>("todas");
   const [busca, setBusca] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
@@ -106,7 +144,8 @@ function Shop() {
   const visiveis = useMemo(() => {
     const termo = busca.trim().toLowerCase();
     return produtos.filter((produto) => {
-      const bateCategoria = filtro === "todas" || produto.categoria === filtro;
+      const slugs = grupos[filtro] ?? [filtro];
+      const bateCategoria = filtro === "todas" || slugs.includes(produto.categoria);
       const bateBusca =
         termo === "" ||
         [produto.titulo, produto.marca, produto.descricao]
@@ -165,35 +204,29 @@ function Shop() {
         </div>
       </header>
 
-      {/* Faixa de abertura */}
-      <section
-        className="relative overflow-hidden border-b border-border/60"
-        style={{
-          background:
-            "radial-gradient(60% 60% at 50% 0%, var(--color-brand) 0%, transparent 65%)",
-        }}
-      >
-        <div className="relative mx-auto flex max-w-4xl flex-col items-center px-4 py-14 text-center sm:px-6">
-          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-1.5 text-sm font-medium text-foreground">
-            <Award className="h-4 w-4 text-accent" />
-            Referência em Tecnologia há +14 anos!
-          </span>
-          <h1 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl">
-            A loja da <span className="text-primary">RegTech</span>
-          </h1>
-          <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-            Produtos e marcas que trabalhamos, com configuração, instalação e
-            suporte de quem atende você pessoalmente.
-          </p>
-          <span className="mt-5 inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-1.5 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 text-accent" />
-            Tucumã-PA / Ourilândia-PA
-          </span>
-        </div>
-      </section>
+      <NavCategorias onEscolher={escolherCategoria} />
+      <BannerPrincipal onEscolher={escolherCategoria} />
+      <BannersSecundarios onEscolher={escolherCategoria} />
+      <CompreCategoria onEscolher={escolherCategoria} />
+      <OfertasDoDia produtos={ofertas.slice(0, 4)} />
+      <ProdutoCarrossel titulo="Mais vendidos" subtitulo="Os queridinhos dos clientes RegTech" produtos={maisVendidos} />
+      <Beneficios />
+      <ProdutoCarrossel titulo="Ofertas que você vai amar" produtos={amar} />
+      {blocos.map((b) =>
+        b.produtos.length > 0 ? (
+          <ProdutoCarrossel
+            key={b.chave}
+            titulo={b.titulo}
+            produtos={b.produtos}
+            onVerTodos={() => escolherCategoria(b.chave)}
+          />
+        ) : null,
+      )}
+      <MarcasSecao marcas={marcas} onMarca={(nome) => { setFiltro("todas"); setBusca(nome); document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" }); }} />
 
+      <h2 id="todos" className="mx-auto mt-16 max-w-6xl px-4 font-display text-2xl font-bold sm:px-6">Todos os produtos</h2>
       {/* Filtros */}
-      <div className="sticky top-16 z-40 border-b border-border/60 bg-background/90 backdrop-blur-md">
+      <div className="sticky top-16 z-40 mt-4 border-b border-border/60 bg-background/90 backdrop-blur-md">
         <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <label className="relative flex-1">
@@ -272,13 +305,15 @@ function Shop() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {visiveis.map((produto) => (
-              <ProdutoCard key={produto.id} produto={produto} />
+              <ProdutoCardLoja key={produto.id} produto={produto} />
             ))}
           </div>
         )}
       </main>
+
+      <Newsletter />
 
       {/* Aviso e apoio */}
       <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
@@ -412,50 +447,3 @@ function CategoriasMenu({
   );
 }
 
-function ProdutoCard({ produto }: { produto: ProdutoLoja }) {
-  const Icone = iconeCategoria(produto.categoria);
-
-  return (
-    <article className="flex flex-col rounded-2xl border border-border bg-card/70 p-5 transition-colors hover:border-primary/60">
-      <div className="flex items-center justify-between gap-3">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/60 px-2.5 py-1 text-xs font-semibold text-muted-foreground">
-          <Icone className="h-3.5 w-3.5 text-primary" />
-          {produto.marca}
-        </span>
-        {produto.emEstoque ? (
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
-            <Check className="h-3.5 w-3.5" />
-            Disponível
-          </span>
-        ) : (
-          <span className="text-xs font-medium text-muted-foreground">
-            Sob encomenda
-          </span>
-        )}
-      </div>
-
-      <h3 className="mt-4 font-display text-lg font-bold leading-snug">
-        {produto.titulo}
-      </h3>
-      <p className="mt-2 flex-1 text-sm text-muted-foreground">
-        {produto.descricao || nomeCategoria(produto.categoria)}
-      </p>
-
-      <p className="mt-4 text-sm font-semibold text-primary">
-        {precoTexto(produto.preco)}
-      </p>
-
-      <a
-        href={whatsappComMensagem(
-          `Olá! Tenho interesse em: ${produto.titulo} (${produto.marca}). Pode me passar valores e prazos?`,
-        )}
-        target="_blank"
-        rel="noreferrer"
-        className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent"
-      >
-        Pedir pelo WhatsApp
-        <ArrowRight className="h-4 w-4" />
-      </a>
-    </article>
-  );
-}
