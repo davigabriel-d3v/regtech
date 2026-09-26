@@ -7,10 +7,11 @@ import {
   Loader2, ChevronDown, Menu, X, MapPin, DollarSign, Receipt,
   PackageOpen, Clock, CheckCircle2, Truck, XCircle, EyeOff,
   RefreshCw, LayoutDashboard, ShoppingBag, ClipboardList,
-  TrendingDown, ArrowUpRight, ArrowDownRight,
+  TrendingDown, ArrowUpRight, ArrowDownRight, Plus, Star, Pencil, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import {
   listarEstatisticas, listarPedidos, listarProdutosAdmin,
   listarAtividades, listarNotificacoes,
@@ -42,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
     const { data: roleData } = await supabase.rpc("has_role", { _user_id: data.user.id, _role: "admin" });
-    if (!roleData?.data) throw redirect({ to: "/conta" });
+    if (!roleData) throw redirect({ to: "/conta" });
     return { user: data.user };
   },
   component: Admin,
@@ -67,101 +68,6 @@ const campo =
 function slugify(s: string) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
-function Admin() {
-  const { user } = Route.useRouteContext();
-  const qc = useQueryClient();
-  const { user: authUser } = useAuth();
-  const [aba, setAba] = useState<"dashboard" | "produtos" | "clientes">("dashboard");
-  const [periodo, setPeriodo] = useState<"hoje" | "7d" | "30d" | "90d" | "12m">("hoje");
-  const [busca, setBusca] = useState("");
-  const [notifAberta, setNotifAberta] = useState(false);
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [clientes, setClientes] = useState<Perfil[]>([]);
-
-  const { data: est, isLoading: estLoading } = useQuery({
-    queryKey: ["estatisticas", periodo],
-    queryFn: () => listarEstatisticas(),
-  });
-  const { data: pedidos, isLoading: pedLoading } = useQuery({
-    queryKey: ["pedidos"],
-    queryFn: () => listarPedidos(),
-  });
-
-  const s = est ?? { vendasHoje: 0, comparativoVendas: 0, totalPedidos: 0, pedidosPendentes: 0, totalClientes: 0, novosClientes: 0, totalProdutos: 0, produtosEstoqueBaixo: 0, receitaPeriodo: 0, ticketMedio: 0 };
-  const formatMoeda = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
-  const pctVendas = s.comparativoVendas > 0 ? ((s.vendasHoje - s.comparativoVendas) / s.comparativoVendas) * 100 : 0;
-
-  const dadosGrafico = useMemo(() => {
-    const lista = pedidos ?? [];
-    const ag = new Date();
-    const f: Record<string, boolean> = {
-      hoje: (d: Date) => d.toDateString() === ag.toDateString(),
-      "7d": (d: Date) => Math.abs(Math.ceil((ag.getTime() - d.getTime()) / 864e5)) <= 7,
-      "30d": (d: Date) => Math.abs(Math.ceil((ag.getTime() - d.getTime()) / 864e5)) <= 30,
-      "90d": (d: Date) => Math.abs(Math.ceil((ag.getTime() - d.getTime()) / 864e5)) <= 90,
-      "12m": (d: Date) => Math.abs(Math.ceil((ag.getTime() - d.getTime()) / 864e5)) <= 365,
-    };
-    const filtrados = lista.filter((p) => { const d = new Date(p.data); return (f[periodo] ?? (() => true))(d); });
-    const agrupados = new Map<string, { receita: number; pedidos: number }>();
-    filtrados.forEach((p) => {
-      const chave = new Date(p.data).toLocaleDateString("pt-BR");
-      const ex = agrupados.get(chave) ?? { receita: 0, pedidos: 0 };
-      agrupados.set(chave, { receita: ex.receita + p.valor, pedidos: ex.pedidos + 1 });
-    });
-    return Array.from(agrupados.entries()).map(([data, val]) => ({ data, receita: val.receita, pedidos: val.pedidos })).sort((a, b) => a.data.localeCompare(b.data));
-  }, [pedidos, periodo]);
-
-  const navegar = useNavigate();
-  function handleVerLoja() { navegar("/shop"); }
-
-  /* ---------- gestão de produtos ---------- */
-  async function carregar() {
-    const [p, c] = await Promise.all([
-      supabase.from("produtos").select("*").order("ordem").order("titulo"),
-      supabase.from("profiles").select("*").order("criado_em", { ascending: false }),
-    ]);
-    if (p.data) setProdutos(p.data.map((r: any) => ({ ...r, chave: r.id ?? r.slug })));
-    if (c.data) setClientes(c.data);
-  }
-  useEffect(() => { carregar(); }, []);
-
-  const [salvando, setSalvando] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [aberto, setAberto] = useState(false);
-  const [form, setForm] = useState(vazio);
-
-  async function salvar(e: React.FormEvent) {
-    e.preventDefault();
-    setSalvando(true);
-    const slug = slugify(form.titulo);
-    const dados = { titulo: form.titulo, marca: form.marca, categoria: form.categoria, descricao: form.descricao, preco: form.preco ? Number(form.preco) : null, imagem_url: form.imagem_url || null, em_estoque: form.em_estoque, destaque: form.destaque, publicado: form.publicado, ordem: form.ordem || 0, slug };
-    const { error } = editId ? await supabase.from("produtos").update(dados).eq("id", editId) : await supabase.from("produtos").insert({ ...dados, slug: `${slugify(dados.titulo)}-${Date.now().toString(36)}` });
-    setSalvando(false);
-    if (error) { toast.error("Erro ao salvar: " + error.message); return; }
-    toast.success(editId ? "Produto atualizado." : "Produto cadastrado.");
-    setAberto(false); setEditId(null); carregar();
-  }
-
-  function abrirEdicao(p: Produto) {
-    setEditId(p.id);
-    setForm({ titulo: p.titulo ?? "", marca: p.marca ?? "", categoria: (p.categoria ?? "apple") as string, descricao: p.descricao ?? "", preco: p.preco ? String(p.preco) : "", imagem_url: p.imagem_url ?? "", em_estoque: p.em_estoque ?? true, destaque: p.destaque ?? false, publicado: p.publicado ?? true, ordem: p.ordem ?? 0 });
-    setAberto(true);
-  }
-
-  async function alternar(p: Produto, campoBool: "publicado" | "destaque") {
-    const patch = campoBool === "publicado" ? { publicado: !p.publicado } : { destaque: !p.destaque };
-    await supabase.from("produtos").update(patch).eq("id", p.id);
-    carregar();
-  }
-
-  async function apagar(p: Produto) {
-    if (!confirm(`Apagar "${p.titulo}"?`)) return;
-    const { error } = await supabase.from("produtos").delete().eq("id", p.id);
-    if (error) { toast.error("Erro ao apagar."); return; }
-    toast.success("Produto apagado.");
-    carregar();
-  }
-
 function Admin() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
