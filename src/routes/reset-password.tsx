@@ -23,7 +23,7 @@ function ResetPage() {
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     const { error } = await supabase.auth.updateUser({ password: senha });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Senha alterada!");
     navigate({ to: "/conta" });
   }

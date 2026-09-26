@@ -103,21 +103,22 @@ function Admin() {
       ? await supabase.from("produtos").update(dados).eq("id", editId)
       : await supabase.from("produtos").insert({ ...dados, slug: `${slugify(dados.titulo)}-${Date.now().toString(36)}` });
     setSalvando(false);
-    if (error) return toast.error("Erro ao salvar: " + error.message);
+    if (error) { toast.error("Erro ao salvar: " + error.message); return; }
     toast.success(editId ? "Produto atualizado!" : "Produto criado!");
     setAberto(false);
     carregar();
   }
 
   async function alternar(p: Produto, campoBool: "publicado" | "destaque") {
-    await supabase.from("produtos").update({ [campoBool]: !p[campoBool] }).eq("id", p.id);
+    const patch = campoBool === "publicado" ? { publicado: !p.publicado } : { destaque: !p.destaque };
+    await supabase.from("produtos").update(patch).eq("id", p.id);
     carregar();
   }
 
   async function apagar(p: Produto) {
     if (!confirm(`Apagar "${p.titulo}"?`)) return;
     const { error } = await supabase.from("produtos").delete().eq("id", p.id);
-    if (error) return toast.error("Erro ao apagar.");
+    if (error) { toast.error("Erro ao apagar."); return; }
     toast.success("Produto apagado.");
     carregar();
   }

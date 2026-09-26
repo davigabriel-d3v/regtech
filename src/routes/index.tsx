@@ -269,6 +269,7 @@ function Index() {
             Fale conosco
             <ArrowRight className="h-4 w-4" />
           </a>
+          </div>
         </div>
       </header>
 
