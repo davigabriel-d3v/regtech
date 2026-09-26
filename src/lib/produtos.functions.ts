@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { fetchProdutos } from "./produtos.server";
-import type { ProdutoLoja } from "./produtos.server";
+import { fetchMarcas, fetchProdutos } from "./produtos.server";
+import type { MarcaLoja, ProdutoLoja } from "./produtos.server";
 
 export const listarProdutos = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) =>
@@ -9,4 +9,8 @@ export const listarProdutos = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }) => fetchProdutos(data.categoria));
 
-export type { ProdutoLoja };
+export const listarMarcas = createServerFn({ method: "GET" }).handler(async () =>
+  fetchMarcas(),
+);
+
+export type { MarcaLoja, ProdutoLoja };
