@@ -63,7 +63,7 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
     ],
   }),
-  component: Home,
+  component: Index,
 });
 
 const services = [
