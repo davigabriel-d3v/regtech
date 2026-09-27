@@ -408,45 +408,137 @@ function Index() {
             </a>
           </div>
 
-          {/* Fale conosco */}
-          <div className="mt-6 flex flex-col items-center">
+          {/* Fale conosco + Chave PIX */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
-              aria-expanded={contatoOpen}
-              onClick={() => setContatoOpen((open) => !open)}
+              onClick={() => setModalAberto("contato")}
               className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
             >
               <MessageCircle className="h-4 w-4" />
               Fale conosco
-              <ChevronDown
-                className={`h-4 w-4 transition-transform ${contatoOpen ? "rotate-180" : ""}`}
-              />
             </button>
-
-            {contatoOpen && (
-              <div className="mt-4 w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-xl shadow-primary/10">
-                <p className="text-center font-display text-sm font-bold uppercase tracking-wide text-foreground">
-                  Fale com o nosso time abaixo:
-                </p>
-                <div className="mt-4 flex flex-col gap-2.5">
-                  {contatosWhatsapp.map((contato) => (
-                    <a
-                      key={contato.label}
-                      href={contato.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      {contato.label}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => setModalAberto("pix")}
+              className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+            >
+              <Landmark className="h-4 w-4" />
+              Chave PIX
+            </button>
           </div>
         </div>
       </section>
+
+      {/* Modal: Fale conosco */}
+      {modalAberto === "contato" && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
+          onClick={() => setModalAberto(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl shadow-primary/20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <p className="font-display text-sm font-bold uppercase tracking-wide text-foreground">
+                Fale com o nosso time abaixo:
+              </p>
+              <button
+                type="button"
+                aria-label="Fechar"
+                onClick={() => setModalAberto(null)}
+                className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="mt-4 flex flex-col gap-2.5">
+              {contatosWhatsapp.map((contato) => (
+                <a
+                  key={contato.label}
+                  href={contato.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  {contato.label}
+                </a>
+              ))}
+              <a
+                href={dadosPix.instagram}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
+              >
+                <Instagram className="h-4 w-4" />
+                Instagram
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Chave PIX */}
+      {modalAberto === "pix" && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
+          onClick={() => setModalAberto(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl shadow-primary/20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-display text-base font-bold text-foreground">
+                  Finalização de Transação PIX
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Confirme os dados e utilize a chave para efetuar o pagamento.
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Fechar"
+                onClick={() => setModalAberto(null)}
+                className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-5 rounded-xl border border-border bg-secondary/40 p-4">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Beneficiário</p>
+              </div>
+              <p className="mt-0.5 text-sm font-semibold text-foreground">{dadosPix.beneficiario}</p>
+
+              <div className="mt-4 flex items-baseline justify-between gap-3">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Chave PIX (CNPJ)</p>
+              </div>
+              <p className="mt-0.5 font-display text-lg font-bold tracking-wide text-primary">
+                {dadosPix.chave}
+              </p>
+
+              <div className="mt-4 flex items-baseline justify-between gap-3">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Instituição</p>
+              </div>
+              <p className="mt-0.5 text-sm font-semibold text-foreground">{dadosPix.instituicao}</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={copiarChavePix}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent"
+            >
+              {chaveCopiada ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {chaveCopiada ? "Chave copiada!" : "Copiar chave PIX"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Números */}
       <section className="border-y border-border/60 bg-card/40">
