@@ -20,6 +20,7 @@ import {
   Tv,
   LayoutGrid,
   ChevronDown,
+  MessageCircle,
   Store,
   Award,
 } from "lucide-react";
