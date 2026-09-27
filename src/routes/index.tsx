@@ -461,7 +461,7 @@ function Index() {
           </div>
 
           {/* Endereço e Avaliações */}
-          <div className="mt-10 grid w-full gap-6 md:grid-cols-2">
+          <div className="mt-10 grid w-full gap-4 sm:gap-6 sm:grid-cols-2">
             <div className="overflow-hidden rounded-2xl border border-border bg-card text-center shadow-lg shadow-primary/10">
               <div className="bg-gradient-to-r from-primary/80 to-accent/80 px-6 py-1.5" />
               <div className="px-6 py-8">
