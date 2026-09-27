@@ -459,6 +459,63 @@ function Index() {
               Instagram
             </a>
           </div>
+
+          {/* Endereço e Avaliações */}
+          <div className="mt-10 grid w-full gap-6 md:grid-cols-2">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card text-center shadow-lg shadow-primary/10">
+              <div className="bg-gradient-to-r from-primary/80 to-accent/80 px-6 py-1.5" />
+              <div className="px-6 py-8">
+                <h3 className="font-display text-2xl font-bold tracking-wide uppercase">
+                  Endereço
+                </h3>
+                <p className="mt-4 text-lg font-medium leading-relaxed">
+                  Av. dos Estados, 241
+                  <br />
+                  Centro
+                  <br />
+                  Tucumã-PA
+                </p>
+                <a
+                  href="https://www.google.com/maps/place/RegTech+CellShop+-+Celulares,+Inform%C3%A1tica,+Assist%C3%AAncia+t%C3%A9cnica+em+Tucum%C3%A3/@-6.7500265,-51.1510822,19z/data=!4m6!3m5!1s0x92e68f71c76f26bd:0x3b61a313b7591b0e!8m2!3d-6.7503213!4d-51.1506949!16s%2Fg%2F11c3k2wc6l?entry=ttu&g_ep=EgoyMDI2MDkyMy4wIKXMDSoASAFQAw%3D%3D"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105"
+                >
+                  <MapPin className="h-5 w-5" />
+                  Localização
+                </a>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-2xl border border-border bg-card text-center shadow-lg shadow-primary/10">
+              <div className="bg-gradient-to-r from-primary/80 to-accent/80 px-6 py-1.5" />
+              <div className="px-6 py-8">
+                <h3 className="font-display text-2xl font-bold tracking-wide uppercase">
+                  Nos avalie
+                </h3>
+                <p className="mx-auto mt-4 max-w-xs text-lg font-medium leading-relaxed">
+                  A sua avaliação sobre o atendimento é muito importante para
+                  nós!
+                </p>
+                <a
+                  href="https://search.google.com/local/writereview?placeid=ChIJvSZvx3GP5pIRDhtZtxOjYTs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105"
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+                    <path fill="currentColor" d="M21.35 11.1H12v2.9h5.35c-.5 2.4-2.55 3.9-5.35 3.9a5.9 5.9 0 1 1 0-11.8c1.5 0 2.85.55 3.9 1.45l2.15-2.15A8.9 8.9 0 0 0 12 3a9 9 0 1 0 0 18c5.2 0 8.65-3.65 8.65-8.8 0-.35-.05-.75-.3-1.1Z" />
+                  </svg>
+                  Avaliar no Google
+                </a>
+                <div className="mt-3 flex items-center justify-center gap-1">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -732,65 +789,6 @@ function Index() {
             <MapPin className="h-4 w-4" />
             Tucumã-PA / Ourilândia-PA
           </p>
-        </div>
-      </section>
-
-      {/* Endereço e Avaliações */}
-      <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="overflow-hidden rounded-2xl border border-border bg-card text-center shadow-lg shadow-primary/10">
-            <div className="bg-gradient-to-r from-primary/80 to-accent/80 px-6 py-1.5" />
-            <div className="px-6 py-8">
-              <h3 className="font-display text-2xl font-bold tracking-wide uppercase">
-                Endereço
-              </h3>
-              <p className="mt-4 text-lg font-medium leading-relaxed">
-                Av. dos Estados, 241
-                <br />
-                Centro
-                <br />
-                Tucumã-PA
-              </p>
-              <a
-                href="https://www.google.com/maps/place/RegTech+CellShop+-+Celulares,+Inform%C3%A1tica,+Assist%C3%AAncia+t%C3%A9cnica+em+Tucum%C3%A3/@-6.7500265,-51.1510822,19z/data=!4m6!3m5!1s0x92e68f71c76f26bd:0x3b61a313b7591b0e!8m2!3d-6.7503213!4d-51.1506949!16s%2Fg%2F11c3k2wc6l?entry=ttu&g_ep=EgoyMDI2MDkyMy4wIKXMDSoASAFQAw%3D%3D"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105"
-              >
-                <MapPin className="h-5 w-5" />
-                Localização
-              </a>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-2xl border border-border bg-card text-center shadow-lg shadow-primary/10">
-            <div className="bg-gradient-to-r from-primary/80 to-accent/80 px-6 py-1.5" />
-            <div className="px-6 py-8">
-              <h3 className="font-display text-2xl font-bold tracking-wide uppercase">
-                Nos avalie
-              </h3>
-              <p className="mx-auto mt-4 max-w-xs text-lg font-medium leading-relaxed">
-                A sua avaliação sobre o atendimento é muito importante para
-                nós!
-              </p>
-              <a
-                href="https://search.google.com/local/writereview?placeid=ChIJvSZvx3GP5pIRDhtZtxOjYTs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105"
-              >
-                <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-                  <path fill="currentColor" d="M21.35 11.1H12v2.9h5.35c-.5 2.4-2.55 3.9-5.35 3.9a5.9 5.9 0 1 1 0-11.8c1.5 0 2.85.55 3.9 1.45l2.15-2.15A8.9 8.9 0 0 0 12 3a9 9 0 1 0 0 18c5.2 0 8.65-3.65 8.65-8.8 0-.35-.05-.75-.3-1.1Z" />
-                </svg>
-                Avaliar no Google
-              </a>
-              <div className="mt-3 flex items-center justify-center gap-1">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
