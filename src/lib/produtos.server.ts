@@ -99,19 +99,40 @@ export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> 
     query = query.eq("categoria", categoria);
   }
 
-  const { data, error } = await query;
-  if (error) throw error;
+  const { data, error } = await comRetentativa(() => query);
+  if (error) {
+    console.error("[loja] falha ao carregar produtos:", error.message);
+    return [];
+  }
 
   return (data ?? []).map(toProduto);
 }
 
 
 export async function fetchMarcas(): Promise<MarcaLoja[]> {
-  const { data, error } = await createReader()
-    .from("marcas")
-    .select("id, nome, logo_url")
-    .eq("ativo", true)
-    .order("ordem", { ascending: true });
-  if (error) throw error;
+  const { data, error } = await comRetentativa(() =>
+    createReader()
+      .from("marcas")
+      .select("id, nome, logo_url")
+      .eq("ativo", true)
+      .order("ordem", { ascending: true }),
+  );
+  if (error) {
+    console.error("[loja] falha ao carregar marcas:", error.message);
+    return [];
+  }
   return (data ?? []).map((m) => ({ id: m.id, nome: m.nome, logoUrl: m.logo_url }));
+}
+
+// Temporary clock drift on the backend ("JWT issued at future") resolves in a
+// second or two, so retry a few times before giving up.
+async function comRetentativa<T extends { error: { message: string } | null }>(
+  fn: () => PromiseLike<T>,
+): Promise<T> {
+  let r = await fn();
+  for (let i = 0; i < 3 && r.error && /future|JWT/i.test(r.error.message); i++) {
+    await new Promise((res) => setTimeout(res, 1000));
+    r = await fn();
+  }
+  return r;
 }
