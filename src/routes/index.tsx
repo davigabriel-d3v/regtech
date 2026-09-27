@@ -449,6 +449,15 @@ function Index() {
               <Landmark className="h-4 w-4" />
               Chave PIX
             </button>
+            <a
+              href={dadosPix.instagram}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+            >
+              <Instagram className="h-4 w-4" />
+              Instagram
+            </a>
           </div>
         </div>
       </section>
@@ -489,15 +498,6 @@ function Index() {
                   {contato.label}
                 </a>
               ))}
-              <a
-                href={dadosPix.instagram}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
-              >
-                <Instagram className="h-4 w-4" />
-                Instagram
-              </a>
             </div>
           </div>
         </div>
