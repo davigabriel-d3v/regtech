@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -23,6 +23,11 @@ import {
   MessageCircle,
   Store,
   Award,
+  Instagram,
+  Copy,
+  Check,
+  X,
+  Landmark,
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
 import { WHATSAPP_URL } from "@/lib/contato";
