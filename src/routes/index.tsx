@@ -213,21 +213,34 @@ function Index() {
   const [chaveCopiada, setChaveCopiada] = useState(false);
 
   const copiarChavePix = async () => {
+    let copiou = false;
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(dadosPix.chave);
-      } else {
+        copiou = true;
+      }
+    } catch {
+      copiou = false;
+    }
+    if (!copiou) {
+      try {
         const area = document.createElement("textarea");
         area.value = dadosPix.chave;
+        area.style.position = "fixed";
+        area.style.opacity = "0";
         document.body.appendChild(area);
         area.select();
-        document.execCommand("copy");
+        copiou = document.execCommand("copy");
         document.body.removeChild(area);
+      } catch {
+        copiou = false;
       }
+    }
+    if (copiou) {
       setChaveCopiada(true);
       toast.success("Chave PIX copiada!");
       setTimeout(() => setChaveCopiada(false), 2000);
-    } catch {
+    } else {
       toast.error("Não foi possível copiar a chave.");
     }
   };
