@@ -1,32 +1,12 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
-  LayoutDashboard, Package, ShoppingCart, Users, Settings,
-  Plus, Search, Filter, Edit2, Trash2, Eye, ChevronDown,
-  Menu, X, ArrowRight, Copy, Check, Mail, Phone, MapPin,
-  PackageOpen, Clock, CheckCircle2, XCircle, AlertCircle,
-  RefreshCw, Image, Star, Hash, Barcode, Tag, Info,
-  ChevronLeft, ChevronRight, Home, LogOut, Shield, Loader2,
+  Package, Users, Plus, Eye, EyeOff, Star, Pencil, Trash2,
+  ArrowLeft, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { listarDashboard, listarProdutos, cadastrarProduto, editarProduto, excluirProduto, alternarStatusProduto, listarPedidos, alterarStatusPedido, criarPedido, listarClientes, cadastrarCliente, editarCliente } from "@/lib/admin.functions";
-import type { AdminProduct, AdminOrder, AdminCustomer } from "@/integrations/supabase/types";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SidebarProvider, Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarTrigger, SidebarInset, SidebarSeparator } from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/useAuth";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -42,27 +22,59 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
 });
 
-/* ---------- ADMIN PANEL COMPONENT ---------- */
+type Produto = {
+  id: string;
+  titulo: string;
+  marca: string;
+  categoria: string;
+  descricao: string | null;
+  preco: number | null;
+  imagem_url: string | null;
+  em_estoque: boolean;
+  destaque: boolean;
+  publicado: boolean;
+  ordem: number;
+};
+
+const categorias: [string, string][] = [
+  ["celulares", "Celulares"],
+  ["informatica", "Informática"],
+  ["acessorios", "Acessórios"],
+  ["servicos", "Serviços"],
+  ["motos", "Motos Elétricas"],
+  ["outros", "Outros"],
+];
+
+const vazio = {
+  titulo: "", marca: "", categoria: "celulares", descricao: "",
+  preco: "", imagem_url: "", em_estoque: true, destaque: false,
+  publicado: true, ordem: 0,
+};
+
+const campo =
+  "w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50";
+
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 export default function Admin() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
-  const { isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [aba, setAba] = useState<"dashboard" | "produtos" | "pedidos" | "clientes" | "configuracoes">("dashboard");
-  const [subAba, setSubAba] = useState<"lista" | "form">("lista");
-  const [busca, setBusca] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState("todos");
-  const [filtroCategoria, setFiltroCategoria] = useState("todos");
-  const [pagina, setPagina] = useState(1);
-  const [produtos, setProdutos] = useState<any[]>([]);
-  const [pedidos, setPedidos] = useState<any[]>([]);
+  const [aba, setAba] = useState<"produtos" | "clientes">("produtos");
+  const [produtos, setProdutos] = useState<Produto[]>([]);
   const [clientes, setClientes] = useState<any[]>([]);
-  const [dash, setDash] = useState<any>(null);
+  const [admin, setAdmin] = useState<boolean | null>(null);
+  const [form, setForm] = useState<any>(vazio);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState<any>({ titulo: "", descricao: "", categoria: "", marca: "", sku: "", barcode: "", preco: "", promotional_price: "", stock: "", minimum_stock: "", status: "ATIVO", notes: "", imagem_url: "" });
-  const [salvando, setSalvando] = useState(false);
-  const [admin, setAdmin] = useState(false);
   const [aberto, setAberto] = useState(false);
+  const [salvando, setSalvando] = useState(false);
 
   async function sair() {
     await qc.cancelQueries();
@@ -71,139 +83,12 @@ export default function Admin() {
     navigate({ to: "/auth", replace: true });
   }
 
-  useEffect(() => {
-    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => {
-      setAdmin(!!data);
-      if (data) carregar();
-    });
-  }, [user.id]);
-
-  async function carregar() {
-  const [dashboard, setDashboard] = useState<any>(null);
-  const [carregando, setCarregando] = useState(true);
-  const [produtoForm, setProdutoForm] = useState<any>(null);
-  const [pedidoSelecionado, setPedidoSelecionado] = useState<any>(null);
-  const [clienteSelecionado, setClienteSelecionado] = useState<any>(null);
-  const [sidebarAberta, setSidebarAberta] = useState(true);
-  const [confirmarExclusao, setConfirmarExclusao] = useState<string | null>(null);
-  const [userAdmin, setUserAdmin] = useState<{email: string; nome: string}>({email: "", nome: ""});
-  const [novaSenha, setNovaSenha] = useState("");
-
-  const ITENS_POR_PAGINA = 10;
-
-  useEffect(() => {
-    carregarDados();
-  }, []);
-
-  async function carregarDados() {
-    try {
-      const [dashRes, prodRes, pedRes, cliRes] = await Promise.all([
-        listarDashboard(), listarProdutos(), listarPedidos(), listarClientes(),
-      ]);
-      setDashboard(dashRes);
-      setProdutos(prodRes ?? []);
-      setPedidos(pedRes ?? []);
-      setClientes(cliRes ?? []);
-    } catch (e) {
-      toast.error("Erro ao carregar dados");
-    } finally {
-      setCarregando(false);
-    }
-  }
-
-  async function handleCadastrarProduto(dados: any) {
-    try {
-      const result = await cadastrarProduto(dados);
-      toast.success(`Produto cadastrado! ID: ${result.product_code}`);
-      setSubAba("lista");
-      carregarDados();
-    } catch (e: any) {
-      toast.error(e.message);
-    }
-  }
-
-  async function handleEditarProduto(dados: any) {
-    try {
-      await editarProduto(dados);
-      toast.success("Produto atualizado!");
-      setSubAba("lista");
-      carregarDados();
-    } catch (e: any) {
-      toast.error(e.message);
-    }
-  }
-
-  async function handleExcluirProduto(id: string, product_code: string) {
-    try {
-      await excluirProduto({ id });
-      toast.success("Produto excluído");
-      carregarDados();
-    } catch (e: any) {
-      toast.error(e.message);
-    }
-  }
-    queryKey: ["estatisticas", periodo],
-    queryFn: () => listarEstatisticas(),
-  });
-  const { data: pedidos, isLoading: pedLoading } = useQuery({
-    queryKey: ["pedidos"],
-    queryFn: () => listarPedidos(),
-  });
-
-  /* ---------- estatísticas formatadas ---------- */
-  const s = est ?? {
-    vendasHoje: 0, comparativoVendas: 0, totalPedidos: 0, pedidosPendentes: 0,
-    totalClientes: 0, novosClientes: 0, totalProdutos: 0, produtosEstoqueBaixo: 0,
-    receitaPeriodo: 0, ticketMedio: 0,
-  };
-  const formatMoeda = (v: number) =>
-    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
-  const formatPct = (v: number) =>
-    `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`;
-  const pctVendas = s.comparativoVendas > 0 ? ((s.vendasHoje - s.comparativoVendas) / s.comparativoVendas) * 100 : 0;
-
-  /* ---------- dados do gráfico ---------- */
-  const dadosGrafico = useMemo(() => {
-    const lista = pedidos ?? [];
-    const agora = new Date();
-    const filtro: Record<string, (d: Date) => boolean> = {
-      hoje: (d: Date) => d.toDateString() === agora.toDateString(),
-      "7d": (d: Date) => Math.abs(Math.ceil((agora.getTime() - d.getTime()) / 864e5)) <= 7,
-      "30d": (d: Date) => Math.abs(Math.ceil((agora.getTime() - d.getTime()) / 864e5)) <= 30,
-      "90d": (d: Date) => Math.abs(Math.ceil((agora.getTime() - d.getTime()) / 864e5)) <= 90,
-      "12m": (d: Date) => Math.abs(Math.ceil((agora.getTime() - d.getTime()) / 864e5)) <= 365,
-    };
-    const filtrados = lista.filter((p) => {
-      const d = new Date(p.data);
-      return (filtro[periodo] ?? (() => true))(d);
-    });
-    const agrupados = new Map<string, { receita: number; pedidos: number }>();
-    filtrados.forEach((p) => {
-      const chave = new Date(p.data).toLocaleDateString("pt-BR");
-      const ex = agrupados.get(chave) ?? { receita: 0, pedidos: 0 };
-      agrupados.set(chave, { receita: ex.receita + p.valor, pedidos: ex.pedidos + 1 });
-    });
-    return Array.from(agrupados.entries())
-      .map(([data, val]) => ({ data, receita: val.receita, pedidos: val.pedidos }))
-      .sort((a, b) => a.data.localeCompare(b.data));
-  }, [pedidos, periodo]);
-
-  /* ---------- navegação ---------- */
-  const navegar = useNavigate();
-  function handleVerLoja() {
-    navegar({ to: "/shop" });
-  }
-  const [form, setForm] = useState(vazio);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [aberto, setAberto] = useState(false);
-  const [salvando, setSalvando] = useState(false);
-
   async function carregar() {
     const [p, c] = await Promise.all([
       supabase.from("produtos").select("*").order("ordem").order("titulo"),
       supabase.from("profiles").select("*").order("criado_em", { ascending: false }),
     ]);
-    setProdutos(p.data ?? []);
+    setProdutos((p.data ?? []) as Produto[]);
     setClientes(c.data ?? []);
     qc.invalidateQueries({ queryKey: ["loja"] });
   }
@@ -229,7 +114,7 @@ export default function Admin() {
   function novo() { setForm(vazio); setEditId(null); setAberto(true); }
   function editar(p: Produto) {
     setForm({
-      titulo: p.titulo, marca: p.marca, categoria: p.categoria, descricao: p.descricao,
+      titulo: p.titulo, marca: p.marca, categoria: p.categoria, descricao: p.descricao ?? "",
       preco: p.preco == null ? "" : String(p.preco), imagem_url: p.imagem_url ?? "",
       em_estoque: p.em_estoque, destaque: p.destaque, publicado: p.publicado, ordem: p.ordem,
     });
@@ -274,9 +159,12 @@ export default function Admin() {
   return (
     <main className="min-h-screen bg-background px-4 py-8">
       <div className="mx-auto max-w-6xl">
-        <Link to="/" className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Voltar ao site
-        </Link>
+        <div className="mb-4 flex items-center justify-between">
+          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Voltar ao site
+          </Link>
+          <button onClick={sair} className="text-sm text-muted-foreground hover:text-foreground">Sair</button>
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h1 className="font-display text-3xl font-bold text-foreground">Painel administrativo</h1>
           <button onClick={novo} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-accent">
