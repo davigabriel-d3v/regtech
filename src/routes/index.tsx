@@ -28,6 +28,7 @@ import {
   Check,
   X,
   Landmark,
+  Star,
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
 import { WHATSAPP_URL } from "@/lib/contato";
