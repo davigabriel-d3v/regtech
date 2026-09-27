@@ -41,12 +41,12 @@ import { whatsappComMensagem } from "@/lib/contato";
 
 export const lojaProdutosQueryOptions = queryOptions({
   queryKey: ["loja", "produtos"],
-  queryFn: () => listarProdutos(),
+  queryFn: async () => (await listarProdutos().catch(() => null)) ?? [],
 });
 
 export const lojaMarcasQueryOptions = queryOptions({
   queryKey: ["loja", "marcas"],
-  queryFn: () => listarMarcas(),
+  queryFn: async () => (await listarMarcas().catch(() => null)) ?? [],
 });
 
 export const Route = createFileRoute("/shop")({
