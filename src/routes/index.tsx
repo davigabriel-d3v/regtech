@@ -611,11 +611,11 @@ function Index() {
             style={{ padding: "177.78% 0 0 0", position: "relative" }}
           >
             <iframe
-              src="https://player.vimeo.com/video/1228819663?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+              src="https://player.vimeo.com/video/1230494677?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&amp;autoplay=1&amp;muted=1&amp;loop=1"
               frameBorder="0"
               allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
-              title="A História por trás da Regtech Cell Shop"
+              title="A História por Trás da RegTech Cell Shop!"
               style={{
                 position: "absolute",
                 top: 0,
