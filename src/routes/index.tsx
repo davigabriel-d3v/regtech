@@ -200,9 +200,37 @@ const contatosWhatsapp = [
   },
 ];
 
+const dadosPix = {
+  beneficiario: "Regtech Celulares",
+  chave: "16.804.160/0001-23",
+  instituicao: "COOP SICREDI SUDOESTE MT/PA",
+  instagram: "https://www.instagram.com/regtechcellshop/",
+};
+
 function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [contatoOpen, setContatoOpen] = useState(false);
+  const [modalAberto, setModalAberto] = useState<"contato" | "pix" | null>(null);
+  const [chaveCopiada, setChaveCopiada] = useState(false);
+
+  const copiarChavePix = async () => {
+    try {
+      await navigator.clipboard.writeText(dadosPix.chave);
+uta      setChaveCopiada(true);
+      toast.success("Chave PIX copiada!");
+      setTimeout(() => setChaveCopiada(false), 2000);
+    } catch {
+      toast.error("Não foi possível copiar a chave.");
+    }
+  };
+
+  useEffect(() => {
+    if (!modalAberto) return;
+    const aoApertar = (evento: KeyboardEvent) => {
+      if (evento.key === "Escape") setModalAberto(null);
+    };
+    window.addEventListener("keydown", aoApertar);
+    return () => window.removeEventListener("keydown", aoApertar);
+  }, [modalAberto]);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
