@@ -215,7 +215,7 @@ function Index() {
   const copiarChavePix = async () => {
     try {
       await navigator.clipboard.writeText(dadosPix.chave);
-uta      setChaveCopiada(true);
+      setChaveCopiada(true);
       toast.success("Chave PIX copiada!");
       setTimeout(() => setChaveCopiada(false), 2000);
     } catch {
