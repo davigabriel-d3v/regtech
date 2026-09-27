@@ -20,6 +20,7 @@ import {
   Tv,
   LayoutGrid,
   ChevronDown,
+  MessageCircle,
   Store,
   Award,
 } from "lucide-react";
@@ -175,8 +176,28 @@ const quickLinks = [
   { label: "Contato", href: "#contato" },
 ];
 
+const contatosWhatsapp = [
+  {
+    label: "Whatzapp Vendas Tucumã",
+    href: "https://api.whatsapp.com/send/?phone=5594992989833&text&type=phone_number&app_absent=0",
+  },
+  {
+    label: "Whatzapp Vendas Ourilândia",
+    href: "https://api.whatsapp.com/send/?phone=5594992975433&text&type=phone_number&app_absent=0",
+  },
+  {
+    label: "Whatzapp Assistência Técnica",
+    href: "https://api.whatsapp.com/send/?phone=5594992867788&text&type=phone_number&app_absent=0",
+  },
+  {
+    label: "Whatzapp Vendas Atacado",
+    href: "https://api.whatsapp.com/send/?phone=5594992042215&text&type=phone_number&app_absent=0",
+  },
+];
+
 function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [contatoOpen, setContatoOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -352,6 +373,44 @@ function Index() {
             >
               Ver serviços
             </a>
+          </div>
+
+          {/* Fale conosco */}
+          <div className="mt-6 flex flex-col items-center">
+            <button
+              type="button"
+              aria-expanded={contatoOpen}
+              onClick={() => setContatoOpen((open) => !open)}
+              className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Fale conosco
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${contatoOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {contatoOpen && (
+              <div className="mt-4 w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-xl shadow-primary/10">
+                <p className="text-center font-display text-sm font-bold uppercase tracking-wide text-foreground">
+                  Fale com o nosso time abaixo:
+                </p>
+                <div className="mt-4 flex flex-col gap-2.5">
+                  {contatosWhatsapp.map((contato) => (
+                    <a
+                      key={contato.label}
+                      href={contato.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      {contato.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
