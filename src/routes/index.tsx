@@ -214,7 +214,16 @@ function Index() {
 
   const copiarChavePix = async () => {
     try {
-      await navigator.clipboard.writeText(dadosPix.chave);
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(dadosPix.chave);
+      } else {
+        const area = document.createElement("textarea");
+        area.value = dadosPix.chave;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        document.body.removeChild(area);
+      }
       setChaveCopiada(true);
       toast.success("Chave PIX copiada!");
       setTimeout(() => setChaveCopiada(false), 2000);
