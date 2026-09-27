@@ -31,14 +31,14 @@ export const listarDashboard = createServerFn({ method: "GET" }).handler(async (
     cancelados: pedidos.filter((p: any) => p.status === "CANCELADO").length,
     total_produtos: produtos.length,
     produtos_ativos: produtos.filter((p: any) => p.publicado !== false).length,
-    sem_estoque: 0,
+    sem_estoque: produtos.filter((p: any) => !p.em_estoque || (p.stock !== undefined && p.stock === 0)).length,
     ultimos_pedidos: pedidos.slice(0, 5).map((p: any) => ({
       id: p.id, order_number: p.order_number, customer_name: p.customer_name,
       product_name: p.product_name, product_code: p.product_code, status: p.status, created_at: p.created_at,
     })),
     ultimos_produtos: produtos.slice(0, 5).map((p: any) => ({
       id: p.id, product_code: p.product_code, name: p.titulo ?? "—", price: Number(p.preco ?? 0),
-      stock: Number(p.em_estoque ? 1 : 0), status: p.publicado ? "ATIVO" : "INATIVO", created_at: p.criado_em,
+      stock: p.stock ?? (p.em_estoque ? 1 : 0), status: p.publicado ? "ATIVO" : "INATIVO", created_at: p.criado_em,
     })),
     atividades: [{ acao: "Painel acessado", usuario: "Admin", data: new Date().toISOString().split("T")[0], hora: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) }],
   };
