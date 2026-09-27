@@ -30,7 +30,6 @@ import {
   Star,
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
-import { WHATSAPP_URL } from "@/lib/contato";
 import { toast } from "sonner";
 import logo from "@/assets/regtech-logo.png";
 import {
