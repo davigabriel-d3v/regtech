@@ -1,32 +1,28 @@
-import { useEffect, useState, useMemo } from "react";
-import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowLeft, Bell, BarChart3, Eye, ShoppingCart, Users, Package,
-  TrendingUp, Store, AlertTriangle, Activity, Search, UserRound,
-  Loader2, ChevronDown, Menu, X, MapPin, DollarSign, Receipt,
-  PackageOpen, Clock, CheckCircle2, Truck, XCircle, EyeOff,
-  RefreshCw, LayoutDashboard, ShoppingBag, ClipboardList,
-  TrendingDown, ArrowUpRight, ArrowDownRight, Plus, Star, Pencil, Trash2,
+  LayoutDashboard, Package, ShoppingCart, Users, Settings,
+  Plus, Search, Filter, Edit2, Trash2, Eye, ChevronDown,
+  Menu, X, ArrowRight, Copy, Check, Mail, Phone, MapPin,
+  PackageOpen, Clock, CheckCircle2, XCircle, AlertCircle,
+  RefreshCw, Image, Star, Hash, Barcode, Tag, Info,
+  ChevronLeft, ChevronRight, Home, LogOut, Shield, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
-import {
-  listarEstatisticas, listarPedidos, listarProdutosAdmin,
-  listarAtividades, listarNotificacoes,
-} from "@/lib/admin.functions";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { listarDashboard, listarProdutos, cadastrarProduto, editarProduto, excluirProduto, alternarStatusProduto, listarPedidos, alterarStatusPedido, criarPedido, listarClientes, cadastrarCliente, editarCliente } from "@/lib/admin.functions";
+import type { AdminProduct, AdminOrder, AdminCustomer } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { BarChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Area } from "recharts";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarTrigger, SidebarInset, SidebarSeparator } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,10 +30,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
-    meta: [
-      { title: "Dashboard — RegTech Admin" },
-      { name: "description", content: "Painel administrativo da RegTech." },
-    ],
+    meta: [{ title: "Painel Admin" }, { name: "description", content: "Painel administrativo" }],
   }),
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
@@ -49,39 +42,106 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
 });
 
-type Produto = Tables<"produtos">;
-type Perfil = Tables<"profiles">;
-
-const categorias = [
-  ["motos-eletricas", "Motos Elétricas"], ["starlink", "Starlink"], ["apple", "Apple"], ["realme", "Realme"],
-  ["dji", "DJI"], ["xiaomi", "Xiaomi"], ["samsung", "Samsung"], ["acessorios", "Acessórios"],
-] as const;
-
-const vazio = {
-  titulo: "", marca: "", categoria: "apple", descricao: "", preco: "", imagem_url: "",
-  em_estoque: true, destaque: false, publicado: true, ordem: 0,
-};
-
-const campo =
-  "w-full rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary";
-
-function slugify(s: string) {
-  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
-function Admin() {
+/* ---------- ADMIN PANEL COMPONENT ---------- */
+export default function Admin() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
-  const { user: authUser } = useAuth();
-  const [admin, setAdmin] = useState<boolean | null>(null);
-  const [aba, setAba] = useState<"dashboard" | "produtos" | "clientes">("dashboard");
-  const [periodo, setPeriodo] = useState<"hoje" | "7d" | "30d" | "90d" | "12m">("hoje");
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const [aba, setAba] = useState<"dashboard" | "produtos" | "pedidos" | "clientes" | "configuracoes">("dashboard");
+  const [subAba, setSubAba] = useState<"lista" | "form">("lista");
   const [busca, setBusca] = useState("");
-  const [notifAberta, setNotifAberta] = useState(false);
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [clientes, setClientes] = useState<Perfil[]>([]);
+  const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [filtroCategoria, setFiltroCategoria] = useState("todos");
+  const [pagina, setPagina] = useState(1);
+  const [produtos, setProdutos] = useState<any[]>([]);
+  const [pedidos, setPedidos] = useState<any[]>([]);
+  const [clientes, setClientes] = useState<any[]>([]);
+  const [dash, setDash] = useState<any>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [form, setForm] = useState<any>({ titulo: "", descricao: "", categoria: "", marca: "", sku: "", barcode: "", preco: "", promotional_price: "", stock: "", minimum_stock: "", status: "ATIVO", notes: "", imagem_url: "" });
+  const [salvando, setSalvando] = useState(false);
+  const [admin, setAdmin] = useState(false);
+  const [aberto, setAberto] = useState(false);
 
-  /* ---------- dados do servidor ---------- */
-  const { data: est, isLoading: estLoading } = useQuery({
+  async function sair() {
+    await qc.cancelQueries();
+    qc.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
+  useEffect(() => {
+    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => {
+      setAdmin(!!data);
+      if (data) carregar();
+    });
+  }, [user.id]);
+
+  async function carregar() {
+  const [dashboard, setDashboard] = useState<any>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [produtoForm, setProdutoForm] = useState<any>(null);
+  const [pedidoSelecionado, setPedidoSelecionado] = useState<any>(null);
+  const [clienteSelecionado, setClienteSelecionado] = useState<any>(null);
+  const [sidebarAberta, setSidebarAberta] = useState(true);
+  const [confirmarExclusao, setConfirmarExclusao] = useState<string | null>(null);
+  const [userAdmin, setUserAdmin] = useState<{email: string; nome: string}>({email: "", nome: ""});
+  const [novaSenha, setNovaSenha] = useState("");
+
+  const ITENS_POR_PAGINA = 10;
+
+  useEffect(() => {
+    carregarDados();
+  }, []);
+
+  async function carregarDados() {
+    try {
+      const [dashRes, prodRes, pedRes, cliRes] = await Promise.all([
+        listarDashboard(), listarProdutos(), listarPedidos(), listarClientes(),
+      ]);
+      setDashboard(dashRes);
+      setProdutos(prodRes ?? []);
+      setPedidos(pedRes ?? []);
+      setClientes(cliRes ?? []);
+    } catch (e) {
+      toast.error("Erro ao carregar dados");
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  async function handleCadastrarProduto(dados: any) {
+    try {
+      const result = await cadastrarProduto(dados);
+      toast.success(`Produto cadastrado! ID: ${result.product_code}`);
+      setSubAba("lista");
+      carregarDados();
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  }
+
+  async function handleEditarProduto(dados: any) {
+    try {
+      await editarProduto(dados);
+      toast.success("Produto atualizado!");
+      setSubAba("lista");
+      carregarDados();
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  }
+
+  async function handleExcluirProduto(id: string, product_code: string) {
+    try {
+      await excluirProduto({ id });
+      toast.success("Produto excluído");
+      carregarDados();
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  }
     queryKey: ["estatisticas", periodo],
     queryFn: () => listarEstatisticas(),
   });

@@ -1,6 +1,101 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
+
+function gerarCodigoProduto(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let codigo = "PROD-";
+  for (let i = 0; i < 6; i++) codigo += chars[Math.floor(Math.random() * chars.length)];
+  return codigo;
+}
+
+function gerarNumeroPedido(): string {
+  const num = Math.floor(Math.random() * 900000) + 100000;
+  return `PED-${num}`;
+}
+
+/* ---------- Dashboard ---------- */
+export const listarDashboard = createServerFn({ method: "GET" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const [pedidosRes, produtosRes] = await Promise.all([
+    supabase.from("pedidos").select("*").order("criado_em", { ascending: false }).limit(5),
+    supabase.from("produtos").select("*").order("criado_em", { ascending: false }).limit(5),
+  ]);
+  const pedidos = (pedidosRes.data ?? []) as any[];
+  const produtos = (produtosRes.data ?? []) as any[];
+  return {
+    novos_pedidos: pedidos.filter((p: any) => p.status === "NOVO").length,
+    em_analise: pedidos.filter((p: any) => p.status === "EM_ANALISE").length,
+    em_andamento: pedidos.filter((p: any) => p.status === "EM_ANDAMENTO").length,
+    concluidos: pedidos.filter((p: any) => p.status === "CONCLUIDO").length,
+    cancelados: pedidos.filter((p: any) => p.status === "CANCELADO").length,
+    total_produtos: produtos.length,
+    produtos_ativos: produtos.filter((p: any) => p.publicado !== false).length,
+    sem_estoque: 0,
+    ultimos_pedidos: pedidos.slice(0, 5).map((p: any) => ({
+      id: p.id, order_number: p.order_number, customer_name: p.customer_name,
+      product_name: p.product_name, product_code: p.product_code, status: p.status, created_at: p.created_at,
+    })),
+    ultimos_produtos: produtos.slice(0, 5).map((p: any) => ({
+      id: p.id, product_code: p.product_code, name: p.titulo ?? "—", price: Number(p.preco ?? 0),
+      stock: Number(p.em_estoque ? 1 : 0), status: p.publicado ? "ATIVO" : "INATIVO", created_at: p.criado_em,
+    })),
+    atividades: [{ acao: "Painel acessado", usuario: "Admin", data: new Date().toISOString().split("T")[0], hora: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) }],
+  };
+});
+
+/* ---------- Produtos ---------- */
+export const listarProdutos = createServerFn({ method: "GET" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const { data, error } = await supabase.from("produtos").select("*").order("criado_em", { ascending: false });
+  if (error) return [];
+  return (data ?? []) as any[];
+});
+
+export const cadastrarProduto = createServerFn({ method: "POST" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const body = await new Response<{ titulo: string; descricao: string; categoria: string; marca: string; sku: string; barcode: string; preco: number; promotional_price?: number; stock: number; minimum_stock: number; status: string; notes?: string }>(null).text().then(async (t) => JSON.parse(t));
+  const product_code = gerarCodigoProduto();
+  const { data, error } = await supabase.from("produtos").insert({
+    product_code, titulo: body.titulo, descricao: body.descricao, categoria: body.categoria,
+    marca: body.marca, sku: body.sku, barcode: body.barcode, preco: body.preco,
+    promotional_price: body.promotional_price ?? null, em_estoque: body.stock > 0,
+    stock: body.stock, minimum_stock: body.minimum_stock, publicado: body.status === "ATIVO",
+    notes: body.notes ?? null, avaliacoes: 0, avaliacao: 0, ordem: 0, destaque: false,
+    slug: body.titulo.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+  }).select().single();
+  if (error) throw new Error(`Erro ao cadastrar produto: ${error.message}`);
+  return { data, product_code };
+});
+
+export const editarProduto = createServerFn({ method: "POST" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const body = await new Response<{ id: string; titulo: string; descricao: string; categoria: string; marca: string; sku: string; barcode: string; preco: number; promotional_price?: number; stock: number; minimum_stock: number; status: string; notes?: string }>(null).text().then(async (t) => JSON.parse(t));
+  const { data, error } = await supabase.from("produtos").update({
+    titulo: body.titulo, descricao: body.descricao, categoria: body.categoria, marca: body.marca,
+    sku: body.sku, barcode: body.barcode, preco: body.preco, promotional_price: body.promotional_price ?? null,
+    stock: body.stock, em_estoque: body.stock > 0, minimum_stock: body.minimum_stock,
+    publicado: body.status === "ATIVO", notes: body.notes ?? null, atualizado_em: new Date().toISOString(),
+  }).eq("id", body.id).select().single();
+  if (error) throw new Error(`Erro ao editar produto: ${error.message}`);
+  return data;
+});
+
+export const excluirProduto = createServerFn({ method: "POST" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const body = await new Response<{ id: string }>(null).text().then(async (t) => JSON.parse(t));
+  const { error } = await supabase.from("produtos").delete().eq("id", body.id);
+  if (error) throw new Error(`Erro ao excluir: ${error.message}`);
+  return { success: true };
+});
+
+export const alternarStatusProduto = createServerFn({ method: "POST" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const body = await new Response<{ id: string; status: string }>(null).text().then(async (t) => JSON.parse(t));
+  const { data, error } = await supabase.from("produtos").update({ publicado: body.status === "ATIVO", atualizado_em: new Date().toISOString() }).eq("id", body.id).select().single();
+  if (error) throw new Error(`Erro ao alterar status: ${error.message}`);
+  return data;
+});
 
 export type PedidoRow = { id: string; cliente: string; data: string; valor: number; status: string };
 export type VendaRow = { id: string; data: string; valor: number };
@@ -34,7 +129,7 @@ async function safeFetch<T>(fn: () => PromiseLike<{ data: any; error: any }>): P
 
 /* ---------- Vendas ---------- */
 export const listarVendas = createServerFn({ method: "GET" }).handler(async () => {
-  const supabase = createReader();
+  const supabase = supabaseAdmin;
   const { data, error } = await supabase.from("vendas").select("*").order("criado_em", { ascending: false }).limit(30);
   if (error) return [];
   return (data ?? []).map((r: any) => ({ id: r.id, data: r.criado_em, valor: Number(r.valor) }));
@@ -42,59 +137,76 @@ export const listarVendas = createServerFn({ method: "GET" }).handler(async () =
 
 /* ---------- Pedidos ---------- */
 export const listarPedidos = createServerFn({ method: "GET" }).handler(async () => {
-  const supabase = createReader();
-  const { data, error } = await supabase.from("pedidos").select("*").order("criado_em", { ascending: false }).limit(10);
+  const supabase = supabaseAdmin;
+  const { data, error } = await supabase.from("pedidos").select("*").order("criado_em", { ascending: false });
   if (error) return [];
-  return (data ?? []).map((r: any) => ({ id: r.id, cliente: r.cliente_nome ?? "—", data: r.criado_em, valor: Number(r.valor_total ?? r.valor ?? 0), status: r.status ?? "Aguardando pagamento" }));
+  return (data ?? []) as any[];
+});
+
+export const buscarPedido = createServerFn({ method: "POST" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const body = await new Response<{ id: string }>(null).text().then(async (t) => JSON.parse(t));
+  const { data, error } = await supabase.from("pedidos").select("*").eq("id", body.id).maybeSingle();
+  if (error) return null;
+  return data;
+});
+
+export const alterarStatusPedido = createServerFn({ method: "POST" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const body = await new Response<{ id: string; status: string; userId: string }>(null).text().then(async (t) => JSON.parse(t));
+  const { data: pedido } = await supabase.from("pedidos").select("status").eq("id", body.id).maybeSingle();
+  const oldStatus = pedido?.status ?? "NOVO";
+  const { data, error } = await supabase.from("pedidos").update({ status: body.status, updated_at: new Date().toISOString() }).eq("id", body.id).select().single();
+  if (error) throw new Error(`Erro ao alterar status: ${error.message}`);
+  await supabase.from("order_status_history").insert({ order_id: body.id, old_status: oldStatus, new_status: body.status, changed_by: body.userId });
+  return data;
 });
 
 /* ---------- Clientes ---------- */
 export const listarClientes = createServerFn({ method: "GET" }).handler(async () => {
-  const supabase = createReader();
-  const { data, error } = await supabase.from("profiles").select("id, nome, email, criado_em").order("criado_em", { ascending: false }).limit(10);
+  const supabase = supabaseAdmin;
+  const { data, error } = await supabase.from("customers").select("*").order("created_at", { ascending: false });
   if (error) return [];
-  return (data ?? []).map((r: any) => ({ id: r.id, nome: r.nome, email: r.email, criado_em: r.criado_em }));
+  return (data ?? []) as any[];
 });
 
-/* ---------- Produtos ---------- */
-export const listarProdutosAdmin = createServerFn({ method: "GET" }).handler(async () => {
-  const supabase = createReader();
-  const { data, error } = await supabase.from("produtos").select("*").order("titulo");
-  if (error) return [];
-  return (data ?? []).map((r: any) => ({ id: r.id, titulo: r.titulo, categoria: r.categoria, quantidade_vendida: Number(r.avaliacoes ?? 0), receita: Number(r.preco ?? 0) * Number(r.avaliacoes ?? 0), estoque: r.em_estoque ? 1 : 0 }));
+export const cadastrarCliente = createServerFn({ method: "POST" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const body = await new Response<{ name: string; email: string; phone: string; whatsapp: string }>(null).text().then(async (t) => JSON.parse(t));
+  const { data, error } = await supabase.from("customers").insert({ name: body.name, email: body.email, phone: body.phone, whatsapp: body.whatsapp }).select().single();
+  if (error) throw new Error(`Erro ao cadastrar cliente: ${error.message}`);
+  return data;
 });
 
-/* ---------- Atividades ---------- */
-export const listarAtividades = createServerFn({ method: "GET" }).handler(async () => {
-  const supabase = createReader();
-  const { data, error } = await supabase.from("atividades_admin").select("*").order("criado_em", { ascending: false }).limit(10);
-  if (error) return [];
-  return (data ?? []).map((r: any) => ({ acao: r.descricao ?? r.acao ?? "Atividade", usuario: r.usuario_nome ?? "Sistema", data: r.criado_em, hora: r.hora ?? "" }));
+export const editarCliente = createServerFn({ method: "POST" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const body = await new Response<{ id: string; name: string; email: string; phone: string; whatsapp: string }>(null).text().then(async (t) => JSON.parse(t));
+  const { data, error } = await supabase.from("customers").update({ name: body.name, email: body.email, phone: body.phone, whatsapp: body.whatsapp, updated_at: new Date().toISOString() }).eq("id", body.id).select().single();
+  if (error) throw new Error(`Erro ao editar cliente: ${error.message}`);
+  return data;
 });
 
-/* ---------- Notificações ---------- */
-export const listarNotificacoes = createServerFn({ method: "GET" }).handler(async () => {
-  const supabase = createReader();
-  const { data, error } = await supabase.from("notificacoes").select("*").eq("lida", false).order("criado_em", { ascending: false }).limit(10);
-  if (error) return [];
-  return (data ?? []).map((r: any) => ({ id: r.id, texto: r.texto, lida: r.lida, area: r.area }));
+export const buscarClientePedidos = createServerFn({ method: "POST" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const body = await new Response<{ customer_id: string }>(null).text().then(async (t) => JSON.parse(t));
+  const { data: customer } = await supabase.from("customers").select("*").eq("id", body.customer_id).maybeSingle();
+  const { data: orders } = await supabase.from("pedidos").select("*").eq("customer_id", body.customer_id).order("criado_em", { ascending: false });
+  return { customer, orders: orders ?? [] };
 });
 
-/* ---------- Estatísticas ---------- */
-export const listarEstatisticas = createServerFn({ method: "GET" }).handler(async () => {
-  const supabase = createReader();
-  const today = new Date().toISOString().split("T")[0];
-  const vendasToday = await supabase.from("vendas").select("valor").eq("criado_em", today);
-  const vendasData = (vendasToday.data ?? []).map((r: any) => Number(r.valor));
-  const vendasHoje = vendasData.reduce((a: number, b: number) => a + b, 0);
-  const pedidos = await safeFetch(() => supabase.from("pedidos").select("*"));
-  const totalPedidos = pedidos.length;
-  const pendentes = pedidos.filter((p: any) => p.status === "Aguardando pagamento").length;
-  const clientes = await safeFetch(() => supabase.from("profiles").select("*"));
-  const totalClientes = clientes.length;
-  const novosClientes = clientes.filter((c: any) => c.criado_em?.startsWith(today)).length;
-  const produtos = await safeFetch(() => supabase.from("produtos").select("*"));
-  const totalProdutos = produtos.length;
-  const estoqueBaixo = produtos.filter((p: any) => p.em_estoque === false).length;
-  return { vendasHoje, comparativoVendas: vendasHoje * 0.875, totalPedidos, pedidosPendentes: pendentes, totalClientes, novosClientes, totalProdutos, produtosEstoqueBaixo: estoqueBaixo, receitaPeriodo: vendasHoje * 30, ticketMedio: totalPedidos > 0 ? vendasHoje / totalPedidos : 0 };
+/* ---------- Criar Pedido ---------- */
+export const criarPedido = createServerFn({ method: "POST" }).handler(async () => {
+  const supabase = supabaseAdmin;
+  const body = await new Response<{ customer_name: string; customer_email: string; customer_phone: string; customer_whatsapp: string; product_id: string; product_code: string; product_name: string; product_image: string | null; product_sku: string | null; quantity: number; selected_variation: string | null; notes?: string }>(null).text().then(async (t) => JSON.parse(t));
+  const order_number = gerarNumeroPedido();
+  const { data, error } = await supabase.from("pedidos").insert({
+    order_number, customer_name: body.customer_name, customer_email: body.customer_email,
+    customer_phone: body.customer_phone, customer_whatsapp: body.customer_whatsapp,
+    product_id: body.product_id, product_code: body.product_code, product_name: body.product_name,
+    product_image: body.product_image, product_sku: body.product_sku, quantity: body.quantity,
+    selected_variation: body.selected_variation, notes: body.notes ?? null, status: "NOVO",
+  }).select().single();
+  if (error) throw new Error(`Erro ao criar pedido: ${error.message}`);
+  await supabase.from("order_status_history").insert({ order_id: data.id, old_status: "NOVO", new_status: "NOVO", changed_by: "system" });
+  return data;
 });
