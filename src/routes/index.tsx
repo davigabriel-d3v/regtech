@@ -358,15 +358,14 @@ function Index() {
           </nav>
           <div className="ml-auto flex items-center gap-2 md:ml-0">
             <ContaBotao />
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            type="button"
+            onClick={() => setModalAberto("contato")}
             className="ml-auto inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent md:ml-0"
           >
             Fale conosco
-            <ArrowRight className="h-4 w-4" />
-          </a>
+            <MessageCircle className="h-4 w-4" />
+          </button>
           </div>
         </div>
       </header>
