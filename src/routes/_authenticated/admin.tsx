@@ -25,10 +25,25 @@ export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
-    const { data: roleData } = await supabase.rpc("has_role", { _user_id: data.user.id, _role: "admin" });
-    const { data: permissionData } = await supabase.from("access_permissions").select("module").eq("user_id", data.user.id).eq("enabled", true);
-    if (!roleData && !(permissionData ?? []).length) throw redirect({ to: "/conta" });
-    return { user: data.user, isAdmin: Boolean(roleData), permissions: (permissionData ?? []).map((p) => p.module) };
+    const { data: roleData, error: roleError } = await supabase.rpc("has_role", { _user_id: data.user.id, _role: "admin" });
+    if (roleError) throw redirect({ to: "/conta" });
+    const isAdmin = Boolean(roleData);
+
+    // Administradores não dependem da tabela de permissões para enxergar o menu.
+    // Isso mantém o Acesso + disponível mesmo quando ainda não existem registros
+    // em access_permissions para o primeiro administrador.
+    if (isAdmin) {
+      return { user: data.user, isAdmin: true, permissions: [] as string[] };
+    }
+
+    const { data: permissionData, error: permissionError } = await supabase
+      .from("access_permissions")
+      .select("module")
+      .eq("user_id", data.user.id)
+      .eq("enabled", true);
+
+    if (permissionError || !(permissionData ?? []).length) throw redirect({ to: "/conta" });
+    return { user: data.user, isAdmin: false, permissions: (permissionData ?? []).map((p) => p.module) };
   },
   component: Admin,
 });
