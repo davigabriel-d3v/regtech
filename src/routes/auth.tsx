@@ -37,10 +37,16 @@ function AuthPage() {
     setEnviando(true);
     try {
       if (modo === "entrar") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
         if (error) throw error;
-        toast.success("Bem-vindo de volta!");
-        navigate({ to: "/conta" });
+
+        const [{ data: adminRole }, { data: operatorRole }] = await Promise.all([
+          supabase.rpc("has_role", { _user_id: data.user.id, _role: "admin" }),
+          supabase.rpc("has_role", { _user_id: data.user.id, _role: "operator" }),
+        ]);
+
+        toast.success("Login realizado com segurança.");
+        navigate({ to: adminRole || operatorRole ? "/admin" : "/conta" });
       } else if (modo === "criar") {
         const { data, error } = await supabase.auth.signUp({
           email,
