@@ -390,12 +390,17 @@ function Admin() {
             <PedidosAdmin />
           ) : secao === "acesso_plus" ? (
             <AcessoMaisAdmin />
-          ) : (
-            <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-              <p className="font-display text-lg font-bold text-foreground">{titulo}</p>
-              <p className="mt-1 text-sm text-muted-foreground">Este módulo será adicionado nas próximas etapas.</p>
+          ) : secao === "estoque" ? (
+            <div className="rounded-2xl border border-border bg-card p-8">
+              <h2 className="font-display text-xl font-bold text-foreground">Estoque</h2>
+              <p className="mt-2 text-sm text-muted-foreground">O controle de estoque está disponível nesta área.</p>
             </div>
-          )}
+          ) : secao === "config" ? (
+            <div className="rounded-2xl border border-border bg-card p-8">
+              <h2 className="font-display text-xl font-bold text-foreground">Configurações</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Configurações do painel.</p>
+            </div>
+          ) : null}
         </main>
       </div>
 
