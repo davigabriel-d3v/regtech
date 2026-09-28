@@ -33,14 +33,24 @@ Deno.serve(async (req) => {
       const { data: created, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
       if (error) throw error;
       const role = isAdmin ? "admin" : "user";
-      await admin.from("user_roles").delete().eq("user_id", created.user.id);
+      const { error: roleDeleteError } = await admin.from("user_roles").delete().eq("user_id", created.user.id);
+      if (roleDeleteError) {
+        await admin.auth.admin.deleteUser(created.user.id);
+        throw roleDeleteError;
+      }
       const { error: roleError } = await admin.from("user_roles").insert({ user_id: created.user.id, role });
-      if (roleError) throw roleError;
+      if (roleError) {
+        await admin.auth.admin.deleteUser(created.user.id);
+        throw roleError;
+      }
       if (!isAdmin) {
         const selected = Array.isArray(body.permissions) ? body.permissions.filter((x: unknown) => modules.includes(String(x))) : [];
         if (!selected.length) throw new Error("Selecione ao menos uma permissão.");
         const { error: permError } = await admin.from("access_permissions").insert(selected.map((module: string) => ({ user_id: created.user.id, module, enabled: true })));
-        if (permError) throw permError;
+        if (permError) {
+          await admin.auth.admin.deleteUser(created.user.id);
+          throw permError;
+        }
       } else {
         await admin.from("access_permissions").delete().eq("user_id", created.user.id);
       }
