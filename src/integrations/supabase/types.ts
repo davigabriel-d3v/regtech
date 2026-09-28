@@ -222,6 +222,33 @@ export type Database = {
           { foreignKeyName: "product_images_product_id_fkey"; columns: ["product_id"]; isOneToOne: false; referencedRelation: "products"; referencedColumns: ["id"] }
         ]
       }
+      customers: {
+        Row: { id: string; name: string; phone: string; phone_normalized: string; whatsapp: string | null; email: string | null; email_normalized: string | null; created_at: string; updated_at: string }
+        Insert: { id?: string; name: string; phone: string; phone_normalized: string; whatsapp?: string | null; email?: string | null; email_normalized?: string | null; created_at?: string; updated_at?: string }
+        Update: { id?: string; name?: string; phone?: string; phone_normalized?: string; whatsapp?: string | null; email?: string | null; email_normalized?: string | null; created_at?: string; updated_at?: string }
+        Relationships: []
+      }
+      orders: {
+        Row: { id: string; order_number: number; customer_id: string; status: "new" | "review" | "in_progress" | "completed" | "cancelled"; notes: string | null; created_at: string; updated_at: string }
+        Insert: { id?: string; order_number?: number; customer_id: string; status?: "new" | "review" | "in_progress" | "completed" | "cancelled"; notes?: string | null; created_at?: string; updated_at?: string }
+        Update: { id?: string; order_number?: number; customer_id?: string; status?: "new" | "review" | "in_progress" | "completed" | "cancelled"; notes?: string | null; created_at?: string; updated_at?: string }
+        Relationships: [{ foreignKeyName: "orders_customer_id_fkey"; columns: ["customer_id"]; isOneToOne: false; referencedRelation: "customers"; referencedColumns: ["id"] }]
+      }
+      order_items: {
+        Row: { id: string; order_id: string; product_id: string; product_code: string; product_name: string; product_image: string | null; product_sku: string | null; quantity: number; selected_variation: Json | null; created_at: string }
+        Insert: { id?: string; order_id: string; product_id: string; product_code: string; product_name: string; product_image?: string | null; product_sku?: string | null; quantity: number; selected_variation?: Json | null; created_at?: string }
+        Update: { id?: string; order_id?: string; product_id?: string; product_code?: string; product_name?: string; product_image?: string | null; product_sku?: string | null; quantity?: number; selected_variation?: Json | null; created_at?: string }
+        Relationships: [
+          { foreignKeyName: "order_items_order_id_fkey"; columns: ["order_id"]; isOneToOne: false; referencedRelation: "orders"; referencedColumns: ["id"] },
+          { foreignKeyName: "order_items_product_id_fkey"; columns: ["product_id"]; isOneToOne: false; referencedRelation: "products"; referencedColumns: ["id"] }
+        ]
+      }
+      order_status_history: {
+        Row: { id: string; order_id: string; old_status: "new" | "review" | "in_progress" | "completed" | "cancelled" | null; new_status: "new" | "review" | "in_progress" | "completed" | "cancelled"; changed_by: string | null; created_at: string }
+        Insert: { id?: string; order_id: string; old_status?: "new" | "review" | "in_progress" | "completed" | "cancelled" | null; new_status: "new" | "review" | "in_progress" | "completed" | "cancelled"; changed_by?: string | null; created_at?: string }
+        Update: { id?: string; order_id?: string; old_status?: "new" | "review" | "in_progress" | "completed" | "cancelled"; new_status?: "new" | "review" | "in_progress" | "completed" | "cancelled"; changed_by?: string | null; created_at?: string }
+        Relationships: [{ foreignKeyName: "order_status_history_order_id_fkey"; columns: ["order_id"]; isOneToOne: false; referencedRelation: "orders"; referencedColumns: ["id"] }]
+      }
       profiles: {
         Row: {
           criado_em: string
