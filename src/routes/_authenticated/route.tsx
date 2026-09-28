@@ -8,5 +8,10 @@ export const Route = createFileRoute("/_authenticated")({
     if (error || !data.user) throw redirect({ to: "/auth" });
     return { user: data.user };
   },
+  pendingComponent: () => (
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="text-sm text-muted-foreground">Verificando sessão segura...</div>
+    </div>
+  ),
   component: () => <Outlet />,
 });
