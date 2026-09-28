@@ -125,6 +125,8 @@ const data = (s: string) => new Date(s).toLocaleString("pt-BR", { dateStyle: "sh
 
 function Admin() {
   const { user, isAdmin, isOperator, permissions, accessDenied } = Route.useRouteContext();
+  const qc = useQueryClient();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
@@ -134,8 +136,6 @@ function Admin() {
     });
     return () => data.subscription.unsubscribe();
   }, [navigate]);
-  const qc = useQueryClient();
-  const navigate = useNavigate();
   const [secao, setSecao] = useState<Secao>("dashboard");
   const [menuAberto, setMenuAberto] = useState(false);
   const [produtos, setProdutos] = useState<Produto[]>([]);
