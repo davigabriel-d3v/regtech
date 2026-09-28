@@ -120,7 +120,7 @@ function Admin() {
       supabase.from("produtos").select("*").order("criado_em", { ascending: false }),
       supabase.from("profiles").select("id,nome,whatsapp,criado_em").order("criado_em", { ascending: false }),
       supabase.from("orders").select("id,order_number,status,created_at,customers(name),order_items(product_id,product_name,product_code)").order("created_at", { ascending: false }),
-      db.from("atividades").select("*").order("criado_em", { ascending: false }).limit(10),
+      db.from("atividades").select("id,tipo,descricao,criado_em").order("criado_em", { ascending: false }).limit(10),
     ]);
     const statusMap: Record<string, StatusPedido> = { new: "novo", review: "analise", in_progress: "andamento", completed: "concluido", cancelled: "cancelado" };
     const pedidosNovos = (pe.data ?? []).map((row) => {
