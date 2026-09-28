@@ -12,6 +12,8 @@ import { ProdutosAdmin } from "@/components/admin/ProdutosAdmin";
 import { PedidosAdmin } from "@/components/admin/PedidosAdmin";
 import { AcessoMaisAdmin } from "@/components/admin/AcessoMaisAdmin";
 
+// Acesso + é um módulo administrativo real e deve ser renderizado pela seção acesso_plus.
+
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
