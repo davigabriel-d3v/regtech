@@ -1,7 +1,7 @@
 create extension if not exists pgcrypto;
 
 alter table public.products
-  add column if not exists variations jsonb not null default '[]'::jsonb;
+  add column if not exists variations jsonb not null default '{}'::jsonb;
 
 create table if not exists public.customers (
   id uuid primary key default gen_random_uuid(),
