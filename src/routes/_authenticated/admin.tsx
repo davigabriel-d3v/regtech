@@ -9,6 +9,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ProdutosAdmin } from "@/components/admin/ProdutosAdmin";
+import { PedidosAdmin } from "@/components/admin/PedidosAdmin";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -113,18 +114,38 @@ function Admin() {
     const [p, c, pe, a] = await Promise.all([
       supabase.from("produtos").select("*").order("criado_em", { ascending: false }),
       supabase.from("profiles").select("*").order("criado_em", { ascending: false }),
-      db.from("pedidos").select("*").order("criado_em", { ascending: false }),
+      supabase.from("orders").select("id,order_number,status,created_at,customers(name),order_items(product_id,product_name,product_code)").order("created_at", { ascending: false }),
       db.from("atividades").select("*").order("criado_em", { ascending: false }).limit(10),
     ]);
+    const statusMap: Record<string, StatusPedido> = { new: "novo", review: "analise", in_progress: "andamento", completed: "concluido", cancelled: "cancelado" };
+    const pedidosNovos = (pe.data ?? []).map((row) => {
+      const customer = Array.isArray(row.customers) ? row.customers[0] : row.customers;
+      const item = Array.isArray(row.order_items) ? row.order_items[0] : row.order_items;
+      return {
+        id: row.id,
+        numero: row.order_number,
+        cliente_nome: customer?.name ?? "—",
+        produto_id: item?.product_id ?? null,
+        produto_titulo: item?.product_name ?? "—",
+        status: statusMap[row.status] ?? "novo",
+        criado_em: row.created_at,
+      } satisfies Pedido;
+    });
     setProdutos((p.data ?? []) as Produto[]);
     setClientes(c.data ?? []);
-    setPedidos((pe.data ?? []) as Pedido[]);
+    setPedidos(pedidosNovos);
     setAtividades((a.data ?? []) as Atividade[]);
     setCarregando(false);
     qc.invalidateQueries({ queryKey: ["loja"] });
   }
 
-  useEffect(() => { carregar(); }, [user.id]);
+  useEffect(() => { void carregar(); }, [user.id]);
+  useEffect(() => {
+    const channel = supabase.channel("admin-dashboard-orders")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => { void carregar(); })
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [user.id]);
 
   function ir(s: Secao) { setSecao(s); setMenuAberto(false); }
   function novo() { setForm(vazio); setEditId(null); setAberto(true); }
@@ -253,6 +274,19 @@ function Admin() {
                   </div>
                 ))}
               </div>
+
+              {pedidos.some((p) => p.status === "novo") && (
+                <button type="button" onClick={() => ir("pedidos")} className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-4 text-left">
+                  <span className="text-xl">🔔</span>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground">Novo pedido recebido</p>
+                    {(() => {
+                      const p = pedidos.find((item) => item.status === "novo");
+                      return p ? <p className="truncate text-sm text-muted-foreground">Pedido #{String(p.numero).padStart(6, "0")} · {p.cliente_nome} · {p.produto_titulo} · {idCurto(p.produto_id)}</p> : null;
+                    })()}
+                  </div>
+                </button>
+              )}
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
