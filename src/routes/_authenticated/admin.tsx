@@ -24,8 +24,9 @@ export const Route = createFileRoute("/_authenticated/admin")({
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
     const { data: roleData } = await supabase.rpc("has_role", { _user_id: data.user.id, _role: "admin" });
-    if (!roleData) throw redirect({ to: "/conta" });
-    return { user: data.user };
+    const { data: permissionData } = await supabase.from("access_permissions").select("module").eq("user_id", data.user.id).eq("enabled", true);
+    if (!roleData && !(permissionData ?? []).length) throw redirect({ to: "/conta" });
+    return { user: data.user, isAdmin: Boolean(roleData), permissions: (permissionData ?? []).map((p) => p.module) };
   },
   component: Admin,
 });
@@ -90,7 +91,7 @@ const idCurto = (id: string | null) => (id ? id.slice(0, 8).toUpperCase() : "—
 const data = (s: string) => new Date(s).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 
 function Admin() {
-  const { user } = Route.useRouteContext();
+  const { user, isAdmin, permissions } = Route.useRouteContext();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [secao, setSecao] = useState<Secao>("dashboard");
@@ -206,13 +207,13 @@ function Admin() {
     { l: "Produtos sem estoque", v: produtos.filter((p) => !p.em_estoque).length, i: PackageX },
   ];
 
-  const Sidebar = (
+  const allowed = (id: Secao) => isAdmin || id === "dashboard" || permissions.includes(id);\n  const visibleMenu = menu.filter((m) => allowed(m.id));\n\n  const Sidebar = (
     <nav className="flex h-full flex-col gap-1 p-4">
       <div className="mb-6 flex items-center gap-2 px-2">
         <img src="/regtech-icon.png" alt="" className="h-8 w-8 rounded-full" />
         <span className="font-display text-lg font-bold text-foreground">RegTech Admin</span>
       </div>
-      {menu.map((m) => (
+      {visibleMenu.map((m) => (
         <button key={m.id} onClick={() => ir(m.id)}
           className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${secao === m.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
           <m.icon className="h-4 w-4" /> {m.label}
@@ -255,7 +256,7 @@ function Admin() {
           <h1 className="font-display text-xl font-bold text-foreground">{titulo}</h1>
           <div className="ml-auto flex items-center gap-3">
             <span className="hidden text-sm text-muted-foreground sm:inline">{user.email}</span>
-            <button onClick={novo} className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-accent">
+            {allowed("produtos") && <button onClick={novo} className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-accent">
               <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Cadastrar produto</span>
             </button>
           </div>
