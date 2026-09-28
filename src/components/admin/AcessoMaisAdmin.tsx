@@ -93,7 +93,7 @@ export function AcessoMaisAdmin() {
             </select>
             <span className="mt-2 block text-xs text-muted-foreground">Operadores não recebem acesso a Acesso + nem Configurações.</span>
           </label>
-          {role !== "admin" && <div><p className="mb-2 text-sm font-semibold">Permissões do operador</p><div className="grid gap-2 sm:grid-cols-2">{modules.map(([id, label]) => <label key={id} className="flex items-center gap-2 rounded-xl border border-border p-3 text-sm"><input type="checkbox" checked={permissions.includes(id)} onChange={() => toggle(id)} /> {label}</label>)}</div></div>}
+          {role !== "admin" && <div><p className="mb-2 text-sm font-semibold">Permissões do operador</p><div className="grid gap-2 sm:grid-cols-2">{modules.filter(([id]) => !["acesso_plus", "configuracoes"].includes(id)).map(([id, label]) => <label key={id} className="flex items-center gap-2 rounded-xl border border-border p-3 text-sm"><input type="checkbox" checked={permissions.includes(id)} onChange={() => toggle(id)} /> {label}</label>)}</div></div>}
         </div>
         <div className="mt-6 flex justify-end gap-2"><button type="button" onClick={() => setOpen(false)} className="rounded-full border border-border px-5 py-2.5">Cancelar</button><button disabled={saving} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-semibold text-primary-foreground">{saving && <Loader2 className="h-4 w-4 animate-spin" />} Criar acesso</button></div>
       </form>
@@ -103,9 +103,12 @@ export function AcessoMaisAdmin() {
         <h3 className="font-display text-2xl font-bold">Editar acesso</h3>
         <p className="mt-1 text-sm text-muted-foreground">{editing.email}</p>
         <div className="mt-5 space-y-4">
-          <label className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">
-            <input type="checkbox" checked={editing.is_admin} onChange={(e) => setEditing({ ...editing, is_admin: e.target.checked })} />
-            <span><b>Administrador</b><br /><span className="text-xs text-muted-foreground">Libera todos os módulos do painel.</span></span>
+          <label className="block rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">
+            <span className="font-semibold">Função</span>
+            <select value={editing.role === "user" ? "operator" : editing.role} onChange={(e) => setEditing({ ...editing, role: e.target.value as Role })} className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2">
+              <option value="operator">Operador</option>
+              <option value="admin">Administrador</option>
+            </select>
           </label>
           {editing.role !== "admin" && <div>
             <p className="mb-2 text-sm font-semibold">Permissões</p>
