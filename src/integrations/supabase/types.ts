@@ -184,6 +184,44 @@ export type Database = {
         }
         Relationships: []
       }
+      product_categories: {
+        Row: { id: string; name: string; created_at: string }
+        Insert: { id?: string; name: string; created_at?: string }
+        Update: { id?: string; name?: string; created_at?: string }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          id: string; product_code: string; name: string; description: string | null; category_id: string | null;
+          brand_id: string | null; price: number; promotional_price: number | null; stock: number;
+          minimum_stock: number; sku: string | null; barcode: string | null; notes: string | null;
+          status: "active" | "inactive"; created_at: string; updated_at: string
+        }
+        Insert: {
+          id?: string; product_code?: string; name: string; description?: string | null; category_id?: string | null;
+          brand_id?: string | null; price: number; promotional_price?: number | null; stock?: number;
+          minimum_stock?: number; sku?: string | null; barcode?: string | null; notes?: string | null;
+          status?: "active" | "inactive"; created_at?: string; updated_at?: string
+        }
+        Update: {
+          id?: string; product_code?: string; name?: string; description?: string | null; category_id?: string | null;
+          brand_id?: string | null; price?: number; promotional_price?: number | null; stock?: number;
+          minimum_stock?: number; sku?: string | null; barcode?: string | null; notes?: string | null;
+          status?: "active" | "inactive"; created_at?: string; updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "products_category_id_fkey"; columns: ["category_id"]; isOneToOne: false; referencedRelation: "product_categories"; referencedColumns: ["id"] },
+          { foreignKeyName: "products_brand_id_fkey"; columns: ["brand_id"]; isOneToOne: false; referencedRelation: "marcas"; referencedColumns: ["id"] }
+        ]
+      }
+      product_images: {
+        Row: { id: string; product_id: string; storage_path: string; image_url: string; is_primary: boolean; display_order: number; created_at: string }
+        Insert: { id?: string; product_id: string; storage_path: string; image_url: string; is_primary?: boolean; display_order?: number; created_at?: string }
+        Update: { id?: string; product_id?: string; storage_path?: string; image_url?: string; is_primary?: boolean; display_order?: number; created_at?: string }
+        Relationships: [
+          { foreignKeyName: "product_images_product_id_fkey"; columns: ["product_id"]; isOneToOne: false; referencedRelation: "products"; referencedColumns: ["id"] }
+        ]
+      }
       profiles: {
         Row: {
           criado_em: string
