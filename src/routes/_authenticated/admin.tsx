@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProdutosAdmin } from "@/components/admin/ProdutosAdmin";
 import { PedidosAdmin } from "@/components/admin/PedidosAdmin";
 import { AcessoMaisAdmin } from "@/components/admin/AcessoMaisAdmin";
+import { ClientesAdmin } from "@/components/admin/ClientesAdmin";
 
 // Acesso + é um módulo administrativo real e deve ser renderizado pela seção acesso_plus.
 
@@ -387,20 +388,7 @@ function Admin() {
           ) : secao === "produtos" ? (
             <ProdutosAdmin />
           ) : secao === "clientes" ? (
-            <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-              <table className="w-full min-w-[480px] text-sm">
-                <thead className="text-left text-muted-foreground"><tr><th className="p-3">Nome</th><th className="p-3">WhatsApp</th><th className="p-3">Cadastro</th></tr></thead>
-                <tbody>
-                  {clientes.map((c) => (
-                    <tr key={c.id} className="border-t border-border text-foreground">
-                      <td className="p-3">{c.nome || "—"}</td>
-                      <td className="p-3">{c.whatsapp ? <a className="text-primary" target="_blank" rel="noreferrer" href={`https://wa.me/55${c.whatsapp.replace(/\D/g, "")}`}>{c.whatsapp}</a> : "—"}</td>
-                      <td className="p-3">{new Date(c.criado_em).toLocaleDateString("pt-BR")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <ClientesAdmin />
           ) : secao === "pedidos" ? (
             <PedidosAdmin />
           ) : secao === "acesso_plus" ? (
