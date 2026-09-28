@@ -94,7 +94,5 @@ create policy "access_permissions_self_select" on public.access_permissions
 for select to authenticated
 using (auth.uid() = user_id);
 
--- Newsletter addresses are collected publicly but are not a client-readable directory.
-revoke select on public.newsletter from authenticated;
 
 notify pgrst, 'reload schema';
