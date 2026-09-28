@@ -34,6 +34,7 @@ type ProdutoCatalogoRow = {
   promotional_price: number | null;
   stock: number;
   status: "active" | "inactive";
+  sku: string | null;
   variations: Record<string, unknown> | null;
   product_categories: { name: string } | { name: string }[] | null;
   marcas: { nome: string } | { nome: string }[] | null;
