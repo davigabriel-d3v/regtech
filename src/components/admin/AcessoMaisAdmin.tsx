@@ -90,5 +90,33 @@ export function AcessoMaisAdmin() {
         <div className="mt-6 flex justify-end gap-2"><button type="button" onClick={() => setOpen(false)} className="rounded-full border border-border px-5 py-2.5">Cancelar</button><button disabled={saving} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-semibold text-primary-foreground">{saving && <Loader2 className="h-4 w-4 animate-spin" />} Criar acesso</button></div>
       </form>
     </div>}
+    {editing && <div className="fixed inset-0 z-[80] flex items-center justify-center bg-background/80 p-4 backdrop-blur" onMouseDown={() => setEditing(null)}>
+      <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-card p-6" onMouseDown={(e) => e.stopPropagation()}>
+        <h3 className="font-display text-2xl font-bold">Editar acesso</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{editing.email}</p>
+        <div className="mt-5 space-y-4">
+          <label className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">
+            <input type="checkbox" checked={editing.is_admin} onChange={(e) => setEditing({ ...editing, is_admin: e.target.checked })} />
+            <span><b>Administrador</b><br /><span className="text-xs text-muted-foreground">Libera todos os módulos do painel.</span></span>
+          </label>
+          {!editing.is_admin && <div>
+            <p className="mb-2 text-sm font-semibold">Permissões</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {modules.map(([id, label]) => <label key={id} className="flex items-center gap-2 rounded-xl border border-border p-3 text-sm">
+                <input type="checkbox" checked={editing.permissions.includes(id)} onChange={() => setEditing({ ...editing, permissions: editing.permissions.includes(id) ? editing.permissions.filter((x) => x !== id) : [...editing.permissions, id] })} />
+                {label}
+              </label>)}
+            </div>
+          </div>}
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <button type="button" onClick={() => setEditing(null)} className="rounded-full border border-border px-5 py-2.5">Cancelar</button>
+          <button type="button" onClick={saveEdit} disabled={saving || (!editing.is_admin && editing.permissions.length === 0)} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-semibold text-primary-foreground disabled:opacity-60">
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />} Salvar alterações
+          </button>
+        </div>
+      </div>
+    </div>}
+
   </section>;
 }
