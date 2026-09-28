@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      atividades: {
+        Row: {
+          criado_em: string
+          descricao: string
+          id: string
+          tipo: string
+        }
+        Insert: {
+          criado_em?: string
+          descricao: string
+          id?: string
+          tipo: string
+        }
+        Update: {
+          criado_em?: string
+          descricao?: string
+          id?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
       marcas: {
         Row: {
           ativo: boolean
@@ -58,6 +79,50 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      pedidos: {
+        Row: {
+          atualizado_em: string
+          cliente_id: string | null
+          cliente_nome: string
+          criado_em: string
+          id: string
+          numero: number
+          produto_id: string | null
+          produto_titulo: string
+          status: string
+        }
+        Insert: {
+          atualizado_em?: string
+          cliente_id?: string | null
+          cliente_nome?: string
+          criado_em?: string
+          id?: string
+          numero?: number
+          produto_id?: string | null
+          produto_titulo?: string
+          status?: string
+        }
+        Update: {
+          atualizado_em?: string
+          cliente_id?: string | null
+          cliente_nome?: string
+          criado_em?: string
+          id?: string
+          numero?: number
+          produto_id?: string | null
+          produto_titulo?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       produtos: {
         Row: {
