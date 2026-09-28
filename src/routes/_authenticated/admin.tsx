@@ -126,6 +126,7 @@ function Admin() {
         numero: row.order_number,
         cliente_nome: customer?.name ?? "—",
         produto_id: item?.product_id ?? null,
+        produto_codigo: item?.product_code ?? null,
         produto_titulo: item?.product_name ?? "—",
         status: statusMap[row.status] ?? "novo",
         criado_em: row.created_at,
