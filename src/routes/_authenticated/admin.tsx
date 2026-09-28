@@ -207,7 +207,10 @@ function Admin() {
     { l: "Produtos sem estoque", v: produtos.filter((p) => !p.em_estoque).length, i: PackageX },
   ];
 
-  const allowed = (id: Secao) => isAdmin || id === "dashboard" || permissions.includes(id);\n  const visibleMenu = menu.filter((m) => allowed(m.id));\n\n  const Sidebar = (
+  const allowed = (id: Secao) => isAdmin || id === "dashboard" || permissions.includes(id);
+  const visibleMenu = menu.filter((m) => allowed(m.id));
+
+  const Sidebar = (
     <nav className="flex h-full flex-col gap-1 p-4">
       <div className="mb-6 flex items-center gap-2 px-2">
         <img src="/regtech-icon.png" alt="" className="h-8 w-8 rounded-full" />
