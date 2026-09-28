@@ -379,7 +379,7 @@ function Admin() {
               </table>
             </div>
           ) : secao === "pedidos" ? (
-            <div className="rounded-2xl border border-border bg-card"><TabelaPedidos pedidos={pedidos} /></div>
+            <PedidosAdmin />
           ) : (
             <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
               <p className="font-display text-lg font-bold text-foreground">{titulo}</p>
