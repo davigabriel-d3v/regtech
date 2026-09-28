@@ -21,7 +21,7 @@ returns text
 language plpgsql
 security definer
 set search_path = public
-as $1declare
+as $declare
   candidate text;
 begin
   loop
@@ -62,7 +62,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $1begin
+as $begin
   if tg_op = 'UPDATE' and old.product_code is distinct from new.product_code then
     raise exception 'product_code cannot be changed';
   end if;
