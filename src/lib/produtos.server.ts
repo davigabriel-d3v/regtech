@@ -25,51 +25,6 @@ export type ProdutoLoja = {
 export type MarcaLoja = { id: string; nome: string; logoUrl: string | null };
 
 
-type ProdutoRow = Database["public"]["Tables"]["produtos"]["Row"];
-
-function isNewBackendKey(value: string): boolean {
-  return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
-}
-
-function createBackendFetch(backendKey: string): typeof fetch {
-  return (input, init) => {
-    const headers = new Headers(
-      typeof Request !== "undefined" && input instanceof Request
-        ? input.headers
-        : undefined,
-    );
-
-    if (init?.headers) {
-      new Headers(init.headers).forEach((value, key) => headers.set(key, value));
-    }
-
-    // New backend keys are opaque strings, not bearer tokens.
-    if (
-      isNewBackendKey(backendKey) &&
-      headers.get("Authorization") === `Bearer ${backendKey}`
-    ) {
-      headers.delete("Authorization");
-    }
-
-    headers.set("apikey", backendKey);
-    return fetch(input, { ...init, headers });
-  };
-}
-
-function createReader(): SupabaseClient<Database> {
-  const url = process.env["SUPABASE_URL"];
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
-
-  if (!url || !key) {
-    throw new Error("Missing backend environment variables for the store.");
-  }
-
-  return createClient<Database>(url, key, {
-    global: { fetch: createBackendFetch(key) },
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-}
-
 type ProdutoCatalogoRow = {
   id: string;
   product_code: string;
