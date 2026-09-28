@@ -32,6 +32,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { whatsappComMensagem } from "@/lib/contato";
+import { SolicitarPedidoModal } from "@/components/loja/SolicitarPedidoModal";
 import type { MarcaLoja, ProdutoLoja } from "@/lib/produtos.functions";
 
 type Icone = ComponentType<{ className?: string }>;
@@ -327,14 +328,22 @@ export function ProdutoCardLoja({ produto }: { produto: ProdutoLoja }) {
         )}
       </div>
 
+      <button
+        type="button"
+        onClick={() => setPedidoAberto(true)}
+        className="mt-3 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent"
+      >
+        <ShoppingCart className="h-4 w-4" /> SOLICITAR PEDIDO
+      </button>
       <a
         href={whatsappComMensagem(`Olá! Quero comprar: ${produto.titulo} (${produto.marca}).`)}
         target="_blank"
         rel="noreferrer"
-        className="mt-3 inline-flex items-center justify-center gap-2 rounded-full border border-primary px-4 py-2 text-sm font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground"
+        className="mt-2 inline-flex items-center justify-center gap-2 rounded-full border border-primary px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
       >
-        <ShoppingCart className="h-4 w-4" /> Comprar
+        Falar no WhatsApp
       </a>
+      <SolicitarPedidoModal produto={pedidoAberto ? produto : null} onClose={() => setPedidoAberto(false)} />
     </article>
   );
 }
