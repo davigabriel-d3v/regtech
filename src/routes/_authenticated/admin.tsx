@@ -386,6 +386,8 @@ function Admin() {
             </div>
           ) : secao === "pedidos" ? (
             <PedidosAdmin />
+          ) : secao === "acesso_plus" ? (
+            <AcessoMaisAdmin />
           ) : (
             <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
               <p className="font-display text-lg font-bold text-foreground">{titulo}</p>
