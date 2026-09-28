@@ -33,7 +33,8 @@ Deno.serve(async (req) => {
       const { data: created, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
       if (error) throw error;
       const role = isAdmin ? "admin" : "user";
-      const { error: roleError } = await admin.from("user_roles").upsert({ user_id: created.user.id, role }, { onConflict: "user_id,role" });
+      await admin.from("user_roles").delete().eq("user_id", created.user.id);
+      const { error: roleError } = await admin.from("user_roles").insert({ user_id: created.user.id, role });
       if (roleError) throw roleError;
       if (!isAdmin) {
         const selected = Array.isArray(body.permissions) ? body.permissions.filter((x: unknown) => modules.includes(String(x))) : [];
