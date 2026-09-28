@@ -64,7 +64,7 @@ export function PedidosAdmin() {
       .channel("admin-orders")
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => load())
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
+    const timer = window.setInterval(() => { void load(); }, 15000);\n    return () => { window.clearInterval(timer); void supabase.removeChannel(channel); };
   }, []);
 
   const filtered = useMemo(() => {
