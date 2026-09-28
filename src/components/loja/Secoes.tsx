@@ -40,9 +40,9 @@ type Escolher = (chave: string) => void;
 
 /** Grupos de categorias da loja → categorias reais dos produtos. */
 export const grupos: Record<string, string[]> = {
-  celulares: ["apple", "samsung", "xiaomi", "realme"],
-  informatica: ["starlink"],
-  eletronicos: ["dji", "motos-eletricas"],
+  celulares: ["celulares", "apple", "samsung", "xiaomi", "realme"],
+  informatica: ["informatica", "starlink"],
+  eletronicos: ["eletronicos", "dji", "motos-eletricas"],
   acessorios: ["acessorios"],
   audio: ["acessorios"],
   smartwatches: ["xiaomi", "apple"],
