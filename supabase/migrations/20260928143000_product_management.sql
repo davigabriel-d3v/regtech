@@ -21,7 +21,8 @@ returns text
 language plpgsql
 security definer
 set search_path = public
-as $declare
+as $$
+declare
   candidate text;
 begin
   loop
@@ -31,7 +32,7 @@ begin
     end if;
   end loop;
 end;
-$;
+$$;
 
 create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
@@ -62,7 +63,8 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $begin
+as $$
+begin
   if tg_op = 'UPDATE' and old.product_code is distinct from new.product_code then
     raise exception 'product_code cannot be changed';
   end if;
@@ -76,7 +78,7 @@ as $begin
   end if;
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists products_product_code_guard on public.products;
 create trigger products_product_code_guard
