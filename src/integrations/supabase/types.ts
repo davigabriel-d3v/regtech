@@ -194,13 +194,13 @@ export type Database = {
         Row: {
           id: string; product_code: string; name: string; description: string | null; category_id: string | null;
           brand_id: string | null; price: number; promotional_price: number | null; stock: number;
-          minimum_stock: number; sku: string | null; barcode: string | null; notes: string | null;
+          minimum_stock: number; sku: string | null; barcode: string | null; notes: string | null; variations: Json;
           status: "active" | "inactive"; created_at: string; updated_at: string
         }
         Insert: {
           id?: string; product_code?: string; name: string; description?: string | null; category_id?: string | null;
           brand_id?: string | null; price: number; promotional_price?: number | null; stock?: number;
-          minimum_stock?: number; sku?: string | null; barcode?: string | null; notes?: string | null;
+          minimum_stock?: number; sku?: string | null; barcode?: string | null; notes?: string | null; variations?: Json;
           status?: "active" | "inactive"; created_at?: string; updated_at?: string
         }
         Update: {
