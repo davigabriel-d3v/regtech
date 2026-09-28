@@ -40,24 +40,6 @@ type ProdutoCatalogoRow = {
   product_images: Array<{ image_url: string; is_primary: boolean; display_order: number }>;
 };
 
-function toProduto(row: ProdutoRow): ProdutoLoja {
-  return {
-    id: row.id,
-    slug: row.slug,
-    titulo: row.titulo,
-    marca: row.marca,
-    categoria: row.categoria,
-    descricao: row.descricao ?? "",
-    preco: row.preco === null ? null : Number(row.preco),
-    emEstoque: row.em_estoque,
-    destaque: row.destaque,
-    imagemUrl: row.imagem_url,
-    precoAntigo: row.preco_antigo === null ? null : Number(row.preco_antigo),
-    avaliacao: Number(row.avaliacao),
-    avaliacoes: row.avaliacoes,
-  };
-}
-
 export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> {
   const supabase = createReader();
 
@@ -74,7 +56,7 @@ export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> 
   }
 
   const rows = (data ?? []) as unknown as ProdutoCatalogoRow[];
-  const toSlug = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const toSlug = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   return rows
     .map((row) => {
