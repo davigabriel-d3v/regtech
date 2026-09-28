@@ -46,13 +46,25 @@ export function ProdutosAdmin() {
 
   async function load() {
     setLoading(true);
-    const [p, c, b] = await Promise.all([
-      supabase.from("products").select("*, product_images(*)").order("created_at", { ascending: false }),
+    const [p, imgs, c, b] = await Promise.all([
+      supabase.from("products").select("*").order("created_at", { ascending: false }),
+      supabase.from("product_images").select("*").order("display_order"),
       supabase.from("product_categories").select("id,name").order("name"),
       supabase.from("marcas").select("id,nome").eq("ativo", true).order("nome"),
     ]);
     if (p.error) toast.error("Não foi possível carregar os produtos: " + p.error.message);
-    setProducts((p.data ?? []) as Product[]);
+    if (imgs.error) toast.error("Não foi possível carregar as imagens dos produtos: " + imgs.error.message);
+    const imagesByProduct = new Map<string, ProductImage[]>();
+    for (const image of (imgs.data ?? []) as ProductImage[]) {
+      const current = imagesByProduct.get(image.product_id) ?? [];
+      current.push(image);
+      imagesByProduct.set(image.product_id, current);
+    }
+    const merged = ((p.data ?? []) as Product[]).map(product => ({
+      ...product,
+      product_images: imagesByProduct.get(product.id) ?? [],
+    }));
+    setProducts(merged);
     setCategories((c.data ?? []) as Category[]);
     setBrands((b.data ?? []) as Brand[]);
     setLoading(false);
@@ -141,7 +153,7 @@ export function ProdutosAdmin() {
           brand_id: form.brand_id, price, promotional_price: promo, stock: Number(form.stock),
           minimum_stock: Number(form.minimum_stock), sku: form.sku.trim() || null, barcode: form.barcode.trim() || null,
           notes: form.notes.trim() || null, status: form.status,
-        }).select("*, product_images(*)").single();
+        }).select().single();
         if (error) throw error;
         productId = data.id;
         createdProduct = data as Product;
