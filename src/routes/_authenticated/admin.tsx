@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ProdutosAdmin } from "@/components/admin/ProdutosAdmin";
 import { PedidosAdmin } from "@/components/admin/PedidosAdmin";
+import { AcessoMaisAdmin } from "@/components/admin/AcessoMaisAdmin";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -43,7 +44,7 @@ type Pedido = {
 };
 type Atividade = { id: string; tipo: string; descricao: string; criado_em: string };
 type StatusPedido = "novo" | "analise" | "andamento" | "concluido" | "cancelado";
-type Secao = "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "config";
+type Secao = "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "acesso_plus" | "config";
 
 const statusInfo: Record<StatusPedido, { label: string; cls: string }> = {
   novo: { label: "Novo", cls: "bg-primary/15 text-primary" },
@@ -69,6 +70,7 @@ const menu: { id: Secao; label: string; icon: typeof Activity }[] = [
   { id: "pedidos", label: "Pedidos", icon: ShoppingBag },
   { id: "clientes", label: "Clientes", icon: Users },
   { id: "estoque", label: "Estoque", icon: Boxes },
+  { id: "acesso_plus", label: "Acesso +", icon: UserPlus },
   { id: "config", label: "Configurações", icon: Settings },
 ];
 
