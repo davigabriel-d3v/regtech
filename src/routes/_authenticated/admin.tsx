@@ -2,15 +2,20 @@ import { useState, useEffect } from "react";
 import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Package, Users, Plus, Eye, EyeOff, Star, Pencil, Trash2,
-  ArrowLeft, Loader2,
+  Package, Users, Plus, Eye, EyeOff, Star, Pencil, Trash2, ArrowLeft, Loader2,
+  LayoutDashboard, ShoppingBag, Boxes, Settings, Menu, X, LogOut, Inbox, Search,
+  Truck, CheckCircle2, XCircle, PackageCheck, PackageX, Activity, UserPlus, FilePen, FilePlus2, RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
-    meta: [{ title: "Painel Admin" }, { name: "description", content: "Painel administrativo" }],
+    meta: [
+      { title: "Painel Admin | RegTech" },
+      { name: "description", content: "Painel administrativo da RegTech Cell Shop" },
+      { name: "robots", content: "noindex" },
+    ],
   }),
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
@@ -22,55 +27,75 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
 });
 
+// Tabelas novas (pedidos, atividades) ainda não estão nos tipos gerados.
+const db = supabase as any;
+
 type Produto = {
-  id: string;
-  titulo: string;
-  marca: string;
-  categoria: string;
-  descricao: string | null;
-  preco: number | null;
-  imagem_url: string | null;
-  em_estoque: boolean;
-  destaque: boolean;
-  publicado: boolean;
-  ordem: number;
+  id: string; titulo: string; marca: string; categoria: string; descricao: string | null;
+  preco: number | null; imagem_url: string | null; em_estoque: boolean; destaque: boolean;
+  publicado: boolean; ordem: number; criado_em: string;
+};
+type Pedido = {
+  id: string; numero: number; cliente_nome: string; produto_id: string | null;
+  produto_titulo: string; status: StatusPedido; criado_em: string;
+};
+type Atividade = { id: string; tipo: string; descricao: string; criado_em: string };
+type StatusPedido = "novo" | "analise" | "andamento" | "concluido" | "cancelado";
+type Secao = "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "config";
+
+const statusInfo: Record<StatusPedido, { label: string; cls: string }> = {
+  novo: { label: "Novo", cls: "bg-primary/15 text-primary" },
+  analise: { label: "Em análise", cls: "bg-accent/15 text-accent-foreground" },
+  andamento: { label: "Em andamento", cls: "bg-secondary text-secondary-foreground" },
+  concluido: { label: "Concluído", cls: "bg-primary/25 text-foreground" },
+  cancelado: { label: "Cancelado", cls: "bg-destructive/15 text-destructive" },
+};
+
+const iconeAtividade: Record<string, typeof Activity> = {
+  produto_cadastrado: FilePlus2, produto_editado: FilePen, novo_pedido: ShoppingBag,
+  pedido_atualizado: RefreshCw, cliente_cadastrado: UserPlus,
 };
 
 const categorias: [string, string][] = [
-  ["celulares", "Celulares"],
-  ["informatica", "Informática"],
-  ["acessorios", "Acessórios"],
-  ["servicos", "Serviços"],
-  ["motos", "Motos Elétricas"],
-  ["outros", "Outros"],
+  ["celulares", "Celulares"], ["informatica", "Informática"], ["acessorios", "Acessórios"],
+  ["servicos", "Serviços"], ["motos", "Motos Elétricas"], ["outros", "Outros"],
+];
+
+const menu: { id: Secao; label: string; icon: typeof Activity }[] = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "produtos", label: "Produtos", icon: Package },
+  { id: "pedidos", label: "Pedidos", icon: ShoppingBag },
+  { id: "clientes", label: "Clientes", icon: Users },
+  { id: "estoque", label: "Estoque", icon: Boxes },
+  { id: "config", label: "Configurações", icon: Settings },
 ];
 
 const vazio = {
   titulo: "", marca: "", categoria: "celulares", descricao: "",
-  preco: "", imagem_url: "", em_estoque: true, destaque: false,
-  publicado: true, ordem: 0,
+  preco: "", imagem_url: "", em_estoque: true, destaque: false, publicado: true, ordem: 0,
 };
 
 const campo =
   "w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50";
 
 function slugify(s: string) {
-  return s
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
+const idCurto = (id: string | null) => (id ? id.slice(0, 8).toUpperCase() : "—");
+const data = (s: string) => new Date(s).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 
-export default function Admin() {
+function Admin() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const [aba, setAba] = useState<"produtos" | "clientes">("produtos");
+  const [secao, setSecao] = useState<Secao>("dashboard");
+  const [menuAberto, setMenuAberto] = useState(false);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [clientes, setClientes] = useState<any[]>([]);
-  const [admin, setAdmin] = useState<boolean | null>(null);
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [atividades, setAtividades] = useState<Atividade[]>([]);
+  const [carregando, setCarregando] = useState(true);
   const [form, setForm] = useState<any>(vazio);
   const [editId, setEditId] = useState<string | null>(null);
   const [aberto, setAberto] = useState(false);
@@ -84,33 +109,23 @@ export default function Admin() {
   }
 
   async function carregar() {
-    const [p, c] = await Promise.all([
-      supabase.from("produtos").select("*").order("ordem").order("titulo"),
+    const [p, c, pe, a] = await Promise.all([
+      supabase.from("produtos").select("*").order("criado_em", { ascending: false }),
       supabase.from("profiles").select("*").order("criado_em", { ascending: false }),
+      db.from("pedidos").select("*").order("criado_em", { ascending: false }),
+      db.from("atividades").select("*").order("criado_em", { ascending: false }).limit(10),
     ]);
     setProdutos((p.data ?? []) as Produto[]);
     setClientes(c.data ?? []);
+    setPedidos((pe.data ?? []) as Pedido[]);
+    setAtividades((a.data ?? []) as Atividade[]);
+    setCarregando(false);
     qc.invalidateQueries({ queryKey: ["loja"] });
   }
 
-  useEffect(() => {
-    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => {
-      setAdmin(!!data);
-      if (data) carregar();
-    });
-  }, [user.id]);
+  useEffect(() => { carregar(); }, [user.id]);
 
-  if (admin === null)
-    return <div className="flex min-h-screen items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
-  if (!admin)
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-4 text-center">
-        <h1 className="font-display text-2xl font-bold text-foreground">Acesso restrito</h1>
-        <p className="text-muted-foreground">Esta área é só para administradores.</p>
-        <Link to="/" className="text-primary">Voltar ao site</Link>
-      </main>
-    );
-
+  function ir(s: Secao) { setSecao(s); setMenuAberto(false); }
   function novo() { setForm(vazio); setEditId(null); setAberto(true); }
   function editar(p: Produto) {
     setForm({
@@ -126,7 +141,7 @@ export default function Admin() {
     setSalvando(true);
     const dados = {
       titulo: form.titulo.trim(), marca: form.marca.trim(), categoria: form.categoria,
-      descricao: form.descricao.trim(), preco: form.preco === "" ? null : Number(form.preco.replace(",", ".")),
+      descricao: form.descricao.trim(), preco: form.preco === "" ? null : Number(String(form.preco).replace(",", ".")),
       imagem_url: form.imagem_url.trim() || null, em_estoque: form.em_estoque, destaque: form.destaque,
       publicado: form.publicado, ordem: Number(form.ordem) || 0, atualizado_em: new Date().toISOString(),
     };
@@ -140,8 +155,8 @@ export default function Admin() {
     carregar();
   }
 
-  async function alternar(p: Produto, campoBool: "publicado" | "destaque") {
-    const patch = campoBool === "publicado" ? { publicado: !p.publicado } : { destaque: !p.destaque };
+  async function alternar(p: Produto, k: "publicado" | "destaque") {
+    const patch = k === "publicado" ? { publicado: !p.publicado } : { destaque: !p.destaque };
     await supabase.from("produtos").update(patch).eq("id", p.id);
     carregar();
   }
@@ -154,84 +169,212 @@ export default function Admin() {
     carregar();
   }
 
-  const publicados = produtos.filter((p) => p.publicado).length;
+  const conta = (s: StatusPedido) => pedidos.filter((p) => p.status === s).length;
+  const cards = [
+    { l: "Novos pedidos", v: conta("novo"), i: Inbox },
+    { l: "Pedidos em análise", v: conta("analise"), i: Search },
+    { l: "Pedidos em andamento", v: conta("andamento"), i: Truck },
+    { l: "Pedidos concluídos", v: conta("concluido"), i: CheckCircle2 },
+    { l: "Pedidos cancelados", v: conta("cancelado"), i: XCircle },
+    { l: "Total de produtos", v: produtos.length, i: Package },
+    { l: "Produtos ativos", v: produtos.filter((p) => p.publicado).length, i: PackageCheck },
+    { l: "Produtos sem estoque", v: produtos.filter((p) => !p.em_estoque).length, i: PackageX },
+  ];
+
+  const Sidebar = (
+    <nav className="flex h-full flex-col gap-1 p-4">
+      <div className="mb-6 flex items-center gap-2 px-2">
+        <img src="/regtech-icon.png" alt="" className="h-8 w-8 rounded-full" />
+        <span className="font-display text-lg font-bold text-foreground">RegTech Admin</span>
+      </div>
+      {menu.map((m) => (
+        <button key={m.id} onClick={() => ir(m.id)}
+          className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${secao === m.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
+          <m.icon className="h-4 w-4" /> {m.label}
+        </button>
+      ))}
+      <div className="mt-auto space-y-1 border-t border-border pt-4">
+        <Link to="/" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Voltar ao site
+        </Link>
+        <button onClick={sair} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground">
+          <LogOut className="h-4 w-4" /> Sair
+        </button>
+      </div>
+    </nav>
+  );
+
+  const titulo = menu.find((m) => m.id === secao)?.label ?? "";
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-4 flex items-center justify-between">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-4 w-4" /> Voltar ao site
-          </Link>
-          <button onClick={sair} className="text-sm text-muted-foreground hover:text-foreground">Sair</button>
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="font-display text-3xl font-bold text-foreground">Painel administrativo</h1>
-          <button onClick={novo} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-accent">
-            <Plus className="h-4 w-4" /> Novo produto
-          </button>
-        </div>
+    <div className="flex min-h-screen w-full bg-background">
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-border bg-card md:block">{Sidebar}</aside>
 
-        <div className="mt-6 grid grid-cols-3 gap-3">
-          {[["Produtos", produtos.length], ["Publicados", publicados], ["Clientes", clientes.length]].map(([l, v]) => (
-            <div key={l} className="rounded-2xl border border-border bg-card p-4">
-              <p className="text-xs text-muted-foreground">{l}</p>
-              <p className="font-display text-2xl font-bold text-foreground">{v}</p>
-            </div>
-          ))}
+      {menuAberto && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur" onClick={() => setMenuAberto(false)} />
+          <aside className="relative h-full w-64 border-r border-border bg-card">
+            <button aria-label="Fechar menu" onClick={() => setMenuAberto(false)} className="absolute right-3 top-4 rounded-lg p-1 text-muted-foreground hover:bg-secondary">
+              <X className="h-5 w-5" />
+            </button>
+            {Sidebar}
+          </aside>
         </div>
+      )}
 
-        <div className="mt-6 flex gap-2">
-          <button onClick={() => setAba("produtos")} className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm ${aba === "produtos" ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground"}`}>
-            <Package className="h-4 w-4" /> Produtos
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur md:px-8">
+          <button aria-label="Abrir menu" onClick={() => setMenuAberto(true)} className="rounded-lg p-2 text-foreground hover:bg-secondary md:hidden">
+            <Menu className="h-5 w-5" />
           </button>
-          <button onClick={() => setAba("clientes")} className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm ${aba === "clientes" ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground"}`}>
-            <Users className="h-4 w-4" /> Clientes
-          </button>
-        </div>
-
-        {aba === "produtos" ? (
-          <div className="mt-4 space-y-2">
-            {produtos.map((p) => (
-              <div key={p.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4">
-                {p.imagem_url ? <img src={p.imagem_url} alt="" className="h-12 w-12 rounded-lg object-cover" /> : <div className="h-12 w-12 rounded-lg bg-secondary" />}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-foreground">{p.titulo}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {p.marca} · {categorias.find((c) => c[0] === p.categoria)?.[1] ?? p.categoria} ·{" "}
-                    {p.preco == null ? "Sob consulta" : Number(p.preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                    {!p.publicado && " · Rascunho"}
-                  </p>
-                </div>
-                <div className="flex gap-1">
-                  <button title={p.publicado ? "Ocultar" : "Publicar"} onClick={() => alternar(p, "publicado")} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary">
-                    {p.publicado ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4" />}
-                  </button>
-                  <button title="Destaque" onClick={() => alternar(p, "destaque")} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary">
-                    <Star className={`h-4 w-4 ${p.destaque ? "fill-primary text-primary" : ""}`} />
-                  </button>
-                  <button title="Editar" onClick={() => editar(p)} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary"><Pencil className="h-4 w-4" /></button>
-                  <button title="Apagar" onClick={() => apagar(p)} className="rounded-lg p-2 text-destructive hover:bg-secondary"><Trash2 className="h-4 w-4" /></button>
-                </div>
-              </div>
-            ))}
+          <h1 className="font-display text-xl font-bold text-foreground">{titulo}</h1>
+          <div className="ml-auto flex items-center gap-3">
+            <span className="hidden text-sm text-muted-foreground sm:inline">{user.email}</span>
+            <button onClick={novo} className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-accent">
+              <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Cadastrar produto</span>
+            </button>
           </div>
-        ) : (
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead className="text-left text-muted-foreground"><tr><th className="p-3">Nome</th><th className="p-3">WhatsApp</th><th className="p-3">Cadastro</th></tr></thead>
-              <tbody>
-                {clientes.map((c) => (
-                  <tr key={c.id} className="border-t border-border text-foreground">
-                    <td className="p-3">{c.nome || "—"}</td>
-                    <td className="p-3">{c.whatsapp ? <a className="text-primary" target="_blank" rel="noreferrer" href={`https://wa.me/55${c.whatsapp.replace(/\D/g, "")}`}>{c.whatsapp}</a> : "—"}</td>
-                    <td className="p-3">{new Date(c.criado_em).toLocaleDateString("pt-BR")}</td>
-                  </tr>
+        </header>
+
+        <main className="flex-1 px-4 py-6 md:px-8">
+          {carregando ? (
+            <div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : secao === "dashboard" ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                {cards.map((c) => (
+                  <div key={c.l} className="rounded-2xl border border-border bg-card p-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">{c.l}</p>
+                      <c.i className="h-4 w-4 text-primary" />
+                    </div>
+                    <p className="mt-2 font-display text-3xl font-bold text-foreground">{c.v}</p>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[
+                  { l: "Cadastrar produto", i: Plus, f: novo },
+                  { l: "Ver pedidos", i: ShoppingBag, f: () => ir("pedidos") },
+                  { l: "Ver clientes", i: Users, f: () => ir("clientes") },
+                  { l: "Ver produtos", i: Package, f: () => ir("produtos") },
+                ].map((a) => (
+                  <button key={a.l} onClick={a.f} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left text-sm font-medium text-foreground hover:border-primary">
+                    <span className="rounded-xl bg-primary/15 p-2 text-primary"><a.i className="h-4 w-4" /></span> {a.l}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid gap-6 xl:grid-cols-3">
+                <section className="rounded-2xl border border-border bg-card xl:col-span-2">
+                  <div className="flex items-center justify-between border-b border-border p-4">
+                    <h2 className="font-display font-bold text-foreground">Últimos pedidos</h2>
+                    <button onClick={() => ir("pedidos")} className="text-sm text-primary">Ver pedidos</button>
+                  </div>
+                  <TabelaPedidos pedidos={pedidos.slice(0, 6)} onVer={() => ir("pedidos")} />
+                </section>
+
+                <section className="rounded-2xl border border-border bg-card">
+                  <div className="border-b border-border p-4">
+                    <h2 className="font-display font-bold text-foreground">Atividades recentes</h2>
+                  </div>
+                  {atividades.length === 0 ? (
+                    <p className="p-6 text-center text-sm text-muted-foreground">Nenhuma atividade registrada ainda.</p>
+                  ) : (
+                    <ul className="divide-y divide-border">
+                      {atividades.map((a) => {
+                        const I = iconeAtividade[a.tipo] ?? Activity;
+                        return (
+                          <li key={a.id} className="flex gap-3 p-4">
+                            <span className="h-fit rounded-lg bg-primary/15 p-2 text-primary"><I className="h-4 w-4" /></span>
+                            <div className="min-w-0">
+                              <p className="truncate text-sm text-foreground">{a.descricao}</p>
+                              <p className="text-xs text-muted-foreground">{data(a.criado_em)}</p>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </section>
+              </div>
+
+              <section className="rounded-2xl border border-border bg-card">
+                <div className="flex items-center justify-between border-b border-border p-4">
+                  <h2 className="font-display font-bold text-foreground">Últimos produtos cadastrados</h2>
+                  <button onClick={() => ir("produtos")} className="text-sm text-primary">Ver produtos</button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[560px] text-sm">
+                    <thead className="text-left text-xs text-muted-foreground">
+                      <tr><th className="p-3">Foto</th><th className="p-3">Nome</th><th className="p-3">ID do produto</th><th className="p-3">Estoque</th><th className="p-3">Status</th></tr>
+                    </thead>
+                    <tbody>
+                      {produtos.slice(0, 5).map((p) => (
+                        <tr key={p.id} className="border-t border-border text-foreground">
+                          <td className="p-3">{p.imagem_url ? <img src={p.imagem_url} alt="" className="h-10 w-10 rounded-lg object-cover" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}</td>
+                          <td className="p-3 font-medium">{p.titulo}</td>
+                          <td className="p-3 font-mono text-xs text-muted-foreground">{idCurto(p.id)}</td>
+                          <td className="p-3">{p.em_estoque ? "Em estoque" : <span className="text-destructive">Sem estoque</span>}</td>
+                          <td className="p-3"><span className={`rounded-full px-2 py-1 text-xs ${p.publicado ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"}`}>{p.publicado ? "Ativo" : "Rascunho"}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          ) : secao === "produtos" ? (
+            <div className="space-y-2">
+              {produtos.map((p) => (
+                <div key={p.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4">
+                  {p.imagem_url ? <img src={p.imagem_url} alt="" className="h-12 w-12 rounded-lg object-cover" /> : <div className="h-12 w-12 rounded-lg bg-secondary" />}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-foreground">{p.titulo}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {p.marca} · {categorias.find((c) => c[0] === p.categoria)?.[1] ?? p.categoria} ·{" "}
+                      {p.preco == null ? "Sob consulta" : Number(p.preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                      {!p.publicado && " · Rascunho"}
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    <button title={p.publicado ? "Ocultar" : "Publicar"} onClick={() => alternar(p, "publicado")} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary">
+                      {p.publicado ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4" />}
+                    </button>
+                    <button title="Destaque" onClick={() => alternar(p, "destaque")} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary">
+                      <Star className={`h-4 w-4 ${p.destaque ? "fill-primary text-primary" : ""}`} />
+                    </button>
+                    <button title="Editar" onClick={() => editar(p)} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary"><Pencil className="h-4 w-4" /></button>
+                    <button title="Apagar" onClick={() => apagar(p)} className="rounded-lg p-2 text-destructive hover:bg-secondary"><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : secao === "clientes" ? (
+            <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+              <table className="w-full min-w-[480px] text-sm">
+                <thead className="text-left text-muted-foreground"><tr><th className="p-3">Nome</th><th className="p-3">WhatsApp</th><th className="p-3">Cadastro</th></tr></thead>
+                <tbody>
+                  {clientes.map((c) => (
+                    <tr key={c.id} className="border-t border-border text-foreground">
+                      <td className="p-3">{c.nome || "—"}</td>
+                      <td className="p-3">{c.whatsapp ? <a className="text-primary" target="_blank" rel="noreferrer" href={`https://wa.me/55${c.whatsapp.replace(/\D/g, "")}`}>{c.whatsapp}</a> : "—"}</td>
+                      <td className="p-3">{new Date(c.criado_em).toLocaleDateString("pt-BR")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : secao === "pedidos" ? (
+            <div className="rounded-2xl border border-border bg-card"><TabelaPedidos pedidos={pedidos} /></div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+              <p className="font-display text-lg font-bold text-foreground">{titulo}</p>
+              <p className="mt-1 text-sm text-muted-foreground">Este módulo será adicionado nas próximas etapas.</p>
+            </div>
+          )}
+        </main>
       </div>
 
       {aberto && (
@@ -267,6 +410,33 @@ export default function Admin() {
           </form>
         </div>
       )}
-    </main>
+    </div>
+  );
+}
+
+function TabelaPedidos({ pedidos, onVer }: { pedidos: Pedido[]; onVer?: () => void }) {
+  if (pedidos.length === 0)
+    return <p className="p-8 text-center text-sm text-muted-foreground">Nenhum pedido recebido ainda.</p>;
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[720px] text-sm">
+        <thead className="text-left text-xs text-muted-foreground">
+          <tr><th className="p-3">Pedido</th><th className="p-3">Cliente</th><th className="p-3">Produto</th><th className="p-3">ID do produto</th><th className="p-3">Data</th><th className="p-3">Status</th><th className="p-3" /></tr>
+        </thead>
+        <tbody>
+          {pedidos.map((p) => (
+            <tr key={p.id} className="border-t border-border text-foreground">
+              <td className="p-3 font-semibold">#{p.numero}</td>
+              <td className="p-3">{p.cliente_nome || "—"}</td>
+              <td className="p-3">{p.produto_titulo || "—"}</td>
+              <td className="p-3 font-mono text-xs text-muted-foreground">{idCurto(p.produto_id)}</td>
+              <td className="p-3 text-muted-foreground">{data(p.criado_em)}</td>
+              <td className="p-3"><span className={`rounded-full px-2 py-1 text-xs ${statusInfo[p.status]?.cls}`}>{statusInfo[p.status]?.label ?? p.status}</span></td>
+              <td className="p-3 text-right"><button onClick={onVer} className="rounded-full border border-border px-3 py-1 text-xs hover:border-primary hover:text-primary">Ver pedido</button></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
