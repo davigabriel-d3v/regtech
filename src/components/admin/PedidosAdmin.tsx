@@ -47,7 +47,7 @@ export function PedidosAdmin() {
     setLoading(true);
     const { data, error } = await supabase
       .from("orders")
-      .select("*, customers(*), order_items(*)")
+      .select("id,order_number,customer_id,status,notes,created_at,updated_at,customers(id,name,phone,whatsapp,email,created_at,updated_at),order_items(id,order_id,product_id,product_code,product_name,product_image,product_sku,quantity,selected_variation,created_at)")
       .order("created_at", { ascending: false });
     if (error) {
       toast.error("Não foi possível carregar os pedidos: " + error.message);
@@ -98,7 +98,7 @@ export function PedidosAdmin() {
     setDetail(order);
     const { data } = await supabase
       .from("order_status_history")
-      .select("*")
+      .select("id,order_id,old_status,new_status,changed_by,created_at")
       .eq("order_id", order.id)
       .order("created_at", { ascending: false });
     setHistory((data ?? []) as History[]);
@@ -124,7 +124,7 @@ export function PedidosAdmin() {
     await load();
     const updated = orders.find((o) => o.id === detail.id);
     if (updated) setDetail({ ...updated, status: next });
-    const { data } = await supabase.from("order_status_history").select("*").eq("order_id", detail.id).order("created_at", { ascending: false });
+    const { data } = await supabase.from("order_status_history").select("id,order_id,old_status,new_status,changed_by,created_at").eq("order_id", detail.id).order("created_at", { ascending: false });
     setHistory((data ?? []) as History[]);
   }
 
