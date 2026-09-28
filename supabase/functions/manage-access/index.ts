@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       const roleMap = new Map((roles ?? []).map((r) => [r.user_id, r.role]));
       const permMap = new Map<string,string[]>();
       for (const p of perms ?? []) permMap.set(p.user_id, [...(permMap.get(p.user_id) ?? []), p.module]);
-      return new Response(JSON.stringify({ users: users.users.map((u) => ({ user_id: u.id, email: u.email ?? "", is_admin: roleMap.get(u.id) === "admin", permissions: permMap.get(u.id) ?? [] })) }), { headers: { ...cors, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ users: users.users.filter((u) => roleMap.has(u.id)).map((u) => ({ user_id: u.id, email: u.email ?? "", is_admin: roleMap.get(u.id) === "admin", permissions: permMap.get(u.id) ?? [] })) }), { headers: { ...cors, "Content-Type": "application/json" } });
     }
     if (body.action === "create") {
       const email = String(body.email ?? "").trim().toLowerCase();
@@ -45,6 +45,22 @@ Deno.serve(async (req) => {
         await admin.from("access_permissions").delete().eq("user_id", created.user.id);
       }
       return new Response(JSON.stringify({ ok: true, user_id: created.user.id }), { headers: { ...cors, "Content-Type": "application/json" } });
+    }
+    if (body.action === "update") {
+      const userId = String(body.user_id ?? "");
+      if (!userId) throw new Error("Usuário inválido.");
+      const isAdmin = Boolean(body.is_admin);
+      const selected = Array.isArray(body.permissions) ? body.permissions.filter((x: unknown) => modules.includes(String(x))) : [];
+      if (!isAdmin && !selected.length) throw new Error("Selecione ao menos uma permissão.");
+      await admin.from("user_roles").delete().eq("user_id", userId);
+      const { error: roleError } = await admin.from("user_roles").insert({ user_id: userId, role: isAdmin ? "admin" : "user" });
+      if (roleError) throw roleError;
+      await admin.from("access_permissions").delete().eq("user_id", userId);
+      if (!isAdmin) {
+        const { error: permError } = await admin.from("access_permissions").insert(selected.map((module: string) => ({ user_id: userId, module, enabled: true })));
+        if (permError) throw permError;
+      }
+      return new Response(JSON.stringify({ ok: true }), { headers: { ...cors, "Content-Type": "application/json" } });
     }
     if (body.action === "remove") {
       const userId = String(body.user_id ?? "");
