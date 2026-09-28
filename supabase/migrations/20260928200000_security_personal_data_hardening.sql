@@ -53,7 +53,7 @@ using (public.has_permission(auth.uid(), 'pedidos'));
 drop policy if exists "orders_admin_update" on public.orders;
 drop policy if exists "orders_permission_update" on public.orders;
 create policy "orders_permission_update" on public.orders
-for update of status to authenticated
+for update to authenticated
 using (public.has_permission(auth.uid(), 'pedidos'))
 with check (public.has_permission(auth.uid(), 'pedidos'));
 
