@@ -207,7 +207,7 @@ function Admin() {
     { l: "Produtos sem estoque", v: produtos.filter((p) => !p.em_estoque).length, i: PackageX },
   ];
 
-  const allowed = (id: Secao) => isAdmin || id === "dashboard" || permissions.includes(id);
+  const allowed = (id: Secao) => isAdmin || id === "dashboard" || permissions.includes(id === "config" ? "configuracoes" : id);
   const visibleMenu = menu.filter((m) => allowed(m.id));
 
   const Sidebar = (
