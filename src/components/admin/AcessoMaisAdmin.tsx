@@ -113,7 +113,7 @@ export function AcessoMaisAdmin() {
           {editing.role !== "admin" && <div>
             <p className="mb-2 text-sm font-semibold">Permissões</p>
             <div className="grid gap-2 sm:grid-cols-2">
-              {modules.map(([id, label]) => <label key={id} className="flex items-center gap-2 rounded-xl border border-border p-3 text-sm">
+              {modules.filter(([id]) => !["acesso_plus", "configuracoes"].includes(id)).map(([id, label]) => <label key={id} className="flex items-center gap-2 rounded-xl border border-border p-3 text-sm">
                 <input type="checkbox" checked={editing.permissions.includes(id)} onChange={() => setEditing({ ...editing, permissions: editing.permissions.includes(id) ? editing.permissions.filter((x) => x !== id) : [...editing.permissions, id] })} />
                 {label}
               </label>)}
