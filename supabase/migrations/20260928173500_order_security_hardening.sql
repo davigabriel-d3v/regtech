@@ -2,7 +2,8 @@
 revoke execute on function public.set_customers_updated_at() from public, anon, authenticated;
 revoke execute on function public.set_orders_updated_at() from public, anon, authenticated;
 revoke execute on function public.record_order_status_history() from public, anon, authenticated;
-revoke execute on function public.generate_product_code() from public, anon;\ngrant execute on function public.generate_product_code() to authenticated;
+revoke execute on function public.generate_product_code() from public, anon;
+grant execute on function public.generate_product_code() to authenticated;
 revoke execute on function public.lock_product_code() from public, anon, authenticated;
 revoke execute on function public.set_products_updated_at() from public, anon, authenticated;
 
