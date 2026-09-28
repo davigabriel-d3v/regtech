@@ -5,6 +5,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 export type ProdutoLoja = {
   id: string;
+  productCode: string;
   slug: string;
   titulo: string;
   marca: string;
@@ -17,6 +18,8 @@ export type ProdutoLoja = {
   precoAntigo: number | null;
   avaliacao: number;
   avaliacoes: number;
+  sku: string | null;
+  variations: Record<string, string[]> | null;
 };
 
 export type MarcaLoja = { id: string; nome: string; logoUrl: string | null };
@@ -89,15 +92,10 @@ export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> 
   const supabase = createReader();
 
   let query = supabase
-    .from("produtos")
-    .select("*")
-    .eq("publicado", true)
-    .order("ordem", { ascending: true })
-    .order("titulo", { ascending: true });
-
-  if (categoria) {
-    query = query.eq("categoria", categoria);
-  }
+    .from("products")
+    .select("id, product_code, name, description, price, promotional_price, stock, status, variations, created_at, product_categories(name), marcas(nome), product_images(image_url,is_primary,display_order)")
+    .eq("status", "active")
+    .order("created_at", { ascending: false });
 
   const { data, error } = await comRetentativa(() => query);
   if (error) {
@@ -105,8 +103,40 @@ export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> 
     return [];
   }
 
-  return (data ?? []).map(toProduto);
+  const rows = (data ?? []) as Array<any>;
+  const toSlug = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  return rows
+    .map((row) => {
+      const category = Array.isArray(row.product_categories) ? row.product_categories[0] : row.product_categories;
+      const brand = Array.isArray(row.marcas) ? row.marcas[0] : row.marcas;
+      const images = Array.isArray(row.product_images) ? row.product_images : [];
+      const primary = [...images].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order)[0];
+      const variations = row.variations && typeof row.variations === "object" && !Array.isArray(row.variations) ? row.variations : null;
+      const currentPrice = row.promotional_price ?? row.price;
+      return {
+        id: row.id,
+        productCode: row.product_code,
+        slug: row.product_code,
+        titulo: row.name,
+        marca: brand?.nome ?? "RegTech",
+        categoria: toSlug(category?.name ?? "outros"),
+        descricao: row.description ?? "",
+        preco: currentPrice == null ? null : Number(currentPrice),
+        emEstoque: Number(row.stock) > 0,
+        destaque: false,
+        imagemUrl: primary?.image_url ?? null,
+        precoAntigo: row.promotional_price != null ? Number(row.price) : null,
+        avaliacao: 0,
+        avaliacoes: 0,
+        sku: row.sku ?? null,
+        variations,
+      } satisfies ProdutoLoja;
+    })
+    .filter((row) => !categoria || row.categoria === categoria);
 }
+
+
 
 
 export async function fetchMarcas(): Promise<MarcaLoja[]> {
