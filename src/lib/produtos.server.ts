@@ -82,7 +82,7 @@ export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> 
       const brand = Array.isArray(row.marcas) ? row.marcas[0] : row.marcas;
       const images = Array.isArray(row.product_images) ? row.product_images : [];
       const primary = [...images].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order)[0];
-      const variations = row.variations && typeof row.variations === "object" && !Array.isArray(row.variations) ? row.variations : null;
+      const variations = row.variations && typeof row.variations === "object" && !Array.isArray(row.variations)\n        ? Object.fromEntries(Object.entries(row.variations).filter(([, value]) => Array.isArray(value)).map(([key, value]) => [key, (value as unknown[]).map(String)]))\n        : null;
       const currentPrice = row.promotional_price ?? row.price;
       return {
         id: row.id,
