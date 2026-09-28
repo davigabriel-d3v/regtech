@@ -14,6 +14,12 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_permissions: {
+        Row: { id: string; user_id: string; module: "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "acesso_plus" | "configuracoes"; enabled: boolean; created_at: string }
+        Insert: { id?: string; user_id: string; module: "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "acesso_plus" | "configuracoes"; enabled?: boolean; created_at?: string }
+        Update: { id?: string; user_id?: string; module?: "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "acesso_plus" | "configuracoes"; enabled?: boolean; created_at?: string }
+        Relationships: []
+      }
       atividades: {
         Row: {
           criado_em: string
