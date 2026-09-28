@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { KeyRound, Loader2, ShieldCheck, Trash2, UserPlus } from "lucide-react";
+import { KeyRound, Loader2, Pencil, ShieldCheck, Trash2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,6 +18,7 @@ export function AcessoMaisAdmin() {
   const [password, setPassword] = useState("");
   const [admin, setAdmin] = useState(false);
   const [permissions, setPermissions] = useState<string[]>(["dashboard"]);
+  const [editing, setEditing] = useState<Access | null>(null);
 
   async function load() {
     setLoading(true);
@@ -47,6 +48,15 @@ export function AcessoMaisAdmin() {
     await load();
   }
 
+  async function saveEdit() {
+    if (!editing) return;
+    setSaving(true);
+    const { data, error } = await supabase.functions.invoke("manage-access", { body: { action: "update", user_id: editing.user_id, is_admin: editing.is_admin, permissions: editing.is_admin ? modules.map(([id]) => id) : editing.permissions } });
+    setSaving(false);
+    if (error || data?.error) { toast.error(data?.error || error?.message || "Não foi possível atualizar."); return; }
+    toast.success("Permissões atualizadas."); setEditing(null); await load();
+  }
+
   async function removeAccess(userId: string) {
     if (!confirm("Remover este acesso? O usuário não poderá mais entrar no painel.")) return;
     const { data, error } = await supabase.functions.invoke("manage-access", { body: { action: "remove", user_id: userId } });
@@ -63,7 +73,7 @@ export function AcessoMaisAdmin() {
     {loading ? <div className="flex justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div> :
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{items.map((item) => <div key={item.user_id} className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{item.email}</p><span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs text-primary">{item.is_admin ? <><ShieldCheck className="h-3.5 w-3.5" /> Administrador</> : <><KeyRound className="h-3.5 w-3.5" /> Usuário</>}</span></div>
-          <button onClick={() => removeAccess(item.user_id)} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Remover acesso"><Trash2 className="h-4 w-4" /></button></div>
+          <div className="flex gap-1"><button onClick={() => setEditing(item)} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground" title="Editar permissões"><Pencil className="h-4 w-4" /></button><button onClick={() => removeAccess(item.user_id)} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Remover acesso"><Trash2 className="h-4 w-4" /></button></div></div>
         {!item.is_admin && <div className="mt-4 flex flex-wrap gap-2">{item.permissions.map((p) => <span key={p} className="rounded-full border border-border px-2.5 py-1 text-xs">{modules.find(([id]) => id === p)?.[1] ?? p}</span>)}</div>}
       </div>)}</div>}
 
