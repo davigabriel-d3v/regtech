@@ -282,7 +282,7 @@ function Admin() {
                     <p className="font-semibold text-foreground">Novo pedido recebido</p>
                     {(() => {
                       const p = pedidos.find((item) => item.status === "novo");
-                      return p ? <p className="truncate text-sm text-muted-foreground">Pedido #{String(p.numero).padStart(6, "0")} · {p.cliente_nome} · {p.produto_titulo} · {idCurto(p.produto_id)}</p> : null;
+                      return p ? <p className="truncate text-sm text-muted-foreground">Pedido #{String(p.numero).padStart(6, "0")} · {p.cliente_nome} · {p.produto_titulo} · {(p.produto_codigo ?? idCurto(p.produto_id))}</p> : null;
                     })()}
                   </div>
                 </button>
@@ -440,7 +440,7 @@ function TabelaPedidos({ pedidos, onVer }: { pedidos: Pedido[]; onVer?: () => vo
               <td className="p-3 font-semibold">#{p.numero}</td>
               <td className="p-3">{p.cliente_nome || "—"}</td>
               <td className="p-3">{p.produto_titulo || "—"}</td>
-              <td className="p-3 font-mono text-xs text-muted-foreground">{idCurto(p.produto_id)}</td>
+              <td className="p-3 font-mono text-xs text-muted-foreground">{p.produto_codigo ?? idCurto(p.produto_id)}</td>
               <td className="p-3 text-muted-foreground">{data(p.criado_em)}</td>
               <td className="p-3"><span className={`rounded-full px-2 py-1 text-xs ${statusInfo[p.status]?.cls}`}>{statusInfo[p.status]?.label ?? p.status}</span></td>
               <td className="p-3 text-right"><button onClick={onVer} className="rounded-full border border-border px-3 py-1 text-xs hover:border-primary hover:text-primary">Ver pedido</button></td>
