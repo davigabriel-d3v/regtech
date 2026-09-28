@@ -33,7 +33,9 @@ grant select (id, name, phone, whatsapp, email, created_at, updated_at) on publi
 revoke update on public.customers from authenticated;
 
 drop policy if exists "customers_admin_select" on public.customers;
+drop policy if exists "customers_admin_update" on public.customers;
 drop policy if exists "customers_permission_select" on public.customers;
+drop policy if exists "customers_permission_update" on public.customers;
 create policy "customers_permission_select" on public.customers
 for select to authenticated
 using (public.has_permission(auth.uid(), 'clientes'));
