@@ -63,6 +63,10 @@ grant update (
 ) on public.products to authenticated;
 grant delete on public.products to authenticated;
 
+drop policy if exists "products_admin_select" on public.products;
+drop policy if exists "products_admin_insert" on public.products;
+drop policy if exists "products_admin_update" on public.products;
+drop policy if exists "products_admin_delete" on public.products;
 drop policy if exists "products_permission_select" on public.products;
 drop policy if exists "products_permission_insert" on public.products;
 drop policy if exists "products_permission_update" on public.products;
@@ -102,6 +106,10 @@ grant update (storage_path, image_url, is_primary, display_order)
   on public.product_images to authenticated;
 grant delete on public.product_images to authenticated;
 
+drop policy if exists "product_images_admin_select" on public.product_images;
+drop policy if exists "product_images_admin_insert" on public.product_images;
+drop policy if exists "product_images_admin_update" on public.product_images;
+drop policy if exists "product_images_admin_delete" on public.product_images;
 drop policy if exists "product_images_permission_select" on public.product_images;
 drop policy if exists "product_images_permission_insert" on public.product_images;
 drop policy if exists "product_images_permission_update" on public.product_images;
@@ -174,6 +182,8 @@ grant select (id, name, phone, whatsapp, email, status, created_at, updated_at)
   on public.customers to authenticated;
 grant update (name, email, phone, whatsapp, status) on public.customers to authenticated;
 
+drop policy if exists "customers_admin_select" on public.customers;
+drop policy if exists "customers_admin_update" on public.customers;
 drop policy if exists "customers_permission_select" on public.customers;
 drop policy if exists "customers_permission_update" on public.customers;
 create policy "customers_permission_select"
@@ -191,6 +201,8 @@ grant select (id, order_number, customer_id, status, notes, created_at, updated_
   on public.orders to authenticated;
 grant update (status) on public.orders to authenticated;
 
+drop policy if exists "orders_admin_select" on public.orders;
+drop policy if exists "orders_admin_update" on public.orders;
 drop policy if exists "orders_permission_select" on public.orders;
 drop policy if exists "orders_permission_update" on public.orders;
 create policy "orders_permission_select"
@@ -206,6 +218,7 @@ grant select (
   id, order_id, product_id, product_code, product_name, product_image,
   product_sku, quantity, selected_variation, created_at
 ) on public.order_items to authenticated;
+drop policy if exists "order_items_admin_select" on public.order_items;
 drop policy if exists "order_items_permission_select" on public.order_items;
 create policy "order_items_permission_select"
 on public.order_items for select to authenticated
@@ -213,6 +226,7 @@ using (public.has_permission(auth.uid(), 'pedidos'));
 
 revoke all on public.order_status_history from anon, authenticated;
 grant select on public.order_status_history to authenticated;
+drop policy if exists "order_history_admin_select" on public.order_status_history;
 drop policy if exists "order_history_permission_select" on public.order_status_history;
 create policy "order_history_permission_select"
 on public.order_status_history for select to authenticated
