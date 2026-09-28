@@ -26,15 +26,25 @@ export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
-    const { data: roleData, error: roleError } = await supabase.rpc("has_role", { _user_id: data.user.id, _role: "admin" });
-    if (roleError) throw redirect({ to: "/conta" });
-    const isAdmin = Boolean(roleData);
 
-    // Administradores não dependem da tabela de permissões para enxergar o menu.
-    // Isso mantém o Acesso + disponível mesmo quando ainda não existem registros
-    // em access_permissions para o primeiro administrador.
+    const [{ data: adminRole, error: adminError }, { data: operatorRole, error: operatorError }] = await Promise.all([
+      supabase.rpc("has_role", { _user_id: data.user.id, _role: "admin" }),
+      supabase.rpc("has_role", { _user_id: data.user.id, _role: "operator" }),
+    ]);
+
+    if (adminError || operatorError) {
+      return { user: data.user, isAdmin: false, isOperator: false, permissions: [] as string[], accessDenied: true };
+    }
+
+    const isAdmin = Boolean(adminRole);
+    const isOperator = Boolean(operatorRole);
+
     if (isAdmin) {
-      return { user: data.user, isAdmin: true, permissions: [] as string[] };
+      return { user: data.user, isAdmin: true, isOperator: false, permissions: [] as string[], accessDenied: false };
+    }
+
+    if (!isOperator) {
+      return { user: data.user, isAdmin: false, isOperator: false, permissions: [] as string[], accessDenied: true };
     }
 
     const { data: permissionData, error: permissionError } = await supabase
@@ -43,8 +53,13 @@ export const Route = createFileRoute("/_authenticated/admin")({
       .eq("user_id", data.user.id)
       .eq("enabled", true);
 
-    if (permissionError || !(permissionData ?? []).length) throw redirect({ to: "/conta" });
-    return { user: data.user, isAdmin: false, permissions: (permissionData ?? []).map((p) => p.module) };
+    return {
+      user: data.user,
+      isAdmin: false,
+      isOperator: true,
+      permissions: permissionError ? [] : (permissionData ?? []).map((p) => p.module),
+      accessDenied: false,
+    };
   },
   component: Admin,
 });
@@ -109,7 +124,16 @@ const idCurto = (id: string | null) => (id ? id.slice(0, 8).toUpperCase() : "—
 const data = (s: string) => new Date(s).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 
 function Admin() {
-  const { user, isAdmin, permissions } = Route.useRouteContext();
+  const { user, isAdmin, isOperator, permissions, accessDenied } = Route.useRouteContext();
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || !session) {
+        void navigate({ to: "/auth", replace: true });
+      }
+    });
+    return () => data.subscription.unsubscribe();
+  }, [navigate]);
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [secao, setSecao] = useState<Secao>("dashboard");
@@ -225,7 +249,28 @@ function Admin() {
     { l: "Produtos sem estoque", v: produtos.filter((p) => !p.em_estoque).length, i: PackageX },
   ];
 
-  const allowed = (id: Secao) => isAdmin || id === "dashboard" || permissions.includes(id === "config" ? "configuracoes" : id);
+  const allowed = (id: Secao) =>
+    isAdmin ||
+    (isOperator && id !== "acesso_plus" && id !== "config" && (id === "dashboard" || permissions.includes(id === "produtos" ? "produtos" : id)));
+
+  if (accessDenied) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="w-full max-w-md rounded-3xl border border-border bg-card p-8 text-center">
+          <h1 className="font-display text-2xl font-bold text-foreground">Acesso negado</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Sua conta está autenticada, mas não possui uma função administrativa válida para acessar este painel.
+          </p>
+          <button
+            onClick={() => void navigate({ to: "/conta", replace: true })}
+            className="mt-6 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+          >
+            Voltar para minha conta
+          </button>
+        </div>
+      </div>
+    );
+  }
   const visibleMenu = menu.filter((m) => allowed(m.id));
 
   const Sidebar = (
