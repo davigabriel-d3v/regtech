@@ -21,21 +21,18 @@ returns text
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $
 declare
   candidate text;
 begin
   loop
     candidate := 'PROD-' || upper(substr(md5(random()::text || clock_timestamp()::text), 1, 6));
-    begin
-      insert into public.product_code_registry(product_code) values (candidate);
+    if not exists (select 1 from public.product_code_registry where product_code = candidate) then
       return candidate;
-    exception when unique_violation then
-      null;
-    end;
+    end if;
   end loop;
 end;
-$$;
+$;
 
 create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
@@ -66,25 +63,22 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $
 begin
   if tg_op = 'UPDATE' and old.product_code is distinct from new.product_code then
     raise exception 'product_code cannot be changed';
   end if;
 
   if tg_op = 'INSERT' then
-    insert into public.product_code_registry(product_code) values (new.product_code)
-    on conflict do nothing;
-    if not exists (
-      select 1 from public.product_code_registry r
-      where r.product_code = new.product_code
-    ) then
-      raise exception 'Unable to reserve product_code';
-    end if;
+    begin
+      insert into public.product_code_registry(product_code) values (new.product_code);
+    exception when unique_violation then
+      raise exception 'product_code already exists or was previously used';
+    end;
   end if;
   return new;
 end;
-$$;
+$;
 
 drop trigger if exists products_product_code_guard on public.products;
 create trigger products_product_code_guard
