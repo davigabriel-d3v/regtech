@@ -70,6 +70,21 @@ function createReader(): SupabaseClient<Database> {
   });
 }
 
+type ProdutoCatalogoRow = {
+  id: string;
+  product_code: string;
+  name: string;
+  description: string | null;
+  price: number;
+  promotional_price: number | null;
+  stock: number;
+  status: "active" | "inactive";
+  variations: Record<string, unknown> | null;
+  product_categories: { name: string } | { name: string }[] | null;
+  marcas: { nome: string } | { nome: string }[] | null;
+  product_images: Array<{ image_url: string; is_primary: boolean; display_order: number }>;
+};
+
 function toProduto(row: ProdutoRow): ProdutoLoja {
   return {
     id: row.id,
@@ -103,7 +118,7 @@ export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> 
     return [];
   }
 
-  const rows = (data ?? []) as Array<any>;
+  const rows = (data ?? []) as unknown as ProdutoCatalogoRow[];
   const toSlug = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   return rows
