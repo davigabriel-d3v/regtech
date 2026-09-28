@@ -76,8 +76,23 @@ create policy "order_history_permission_select" on public.order_status_history
 for select to authenticated
 using (public.has_permission(auth.uid(), 'pedidos'));
 
--- Permission rows themselves are administrative data.
+-- Permission rows are readable by the account owner only; mutations remain admin-only.
 revoke all on public.access_permissions from authenticated;
 grant select, insert, update, delete on public.access_permissions to authenticated;
+
+drop policy if exists "access_permissions_admin_all" on public.access_permissions;
+drop policy if exists "access_permissions_self_select" on public.access_permissions;
+
+create policy "access_permissions_admin_all" on public.access_permissions
+for all to authenticated
+using (public.has_role(auth.uid(), 'admin'))
+with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "access_permissions_self_select" on public.access_permissions
+for select to authenticated
+using (auth.uid() = user_id);
+
+-- Newsletter addresses are collected publicly but are not a client-readable directory.
+revoke select on public.newsletter from authenticated;
 
 notify pgrst, 'reload schema';
