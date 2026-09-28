@@ -38,7 +38,7 @@ type Produto = {
   publicado: boolean; ordem: number; criado_em: string;
 };
 type Pedido = {
-  id: string; numero: number; cliente_nome: string; produto_id: string | null;
+  id: string; numero: number; cliente_nome: string; produto_id: string | null; produto_codigo: string | null;
   produto_titulo: string; status: StatusPedido; criado_em: string;
 };
 type Atividade = { id: string; tipo: string; descricao: string; criado_em: string };
