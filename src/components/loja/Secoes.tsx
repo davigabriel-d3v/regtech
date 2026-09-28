@@ -280,6 +280,7 @@ function Estrelas({ nota }: { nota: number }) {
 
 export function ProdutoCardLoja({ produto }: { produto: ProdutoLoja }) {
   const { favs, alternar } = useFavoritos();
+  const [pedidoAberto, setPedidoAberto] = useState(false);
   const fav = favs.includes(produto.id);
   const desconto =
     produto.preco && produto.precoAntigo && produto.precoAntigo > produto.preco
