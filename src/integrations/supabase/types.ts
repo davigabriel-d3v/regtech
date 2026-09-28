@@ -212,7 +212,7 @@ export type Database = {
         Relationships: [
           { foreignKeyName: "products_category_id_fkey"; columns: ["category_id"]; isOneToOne: false; referencedRelation: "product_categories"; referencedColumns: ["id"] },
           { foreignKeyName: "products_brand_id_fkey"; columns: ["brand_id"]; isOneToOne: false; referencedRelation: "marcas"; referencedColumns: ["id"] },
-          { foreignKeyName: "product_images_product_id_fkey"; columns: ["id"]; isOneToMany: true; referencedRelation: "product_images"; referencedColumns: ["product_id"] }
+          { foreignKeyName: "product_images_product_id_fkey"; columns: ["id"]; isOneToOne: false; referencedRelation: "product_images"; referencedColumns: ["product_id"] }
         ]
       }
       product_images: {
