@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { ProdutosAdmin } from "@/components/admin/ProdutosAdmin";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -326,31 +327,7 @@ function Admin() {
               </section>
             </div>
           ) : secao === "produtos" ? (
-            <div className="space-y-2">
-              {produtos.map((p) => (
-                <div key={p.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4">
-                  {p.imagem_url ? <img src={p.imagem_url} alt="" className="h-12 w-12 rounded-lg object-cover" /> : <div className="h-12 w-12 rounded-lg bg-secondary" />}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-foreground">{p.titulo}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {p.marca} · {categorias.find((c) => c[0] === p.categoria)?.[1] ?? p.categoria} ·{" "}
-                      {p.preco == null ? "Sob consulta" : Number(p.preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                      {!p.publicado && " · Rascunho"}
-                    </p>
-                  </div>
-                  <div className="flex gap-1">
-                    <button title={p.publicado ? "Ocultar" : "Publicar"} onClick={() => alternar(p, "publicado")} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary">
-                      {p.publicado ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4" />}
-                    </button>
-                    <button title="Destaque" onClick={() => alternar(p, "destaque")} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary">
-                      <Star className={`h-4 w-4 ${p.destaque ? "fill-primary text-primary" : ""}`} />
-                    </button>
-                    <button title="Editar" onClick={() => editar(p)} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary"><Pencil className="h-4 w-4" /></button>
-                    <button title="Apagar" onClick={() => apagar(p)} className="rounded-lg p-2 text-destructive hover:bg-secondary"><Trash2 className="h-4 w-4" /></button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ProdutosAdmin />
           ) : secao === "clientes" ? (
             <div className="overflow-x-auto rounded-2xl border border-border bg-card">
               <table className="w-full min-w-[480px] text-sm">
