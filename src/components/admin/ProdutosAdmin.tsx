@@ -126,6 +126,7 @@ export function ProdutosAdmin() {
     setSaving(true);
     try {
       let productId = editing?.id;
+      let createdProduct: Product | null = null;
       if (editing) {
         const { error } = await supabase.from("products").update({
           name: form.name.trim(), description: form.description.trim() || null, category_id: form.category_id,
@@ -143,6 +144,7 @@ export function ProdutosAdmin() {
         }).select("*, product_images(*)").single();
         if (error) throw error;
         productId = data.id;
+        createdProduct = data as Product;
       }
 
       if (!productId) throw new Error("Produto sem ID.");
@@ -160,7 +162,17 @@ export function ProdutosAdmin() {
       }
 
       toast.success(editing ? "Produto atualizado!" : "Produto cadastrado!");
-      setFormOpen(false); setFiles([]); setImages([]); await load();
+      if (!editing && createdProduct) {
+        setEditing(createdProduct);
+        setImages([]);
+        setFiles([]);
+        await load();
+      } else {
+        setFormOpen(false);
+        setFiles([]);
+        setImages([]);
+        await load();
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível salvar o produto.");
     } finally { setSaving(false); }
@@ -308,7 +320,7 @@ export function ProdutosAdmin() {
                     {img.is_primary && <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] text-primary-foreground">Principal</span>}
                     <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-background/80 p-1 opacity-0 transition group-hover:opacity-100"><button type="button" onClick={()=>setPrimary(img)} title="Principal"><Star className="h-3.5 w-3.5"/></button><button type="button" onClick={()=>{setReplaceTarget(img);replaceInput.current?.click()}} title="Substituir"><Upload className="h-3.5 w-3.5"/></button><button type="button" onClick={()=>removeImage(img)} title="Excluir"><Trash2 className="h-3.5 w-3.5 text-destructive"/></button></div>
                   </div>)}
-                  {files.map((f,i)=><div key={f.name+i} className="relative overflow-hidden rounded-xl border border-dashed border-primary/40 p-2 text-xs"><div className="aspect-square rounded-lg bg-secondary flex items-center justify-center"><ImagePlus className="h-6 w-6"/></div><p className="truncate mt-1">{f.name}</p></div>)}
+                  {files.map((f,i)=><div key={f.name+i} className="relative overflow-hidden rounded-xl border border-dashed border-primary/40 p-2 text-xs"><img src={URL.createObjectURL(f)} alt={f.name} className="aspect-square w-full rounded-lg object-cover"/><p className="truncate mt-1">{f.name}</p></div>)}
                 </div>
                 {!images.length && !files.length && <div className="py-8 text-center text-sm text-muted-foreground">Selecione ou arraste fotos para cá.</div>}
               </div>
