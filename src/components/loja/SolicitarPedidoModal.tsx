@@ -59,8 +59,8 @@ export function SolicitarPedidoModal({ produto, onClose }: Props) {
       p_product_id: produto.id,
       p_quantity: form.quantity,
       p_customer: { name: form.name.trim(), phone: form.phone.trim(), whatsapp: form.whatsapp.trim() || null, email: form.email.trim() || null },
-      p_notes: form.notes.trim() || undefined,
-      p_selected_variation: Object.keys(variation).length ? variation : null,
+      ...(form.notes.trim() ? { p_notes: form.notes.trim() } : {}),
+      ...(Object.keys(variation).length ? { p_selected_variation: variation } : {}),
     });
     setSending(false);
     if (error) {
