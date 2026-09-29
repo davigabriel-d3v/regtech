@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { KeyRound, Loader2, Pencil, ShieldCheck, Trash2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { gerenciarAcesso } from "@/lib/acessos.functions";
 
 type Role = "admin" | "operator" | "user";
 type Access = { user_id: string; email: string; role: Role; permissions: string[] };
@@ -20,11 +21,13 @@ export function AcessoMaisAdmin() {
   const [role, setRole] = useState<Role>("operator");
   const [permissions, setPermissions] = useState<string[]>(["dashboard", "produtos", "pedidos", "clientes", "estoque"]);
   const [editing, setEditing] = useState<Access | null>(null);
+  const gerenciar = useServerFn(gerenciarAcesso);
+  const call = async (body: any): Promise<{ data: any; error: Error | null }> => { try { return { data: await gerenciar({ data: body }), error: null }; } catch (e) { return { data: null, error: e as Error }; } };
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase.functions.invoke("manage-access", { body: { action: "list" } });
-    if (error) toast.error("Não foi possível carregar os acessos.");
+    const { data, error } = await call({ action: "list" });
+    if (error || data?.error) toast.error(data?.error || "Não foi possível carregar os acessos.");
     else setItems(data?.users ?? []);
     setLoading(false);
   }
@@ -52,7 +55,7 @@ export function AcessoMaisAdmin() {
   async function saveEdit() {
     if (!editing) return;
     setSaving(true);
-    const { data, error } = await supabase.functions.invoke("manage-access", { body: { action: "update", user_id: editing.user_id, role: editing.role, permissions: editing.role === "admin" ? modules.map(([id]) => id) : editing.permissions.filter((p) => !["acesso_plus", "configuracoes"].includes(p)) } });
+    const { data, error } = await call({ action: "update", user_id: editing.user_id, role: editing.role, permissions: editing.role === "admin" ? modules.map(([id]) => id) : editing.permissions.filter((p) => !["acesso_plus", "configuracoes"].includes(p)) });
     setSaving(false);
     if (error || data?.error) { toast.error(data?.error || error?.message || "Não foi possível atualizar."); return; }
     toast.success("Permissões atualizadas."); setEditing(null); await load();
@@ -60,7 +63,7 @@ export function AcessoMaisAdmin() {
 
   async function removeAccess(userId: string) {
     if (!confirm("Remover este acesso? O usuário não poderá mais entrar no painel.")) return;
-    const { data, error } = await supabase.functions.invoke("manage-access", { body: { action: "remove", user_id: userId } });
+    const { data, error } = await call({ action: "remove", user_id: userId });
     if (error || data?.error) toast.error(data?.error || error?.message || "Não foi possível remover.");
     else { toast.success("Acesso removido."); await load(); }
   }
