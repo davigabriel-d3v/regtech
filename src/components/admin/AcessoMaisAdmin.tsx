@@ -42,9 +42,7 @@ export function AcessoMaisAdmin() {
     if (password.length < 6) { toast.error("A senha deve ter pelo menos 6 caracteres."); return; }
     if (role !== "admin" && permissions.length === 0) { toast.error("Escolha pelo menos uma permissão."); return; }
     setSaving(true);
-    const { data, error } = await supabase.functions.invoke("manage-access", {
-      body: { action: "create", email: email.trim(), password, role, permissions: role === "admin" ? modules.map(([id]) => id) : permissions.filter((p) => !["acesso_plus", "configuracoes"].includes(p)) },
-    });
+    const { data, error } = await call({ action: "create", email: email.trim(), password, role, permissions: role === "admin" ? modules.map(([id]) => id) : permissions.filter((p) => !["acesso_plus", "configuracoes"].includes(p)) });
     setSaving(false);
     if (error || data?.error) { toast.error(data?.error || error?.message || "Não foi possível criar o acesso."); return; }
     toast.success("Acesso criado com sucesso.");
