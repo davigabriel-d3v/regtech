@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_permissions: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          module: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          module: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          module?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       atividades: {
         Row: {
           criado_em: string
@@ -44,6 +68,7 @@ export type Database = {
           name: string
           phone: string
           phone_normalized: string
+          status: string
           updated_at: string
           whatsapp: string | null
         }
@@ -55,6 +80,7 @@ export type Database = {
           name: string
           phone: string
           phone_normalized: string
+          status?: string
           updated_at?: string
           whatsapp?: string | null
         }
@@ -66,6 +92,7 @@ export type Database = {
           name?: string
           phone?: string
           phone_normalized?: string
+          status?: string
           updated_at?: string
           whatsapp?: string | null
         }
@@ -601,7 +628,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "operator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -729,7 +756,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "operator"],
     },
   },
 } as const

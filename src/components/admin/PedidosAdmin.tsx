@@ -142,7 +142,7 @@ export function PedidosAdmin() {
         </label>
         <select value={status} onChange={(e) => setStatus(e.target.value as Status | "all")} className="rounded-xl border border-border bg-card px-3 py-2.5 text-sm">
           <option value="all">Todos os status</option>
-          {statuses.map((s) => <option key={s} value={s}>{statusInfo[s].label}</option>)}
+          {statuses.map((s) => <option key={s} value={s}>{statusInfo[s]!.label}</option>)}
         </select>
         <label className="relative"><Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="w-full rounded-xl border border-border bg-card px-3 py-2.5 pl-9 text-sm" /></label>
         <label className="relative"><Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="w-full rounded-xl border border-border bg-card px-3 py-2.5 pl-9 text-sm" /></label>
@@ -163,7 +163,7 @@ export function PedidosAdmin() {
                   <td className="p-3">{item?.product_name ?? "—"}</td>
                   <td className="p-3 font-mono text-xs text-muted-foreground">{item?.product_code ?? "—"}</td>
                   <td className="p-3 text-muted-foreground">{dateTime(order.created_at)}</td>
-                  <td className="p-3"><span className={"rounded-full px-2.5 py-1 text-xs " + statusInfo[order.status].cls}>{statusInfo[order.status].label}</span></td>
+                  <td className="p-3"><span className={"rounded-full px-2.5 py-1 text-xs " + statusInfo[order.status]!.cls}>{statusInfo[order.status]!.label}</span></td>
                   <td className="p-3"><button type="button" onClick={() => openDetail(order)} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"><Eye className="h-3.5 w-3.5" /> Ver pedido</button></td>
                 </tr>;
               })}
@@ -189,7 +189,7 @@ export function PedidosAdmin() {
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <section className="rounded-2xl border border-border p-4">
                 <h4 className="font-display font-bold">Pedido</h4>
-                <div className="mt-3 flex items-center justify-between gap-3"><span className="text-sm text-muted-foreground">Status</span><select disabled={savingStatus} value={detail.status} onChange={(e) => updateStatus(e.target.value as Status)} className="rounded-xl border border-border bg-background px-3 py-2 text-sm">{statuses.map((s) => <option key={s} value={s}>{statusInfo[s].label}</option>)}</select></div>
+                <div className="mt-3 flex items-center justify-between gap-3"><span className="text-sm text-muted-foreground">Status</span><select disabled={savingStatus} value={detail.status} onChange={(e) => updateStatus(e.target.value as Status)} className="rounded-xl border border-border bg-background px-3 py-2 text-sm">{statuses.map((s) => <option key={s} value={s}>{statusInfo[s]!.label}</option>)}</select></div>
               </section>
               <section className="rounded-2xl border border-border p-4">
                 <h4 className="font-display font-bold">Cliente</h4>
@@ -214,7 +214,7 @@ export function PedidosAdmin() {
               <h4 className="font-display font-bold">Histórico do pedido</h4>
               <div className="mt-3 space-y-3">
                 {history.map((entry) => <div key={entry.id} className="flex gap-3 border-l-2 border-primary/30 pl-3 text-sm">
-                  <div><p className="font-medium">{entry.old_status ? statusInfo[entry.old_status].label + " → " : "Pedido criado → "}{statusInfo[entry.new_status].label}</p><p className="text-xs text-muted-foreground">{dateTime(entry.created_at)} · {entry.changed_by ? (admins[entry.changed_by] || "Administrador") : "Cliente"}</p></div>
+                  <div><p className="font-medium">{entry.old_status ? statusInfo[entry.old_status]!.label + " → " : "Pedido criado → "}{statusInfo[entry.new_status]!.label}</p><p className="text-xs text-muted-foreground">{dateTime(entry.created_at)} · {entry.changed_by ? (admins[entry.changed_by] || "Administrador") : "Cliente"}</p></div>
                 </div>)}
                 {history.length === 0 && <p className="text-sm text-muted-foreground">Nenhum histórico registrado.</p>}
               </div>
