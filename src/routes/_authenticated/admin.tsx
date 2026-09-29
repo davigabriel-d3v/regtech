@@ -324,7 +324,7 @@ function Admin() {
             <span className="hidden text-sm text-muted-foreground sm:inline">{user.email}</span>
             {allowed("produtos") && <button onClick={novo} className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-accent">
               <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Cadastrar produto</span>
-            </button>
+            </button>}
           </div>
         </header>
 
@@ -347,7 +347,7 @@ function Admin() {
 
               {pedidos.some((p) => p.status === "novo") && (
                 <button type="button" onClick={() => ir("pedidos")} className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-4 text-left">
-                  <span className="text-xl">🔔</span>
+                  <Bell className="h-5 w-5 text-primary" />
                   <div className="min-w-0">
                     <p className="font-semibold text-foreground">Novo pedido recebido</p>
                     {(() => {
