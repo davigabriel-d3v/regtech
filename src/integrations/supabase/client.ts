@@ -9,57 +9,34 @@ function isNewSupabaseApiKey(value: string): boolean {
 
 function createSupabaseFetch(supabaseKey: string): typeof fetch {
   return (input, init) => {
-    const headers = new Headers(
-      typeof Request !== 'undefined' && input instanceof Request ? input.headers : undefined,
-    );
-
-    if (init?.headers) {
-      new Headers(init.headers).forEach((value, key) => headers.set(key, value));
-    }
-
-    // New Supabase API keys are opaque strings, not bearer JWTs.
-    if (isNewSupabaseApiKey(supabaseKey) && headers.get('Authorization') === `Bearer ${supabaseKey}`) {
-      headers.delete('Authorization');
-    }
-
+    const headers = new Headers(typeof Request !== 'undefined' && input instanceof Request ? input.headers : undefined);
+    if (init?.headers) new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+    if (isNewSupabaseApiKey(supabaseKey) && headers.get('Authorization') === `Bearer ${supabaseKey}`) headers.delete('Authorization');
     headers.set('apikey', supabaseKey);
     return fetch(input, { ...init, headers });
   };
 }
 
-
 function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
   const SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || process.env['SUPABASE_URL'];
   const SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || process.env['SUPABASE_PUBLISHABLE_KEY'];
-
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    const missing = [
-      ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
-      ...(!SUPABASE_PUBLISHABLE_KEY ? ['SUPABASE_PUBLISHABLE_KEY'] : []),
-    ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
-    console.error(`[Supabase] ${message}`);
-    throw new Error(message);
+    const missing = [...(!SUPABASE_URL ? ['VITE_SUPABASE_URL'] : []), ...(!SUPABASE_PUBLISHABLE_KEY ? ['VITE_SUPABASE_PUBLISHABLE_KEY'] : [])];
+    throw new Error(`Variáveis Supabase ausentes: ${missing.join(', ')}. Configure-as no Vercel.`);
   }
-
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-    global: {
-      fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
-    },
+    global: { fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY) },
     auth: {
       storage: brokeredPreviewStorage(),
       persistSession: true,
       autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce',
     },
   });
 }
 
 let _supabase: ReturnType<typeof createSupabaseClient> | undefined;
-
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
 export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>, {
   get(_, prop, receiver) {
     if (!_supabase) _supabase = createSupabaseClient();
@@ -67,3 +44,18 @@ export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>,
   },
 });
 
+export async function invokeAuthorizedFunction<T = unknown>(functionName: string, body: Record<string, unknown>) {
+  const { data: sessionData } = await supabase.auth.getSession();
+  let session = sessionData.session;
+  if (session) {
+    const { data: refreshed } = await supabase.auth.refreshSession();
+    session = refreshed.session ?? session;
+  }
+  if (!session?.access_token) {
+    return { data: null as T | null, error: new Error('Sessão expirada. Entre novamente para continuar.') };
+  }
+  return supabase.functions.invoke<T>(functionName, {
+    body,
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+}
