@@ -162,12 +162,12 @@ export function ProdutosAdmin() {
       if (!productId) throw new Error("Produto sem ID.");
       const uploaded: ProductImage[] = [];
       for (let i = 0; i < files.length; i++) {
-        uploaded.push(await uploadImage(productId, files[i], images.length + i, images.length === 0 && i === 0));
+        uploaded.push(await uploadImage(productId, files[i]!, images.length + i, images.length === 0 && i === 0));
       }
 
       const nextImages = [...images, ...uploaded];
       if (nextImages.length > 0) {
-        const primaryId = nextImages.find(i => i.is_primary)?.id ?? nextImages[0].id;
+        const primaryId = nextImages.find(i => i.is_primary)?.id ?? nextImages[0]!.id;
         await supabase.from("product_images").update({ is_primary: false }).eq("product_id", productId);
         await supabase.from("product_images").update({ is_primary: true, display_order: 0 }).eq("id", primaryId);
         await Promise.all(nextImages.map((img, i) => supabase.from("product_images").update({ display_order: i }).eq("id", img.id)));
@@ -199,7 +199,7 @@ export function ProdutosAdmin() {
       setImages(next);
       if (img.is_primary && next.length) {
         await supabase.from("product_images").update({ is_primary: false }).eq("product_id", img.product_id);
-        await supabase.from("product_images").update({ is_primary: true }).eq("id", next[0].id);
+        await supabase.from("product_images").update({ is_primary: true }).eq("id", next[0]!.id);
       }
     } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível excluir a imagem."); }
   }
@@ -227,7 +227,7 @@ export function ProdutosAdmin() {
 
   async function reorder(from: number, to: number) {
     if (from === to) return;
-    const next = [...images]; const [moved] = next.splice(from, 1); next.splice(to, 0, moved);
+    const next = [...images]; const [moved] = next.splice(from, 1); next.splice(to, 0, moved!);
     setImages(next);
     await Promise.all(next.map((img, i) => supabase.from("product_images").update({ display_order: i }).eq("id", img.id)));
   }
@@ -284,7 +284,7 @@ export function ProdutosAdmin() {
           </tr></thead>
           <tbody>
             {rows.map(p => <tr key={p.id} className="border-b border-border last:border-0">
-              <td className="p-3">{p.product_images?.sort((a,b)=>a.display_order-b.display_order)[0]?.image_url ? <img src={p.product_images.sort((a,b)=>a.display_order-b.display_order)[0].image_url} className="h-11 w-11 rounded-lg object-cover" /> : <div className="h-11 w-11 rounded-lg bg-secondary" />}</td>
+              <td className="p-3">{p.product_images?.sort((a,b)=>a.display_order-b.display_order)[0]?.image_url ? <img src={p.product_images.sort((a,b)=>a.display_order-b.display_order)[0]!.image_url} className="h-11 w-11 rounded-lg object-cover" /> : <div className="h-11 w-11 rounded-lg bg-secondary" />}</td>
               <td className="p-3"><div className="font-semibold">{p.name}</div><div className="text-xs text-muted-foreground">{p.sku || "Sem SKU"}</div></td>
               <td className="p-3"><button className="inline-flex items-center gap-1 font-mono text-xs text-primary" onClick={() => navigator.clipboard.writeText(p.product_code).then(()=>toast.success("ID copiado!"))}>{p.product_code}<Copy className="h-3.5 w-3.5" /></button></td>
               <td className="p-3">{money(p.promotional_price ?? p.price)}</td><td className="p-3">{p.stock}</td>

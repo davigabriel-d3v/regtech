@@ -121,3 +121,9 @@ async function comRetentativa<T extends { error: { message: string } | null }>(
   }
   return r;
 }
+
+function createReader(): SupabaseClient<Database> {
+  return createClient<Database>(process.env['SUPABASE_URL']!, process.env['SUPABASE_PUBLISHABLE_KEY']!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}

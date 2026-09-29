@@ -47,20 +47,20 @@ export function SolicitarPedidoModal({ produto, onClose }: Props) {
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (form.name.trim().length < 2) return toast.error("Informe seu nome.");
-    if (form.phone.replace(/\D/g, "").length < 8) return toast.error("Informe um telefone válido.");
-    if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.trim())) return toast.error("Informe um e-mail válido.");
-    if (form.quantity < 1) return toast.error("A quantidade deve ser maior que zero.");
+    if (form.name.trim().length < 2) { toast.error("Informe seu nome."); return; }
+    if (form.phone.replace(/\D/g, "").length < 8) { toast.error("Informe um telefone válido."); return; }
+    if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.trim())) { toast.error("Informe um e-mail válido."); return; }
+    if (form.quantity < 1) { toast.error("A quantidade deve ser maior que zero."); return; }
     const missing = Object.keys(variations).find((key) => !variation[key]);
-    if (missing) return toast.error("Selecione " + (variationLabels[missing] ?? missing) + ".");
+    if (missing) { toast.error("Selecione " + (variationLabels[missing] ?? missing) + "."); return; }
 
     setSending(true);
     const { data, error } = await supabase.rpc("create_public_order", {
       p_product_id: produto.id,
       p_quantity: form.quantity,
       p_customer: { name: form.name.trim(), phone: form.phone.trim(), whatsapp: form.whatsapp.trim() || null, email: form.email.trim() || null },
-      p_notes: form.notes.trim() || null,
-      p_selected_variation: Object.keys(variation).length ? variation : null,
+      ...(form.notes.trim() ? { p_notes: form.notes.trim() } : {}),
+      ...(Object.keys(variation).length ? { p_selected_variation: variation } : {}),
     });
     setSending(false);
     if (error) {
