@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   Package, Users, Plus, Eye, EyeOff, Star, Pencil, Trash2, ArrowLeft, Loader2,
   LayoutDashboard, ShoppingBag, Boxes, Settings, Menu, X, LogOut, Inbox, Search,
-  Truck, CheckCircle2, XCircle, PackageCheck, PackageX, Activity, UserPlus, FilePen, FilePlus2, RefreshCw,
+  Truck, CheckCircle2, XCircle, PackageCheck, PackageX, Activity, UserPlus, FilePen, FilePlus2, RefreshCw, Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
