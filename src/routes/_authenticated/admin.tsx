@@ -183,7 +183,11 @@ function Admin() {
   }, [user.id]);
 
   function ir(s: Secao) { setSecao(s); setMenuAberto(false); }
-  function novo() {\n    ir("produtos");\n  }\n\n  const conta = (s: StatusPedido) => pedidos.filter((p) => p.status === s).length;
+  function novo() {
+    ir("produtos");
+  }
+
+  const conta = (s: StatusPedido) => pedidos.filter((p) => p.status === s).length;
   const cards = [
     { l: "Novos pedidos", v: conta("novo"), i: Inbox },
     { l: "Pedidos em análise", v: conta("analise"), i: Search },
