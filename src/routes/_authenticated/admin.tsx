@@ -64,9 +64,6 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
 });
 
-// Tabelas novas (pedidos, atividades) ainda não estão nos tipos gerados.
-const db = supabase as any;
-
 type Produto = {
   id: string; titulo: string; marca: string; categoria: string; descricao: string | null;
   preco: number | null; imagem_url: string | null; em_estoque: boolean; destaque: boolean;
@@ -143,10 +140,6 @@ function Admin() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [carregando, setCarregando] = useState(true);
-  const [form, setForm] = useState<any>(vazio);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [aberto, setAberto] = useState(false);
-  const [salvando, setSalvando] = useState(false);
 
   async function sair() {
     await qc.cancelQueries();
@@ -155,7 +148,32 @@ function Admin() {
     navigate({ to: "/auth", replace: true });
   }
 
-  async function carregar() {\n    setCarregando(true);\n    const [p, pe] = await Promise.all([\n      supabase.from("products").select("id,product_code,name,description,price,promotional_price,stock,status,created_at,marcas(nome),product_categories(name),product_images(image_url,is_primary,display_order)").order("created_at", { ascending: false }),\n      supabase.from("orders").select("id,order_number,status,created_at,customers(name),order_items(product_id,product_name,product_code)").order("created_at", { ascending: false }),\n    ]);\n    const statusMap: Record<string, StatusPedido> = { new: "novo", review: "analise", in_progress: "andamento", completed: "concluido", cancelled: "cancelado" };\n    const pedidosNovos = (pe.data ?? []).map((row: any) => {\n      const customer = Array.isArray(row.customers) ? row.customers[0] : row.customers;\n      const item = Array.isArray(row.order_items) ? row.order_items[0] : row.order_items;\n      return { id: row.id, numero: row.order_number, cliente_nome: customer?.name ?? "—", produto_id: item?.product_id ?? null, produto_codigo: item?.product_code ?? null, produto_titulo: item?.product_name ?? "—", status: statusMap[row.status] ?? "novo", criado_em: row.created_at } satisfies Pedido;\n    });\n    if (p.error) { toast.error("Não foi possível carregar os produtos: " + p.error.message); setProdutos([]); }\n    else {\n      setProdutos((p.data ?? []).map((row: any) => {\n        const brand = Array.isArray(row.marcas) ? row.marcas[0] : row.marcas;\n        const category = Array.isArray(row.product_categories) ? row.product_categories[0] : row.product_categories;\n        const images = Array.isArray(row.product_images) ? row.product_images : [];\n        const primary = [...images].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order)[0];\n        return { id: row.id, titulo: row.name, marca: brand?.nome ?? "—", categoria: category?.name ?? "Outros", descricao: row.description, preco: row.promotional_price ?? row.price, imagem_url: primary?.image_url ?? null, em_estoque: Number(row.stock) > 0, destaque: false, publicado: row.status === "active", ordem: 0, criado_em: row.created_at } satisfies Produto;\n      }));\n    }\n    if (pe.error) { toast.error("Não foi possível carregar os pedidos: " + pe.error.message); setPedidos([]); } else setPedidos(pedidosNovos);\n    setClientes([]); setAtividades([]); setCarregando(false); qc.invalidateQueries({ queryKey: ["loja"] });\n  }\n
+  async function carregar() {
+    setCarregando(true);
+    const [p, pe] = await Promise.all([
+      supabase.from("products").select("id,product_code,name,description,price,promotional_price,stock,status,created_at,marcas(nome),product_categories(name),product_images(image_url,is_primary,display_order)").order("created_at", { ascending: false }),
+      supabase.from("orders").select("id,order_number,status,created_at,customers(name),order_items(product_id,product_name,product_code)").order("created_at", { ascending: false }),
+    ]);
+    const statusMap: Record<string, StatusPedido> = { new: "novo", review: "analise", in_progress: "andamento", completed: "concluido", cancelled: "cancelado" };
+    const pedidosNovos = (pe.data ?? []).map((row: any) => {
+      const customer = Array.isArray(row.customers) ? row.customers[0] : row.customers;
+      const item = Array.isArray(row.order_items) ? row.order_items[0] : row.order_items;
+      return { id: row.id, numero: row.order_number, cliente_nome: customer?.name ?? "—", produto_id: item?.product_id ?? null, produto_codigo: item?.product_code ?? null, produto_titulo: item?.product_name ?? "—", status: statusMap[row.status] ?? "novo", criado_em: row.created_at } satisfies Pedido;
+    });
+    if (p.error) { toast.error("Não foi possível carregar os produtos: " + p.error.message); setProdutos([]); }
+    else {
+      setProdutos((p.data ?? []).map((row: any) => {
+        const brand = Array.isArray(row.marcas) ? row.marcas[0] : row.marcas;
+        const category = Array.isArray(row.product_categories) ? row.product_categories[0] : row.product_categories;
+        const images = Array.isArray(row.product_images) ? row.product_images : [];
+        const primary = [...images].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order)[0];
+        return { id: row.id, titulo: row.name, marca: brand?.nome ?? "—", categoria: category?.name ?? "Outros", descricao: row.description, preco: row.promotional_price ?? row.price, imagem_url: primary?.image_url ?? null, em_estoque: Number(row.stock) > 0, destaque: false, publicado: row.status === "active", ordem: 0, criado_em: row.created_at } satisfies Produto;
+      }));
+    }
+    if (pe.error) { toast.error("Não foi possível carregar os pedidos: " + pe.error.message); setPedidos([]); } else setPedidos(pedidosNovos);
+    setClientes([]); setAtividades([]); setCarregando(false); qc.invalidateQueries({ queryKey: ["loja"] });
+  }
+
   useEffect(() => { void carregar(); }, [user.id]);
   useEffect(() => {
     const channel = supabase.channel("admin-dashboard-orders")
