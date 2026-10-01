@@ -155,36 +155,7 @@ function Admin() {
     navigate({ to: "/auth", replace: true });
   }
 
-  async function carregar() {
-    const [p, c, pe, a] = await Promise.all([
-      supabase.from("produtos").select("*").order("criado_em", { ascending: false }),
-      supabase.from("profiles").select("id,nome,whatsapp,criado_em").order("criado_em", { ascending: false }),
-      supabase.from("orders").select("id,order_number,status,created_at,customers(name),order_items(product_id,product_name,product_code)").order("created_at", { ascending: false }),
-      db.from("atividades").select("id,tipo,descricao,criado_em").order("criado_em", { ascending: false }).limit(10),
-    ]);
-    const statusMap: Record<string, StatusPedido> = { new: "novo", review: "analise", in_progress: "andamento", completed: "concluido", cancelled: "cancelado" };
-    const pedidosNovos = (pe.data ?? []).map((row) => {
-      const customer = Array.isArray(row.customers) ? row.customers[0] : row.customers;
-      const item = Array.isArray(row.order_items) ? row.order_items[0] : row.order_items;
-      return {
-        id: row.id,
-        numero: row.order_number,
-        cliente_nome: customer?.name ?? "—",
-        produto_id: item?.product_id ?? null,
-        produto_codigo: item?.product_code ?? null,
-        produto_titulo: item?.product_name ?? "—",
-        status: statusMap[row.status] ?? "novo",
-        criado_em: row.created_at,
-      } satisfies Pedido;
-    });
-    setProdutos((p.data ?? []) as Produto[]);
-    setClientes(c.data ?? []);
-    setPedidos(pedidosNovos);
-    setAtividades((a.data ?? []) as Atividade[]);
-    setCarregando(false);
-    qc.invalidateQueries({ queryKey: ["loja"] });
-  }
-
+  async function carregar() {\n    setCarregando(true);\n    const [p, pe] = await Promise.all([\n      supabase.from("products").select("id,product_code,name,description,price,promotional_price,stock,status,created_at,marcas(nome),product_categories(name),product_images(image_url,is_primary,display_order)").order("created_at", { ascending: false }),\n      supabase.from("orders").select("id,order_number,status,created_at,customers(name),order_items(product_id,product_name,product_code)").order("created_at", { ascending: false }),\n    ]);\n    const statusMap: Record<string, StatusPedido> = { new: "novo", review: "analise", in_progress: "andamento", completed: "concluido", cancelled: "cancelado" };\n    const pedidosNovos = (pe.data ?? []).map((row: any) => {\n      const customer = Array.isArray(row.customers) ? row.customers[0] : row.customers;\n      const item = Array.isArray(row.order_items) ? row.order_items[0] : row.order_items;\n      return { id: row.id, numero: row.order_number, cliente_nome: customer?.name ?? "—", produto_id: item?.product_id ?? null, produto_codigo: item?.product_code ?? null, produto_titulo: item?.product_name ?? "—", status: statusMap[row.status] ?? "novo", criado_em: row.created_at } satisfies Pedido;\n    });\n    if (p.error) { toast.error("Não foi possível carregar os produtos: " + p.error.message); setProdutos([]); }\n    else {\n      setProdutos((p.data ?? []).map((row: any) => {\n        const brand = Array.isArray(row.marcas) ? row.marcas[0] : row.marcas;\n        const category = Array.isArray(row.product_categories) ? row.product_categories[0] : row.product_categories;\n        const images = Array.isArray(row.product_images) ? row.product_images : [];\n        const primary = [...images].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order)[0];\n        return { id: row.id, titulo: row.name, marca: brand?.nome ?? "—", categoria: category?.name ?? "Outros", descricao: row.description, preco: row.promotional_price ?? row.price, imagem_url: primary?.image_url ?? null, em_estoque: Number(row.stock) > 0, destaque: false, publicado: row.status === "active", ordem: 0, criado_em: row.created_at } satisfies Produto;\n      }));\n    }\n    if (pe.error) { toast.error("Não foi possível carregar os pedidos: " + pe.error.message); setPedidos([]); } else setPedidos(pedidosNovos);\n    setClientes([]); setAtividades([]); setCarregando(false); qc.invalidateQueries({ queryKey: ["loja"] });\n  }\n
   useEffect(() => { void carregar(); }, [user.id]);
   useEffect(() => {
     const channel = supabase.channel("admin-dashboard-orders")
@@ -194,50 +165,7 @@ function Admin() {
   }, [user.id]);
 
   function ir(s: Secao) { setSecao(s); setMenuAberto(false); }
-  function novo() { setForm(vazio); setEditId(null); setAberto(true); }
-  function editar(p: Produto) {
-    setForm({
-      titulo: p.titulo, marca: p.marca, categoria: p.categoria, descricao: p.descricao ?? "",
-      preco: p.preco == null ? "" : String(p.preco), imagem_url: p.imagem_url ?? "",
-      em_estoque: p.em_estoque, destaque: p.destaque, publicado: p.publicado, ordem: p.ordem,
-    });
-    setEditId(p.id); setAberto(true);
-  }
-
-  async function salvar(e: React.FormEvent) {
-    e.preventDefault();
-    setSalvando(true);
-    const dados = {
-      titulo: form.titulo.trim(), marca: form.marca.trim(), categoria: form.categoria,
-      descricao: form.descricao.trim(), preco: form.preco === "" ? null : Number(String(form.preco).replace(",", ".")),
-      imagem_url: form.imagem_url.trim() || null, em_estoque: form.em_estoque, destaque: form.destaque,
-      publicado: form.publicado, ordem: Number(form.ordem) || 0, atualizado_em: new Date().toISOString(),
-    };
-    const { error } = editId
-      ? await supabase.from("produtos").update(dados).eq("id", editId)
-      : await supabase.from("produtos").insert({ ...dados, slug: `${slugify(dados.titulo)}-${Date.now().toString(36)}` });
-    setSalvando(false);
-    if (error) { toast.error("Erro ao salvar: " + error.message); return; }
-    toast.success(editId ? "Produto atualizado!" : "Produto criado!");
-    setAberto(false);
-    carregar();
-  }
-
-  async function alternar(p: Produto, k: "publicado" | "destaque") {
-    const patch = k === "publicado" ? { publicado: !p.publicado } : { destaque: !p.destaque };
-    await supabase.from("produtos").update(patch).eq("id", p.id);
-    carregar();
-  }
-
-  async function apagar(p: Produto) {
-    if (!confirm(`Apagar "${p.titulo}"?`)) return;
-    const { error } = await supabase.from("produtos").delete().eq("id", p.id);
-    if (error) { toast.error("Erro ao apagar."); return; }
-    toast.success("Produto apagado.");
-    carregar();
-  }
-
-  const conta = (s: StatusPedido) => pedidos.filter((p) => p.status === s).length;
+  function novo() {\n    ir("produtos");\n  }\n\n  const conta = (s: StatusPedido) => pedidos.filter((p) => p.status === s).length;
   const cards = [
     { l: "Novos pedidos", v: conta("novo"), i: Inbox },
     { l: "Pedidos em análise", v: conta("analise"), i: Search },
@@ -452,39 +380,6 @@ function Admin() {
         </main>
       </div>
 
-      {aberto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur" onClick={() => setAberto(false)}>
-          <form onClick={(e) => e.stopPropagation()} onSubmit={salvar} className="max-h-[90vh] w-full max-w-lg space-y-3 overflow-y-auto rounded-3xl border border-border bg-card p-6">
-            <h2 className="font-display text-xl font-bold text-foreground">{editId ? "Editar produto" : "Novo produto"}</h2>
-            <input className={campo} placeholder="Nome do produto" required maxLength={150} value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} />
-            <div className="grid grid-cols-2 gap-3">
-              <input className={campo} placeholder="Marca" required maxLength={60} value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })} />
-              <select className={campo} value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
-                {categorias.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-            </div>
-            <textarea className={campo} rows={3} placeholder="Descrição" maxLength={1000} value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} />
-            <div className="grid grid-cols-2 gap-3">
-              <input className={campo} placeholder="Preço (vazio = sob consulta)" inputMode="decimal" value={form.preco} onChange={(e) => setForm({ ...form, preco: e.target.value })} />
-              <input className={campo} type="number" placeholder="Ordem" value={form.ordem} onChange={(e) => setForm({ ...form, ordem: Number(e.target.value) })} />
-            </div>
-            <input className={campo} placeholder="Link da foto (https://...)" value={form.imagem_url} onChange={(e) => setForm({ ...form, imagem_url: e.target.value })} />
-            <div className="flex flex-wrap gap-4 text-sm text-foreground">
-              {([["publicado", "Publicado"], ["em_estoque", "Em estoque"], ["destaque", "Destaque"]] as const).map(([k, l]) => (
-                <label key={k} className="inline-flex items-center gap-2">
-                  <input type="checkbox" checked={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.checked })} className="accent-primary" /> {l}
-                </label>
-              ))}
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={() => setAberto(false)} className="rounded-full border border-border px-4 py-2 text-sm text-foreground">Cancelar</button>
-              <button disabled={salvando} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
-                {salvando && <Loader2 className="h-4 w-4 animate-spin" />} Salvar
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
     </div>
   );
 }
