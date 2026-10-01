@@ -145,6 +145,10 @@ using (public.has_role(auth.uid(), 'admin'));
 -- Categories/brands: public storefront read; only admins may change catalog metadata.
 revoke all on public.product_categories from anon, authenticated;
 grant select on public.product_categories to anon, authenticated;
+drop policy if exists "product_categories_public_select" on public.product_categories;
+drop policy if exists "product_categories_admin_select" on public.product_categories;
+drop policy if exists "product_categories_permission_select" on public.product_categories;
+drop policy if exists "product_categories_admin_mutation" on public.product_categories;
 create policy "product_categories_public_select"
 on public.product_categories for select to anon, authenticated
 using (true);
