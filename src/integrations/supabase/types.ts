@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.18"
   }
   public: {
     Tables: {
@@ -35,27 +35,6 @@ export type Database = {
           id?: string
           module?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      atividades: {
-        Row: {
-          criado_em: string
-          descricao: string
-          id: string
-          tipo: string
-        }
-        Insert: {
-          criado_em?: string
-          descricao: string
-          id?: string
-          tipo: string
-        }
-        Update: {
-          criado_em?: string
-          descricao?: string
-          id?: string
-          tipo?: string
         }
         Relationships: []
       }
@@ -122,24 +101,6 @@ export type Database = {
           logo_url?: string | null
           nome?: string
           ordem?: number
-        }
-        Relationships: []
-      }
-      newsletter: {
-        Row: {
-          criado_em: string
-          email: string
-          id: string
-        }
-        Insert: {
-          criado_em?: string
-          email: string
-          id?: string
-        }
-        Update: {
-          criado_em?: string
-          email?: string
-          id?: string
         }
         Relationships: []
       }
@@ -270,50 +231,6 @@ export type Database = {
           },
         ]
       }
-      pedidos: {
-        Row: {
-          atualizado_em: string
-          cliente_id: string | null
-          cliente_nome: string
-          criado_em: string
-          id: string
-          numero: number
-          produto_id: string | null
-          produto_titulo: string
-          status: string
-        }
-        Insert: {
-          atualizado_em?: string
-          cliente_id?: string | null
-          cliente_nome?: string
-          criado_em?: string
-          id?: string
-          numero?: number
-          produto_id?: string | null
-          produto_titulo?: string
-          status?: string
-        }
-        Update: {
-          atualizado_em?: string
-          cliente_id?: string | null
-          cliente_nome?: string
-          criado_em?: string
-          id?: string
-          numero?: number
-          produto_id?: string | null
-          produto_titulo?: string
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pedidos_produto_id_fkey"
-            columns: ["produto_id"]
-            isOneToOne: false
-            referencedRelation: "produtos"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       product_categories: {
         Row: {
           created_at: string
@@ -343,6 +260,21 @@ export type Database = {
         }
         Update: {
           product_code?: string
+          reserved_at?: string
+        }
+        Relationships: []
+      }
+      product_id_registry: {
+        Row: {
+          product_id: string
+          reserved_at: string
+        }
+        Insert: {
+          product_id: string
+          reserved_at?: string
+        }
+        Update: {
+          product_id?: string
           reserved_at?: string
         }
         Relationships: []
@@ -403,7 +335,7 @@ export type Database = {
           status: string
           stock: number
           updated_at: string
-          variations: Json
+          variations: Json | null
         }
         Insert: {
           barcode?: string | null
@@ -422,7 +354,7 @@ export type Database = {
           status?: string
           stock?: number
           updated_at?: string
-          variations?: Json
+          variations?: Json | null
         }
         Update: {
           barcode?: string | null
@@ -441,7 +373,7 @@ export type Database = {
           status?: string
           stock?: number
           updated_at?: string
-          variations?: Json
+          variations?: Json | null
         }
         Relationships: [
           {
@@ -460,138 +392,42 @@ export type Database = {
           },
         ]
       }
-      produto_codigos_usados: {
-        Row: {
-          code: string
-          criado_em: string
-        }
-        Insert: {
-          code: string
-          criado_em?: string
-        }
-        Update: {
-          code?: string
-          criado_em?: string
-        }
-        Relationships: []
-      }
-      produtos: {
-        Row: {
-          atualizado_em: string
-          avaliacao: number
-          avaliacoes: number
-          barcode: string | null
-          categoria: string
-          criado_em: string
-          descricao: string
-          destaque: boolean
-          em_estoque: boolean
-          id: string
-          imagem_url: string | null
-          marca: string
-          minimum_stock: number
-          notes: string
-          ordem: number
-          preco: number | null
-          preco_antigo: number | null
-          product_code: string | null
-          promotional_price: number | null
-          publicado: boolean
-          sku: string | null
-          slug: string
-          status: string
-          stock: number
-          titulo: string
-        }
-        Insert: {
-          atualizado_em?: string
-          avaliacao?: number
-          avaliacoes?: number
-          barcode?: string | null
-          categoria: string
-          criado_em?: string
-          descricao?: string
-          destaque?: boolean
-          em_estoque?: boolean
-          id?: string
-          imagem_url?: string | null
-          marca: string
-          minimum_stock?: number
-          notes?: string
-          ordem?: number
-          preco?: number | null
-          preco_antigo?: number | null
-          product_code?: string | null
-          promotional_price?: number | null
-          publicado?: boolean
-          sku?: string | null
-          slug: string
-          status?: string
-          stock?: number
-          titulo: string
-        }
-        Update: {
-          atualizado_em?: string
-          avaliacao?: number
-          avaliacoes?: number
-          barcode?: string | null
-          categoria?: string
-          criado_em?: string
-          descricao?: string
-          destaque?: boolean
-          em_estoque?: boolean
-          id?: string
-          imagem_url?: string | null
-          marca?: string
-          minimum_stock?: number
-          notes?: string
-          ordem?: number
-          preco?: number | null
-          preco_antigo?: number | null
-          product_code?: string | null
-          promotional_price?: number | null
-          publicado?: boolean
-          sku?: string | null
-          slug?: string
-          status?: string
-          stock?: number
-          titulo?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           criado_em: string
           id: string
-          nome: string
-          whatsapp: string
+          nome: string | null
+          whatsapp: string | null
         }
         Insert: {
           criado_em?: string
           id: string
-          nome?: string
-          whatsapp?: string
+          nome?: string | null
+          whatsapp?: string | null
         }
         Update: {
           criado_em?: string
           id?: string
-          nome?: string
-          whatsapp?: string
+          nome?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
       user_roles: {
         Row: {
+          created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          created_at?: string
           id?: string
-          role: Database["public"]["Enums"]["app_role"]
+          role?: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
@@ -618,14 +454,11 @@ export type Database = {
         }[]
       }
       generate_product_code: { Args: never; Returns: string }
-      gerar_product_code: { Args: never; Returns: string }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
+      has_permission: {
+        Args: { p_module: string; p_user_id: string }
         Returns: boolean
       }
+      has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user" | "operator"
