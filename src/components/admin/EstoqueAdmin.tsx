@@ -17,7 +17,7 @@ export function EstoqueAdmin(){
   setLoading(true);
   const [p,m]=await Promise.all([
    supabase.from("products").select("id,product_code,name,stock,minimum_stock,status,sku,product_images(image_url,is_primary,display_order)").order("name"),
-   supabase.from("inventory_movements").select("id,product_id,movement_type,quantity,stock_before,stock_after,reason,created_at").order("created_at",{ascending:false}).limit(300)
+   (supabase as any).from("inventory_movements").select("id,product_id,movement_type,quantity,stock_before,stock_after,reason,created_at").order("created_at",{ascending:false}).limit(300)
   ]);
   if(p.error) toast.error("Erro ao carregar produtos: "+p.error.message); if(m.error) toast.error("Erro ao carregar histórico: "+m.error.message);
   setProducts((p.data||[]) as Product[]); setMovements((m.data||[]) as Movement[]); setLoading(false);
