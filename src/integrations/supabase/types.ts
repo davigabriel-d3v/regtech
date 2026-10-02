@@ -483,18 +483,21 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           criado_em: string
           id: string
           nome: string | null
           whatsapp: string | null
         }
         Insert: {
+          avatar_url?: string | null
           criado_em?: string
           id: string
           nome?: string | null
           whatsapp?: string | null
         }
         Update: {
+          avatar_url?: string | null
           criado_em?: string
           id?: string
           nome?: string | null
