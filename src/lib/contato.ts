@@ -1,7 +1,9 @@
-// WhatsApp principal de vendas (Tucumã)
-export const WHATSAPP_URL =
-  "https://api.whatsapp.com/send/?phone=5594992989833&text&type=phone_number&app_absent=0";
+const WHATSAPP_PADRAO = "5594992989833";
 
-export function whatsappComMensagem(texto: string): string {
-  return `${WHATSAPP_URL}?text=${encodeURIComponent(texto)}`;
+export const WHATSAPP_URL = `https://api.whatsapp.com/send/?phone=${WHATSAPP_PADRAO}&text`;
+
+export function whatsappComMensagem(texto: string, telefone = WHATSAPP_PADRAO): string {
+  const numero = telefone.replace(/\D/g, "");
+  const base = `https://api.whatsapp.com/send/?phone=${numero}&text`;
+  return `${base}=${encodeURIComponent(texto)}`;
 }
