@@ -181,7 +181,7 @@ function Shop() {
   );
   const [filtro, setFiltro] = useState<string>("todas");
   const [busca, setBusca] = useState("");
-  const [menuAberto, setMenuAberto] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false);\n  const [ordenacao, setOrdenacao] = useState("relevancia");\n  const [somenteEstoque, setSomenteEstoque] = useState(false);
 
   const escolherCategoria = (slug: string) => {
     setFiltro(slug);
@@ -373,7 +373,7 @@ function Shop() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {visiveis.map((produto) => (
+            {produtosOrdenados.map((produto) => (
               <ProdutoCardLoja key={produto.id} produto={produto} whatsappPhone={lojaSettings.whatsappPhone} />
             ))}
           </div>
