@@ -44,6 +44,7 @@ import type { BannerPrincipal as BannerPrincipalData } from "@/lib/banners";
 import { whatsappComMensagem } from "@/lib/contato";
 import { listarConfiguracoesLoja } from "@/lib/loja-settings.functions";
 import { DEFAULT_LOJA_SETTINGS } from "@/lib/loja-settings";
+import { DEFAULT_BANNERS } from "@/lib/banners";
 import { useCarrinho } from "@/components/loja/CarrinhoContext";
 
 export const lojaProdutosQueryOptions = queryOptions({
@@ -58,7 +59,10 @@ export const lojaMarcasQueryOptions = queryOptions({
 
 export const lojaBannersQueryOptions = queryOptions({
   queryKey: ["loja", "banners"],
-  queryFn: async () => (await listarBanners().catch(() => null)) ?? [],
+  queryFn: async () => {
+    const banners = await listarBanners().catch(() => null);
+    return banners && banners.length > 0 ? banners : DEFAULT_BANNERS;
+  },
 });
 
 export const lojaSettingsQueryOptions = queryOptions({
