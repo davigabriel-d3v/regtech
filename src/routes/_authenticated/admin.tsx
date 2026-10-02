@@ -14,6 +14,7 @@ import { AcessoMaisAdmin } from "@/components/admin/AcessoMaisAdmin";
 import { ClientesAdmin } from "@/components/admin/ClientesAdmin";
 import { BannerPrincipalAdmin } from "@/components/admin/BannerPrincipalAdmin";
 import { CuponsAdmin } from "@/components/admin/CuponsAdmin";
+import { LojaCatalogoAdmin } from "@/components/admin/LojaCatalogoAdmin";
 
 // Acesso + é um módulo administrativo real e deve ser renderizado pela seção acesso_plus.
 
@@ -78,7 +79,7 @@ type Pedido = {
 type Atividade = { id: string; tipo: string; descricao: string; criado_em: string };
 type StatusPedido = "novo" | "analise" | "andamento" | "concluido" | "cancelado";
 type Secao = "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "cupons" | "acesso_plus" | "config";
-type ConfiguracaoSecao = "inicio" | "banners";
+type ConfiguracaoSecao = "inicio" | "banners" | "loja";
 
 const statusInfo: Record<StatusPedido, { label: string; cls: string }> = {
   novo: { label: "Novo", cls: "bg-primary/15 text-primary" },
@@ -506,7 +507,18 @@ function Admin() {
               <p className="mt-2 text-sm text-muted-foreground">O controle de estoque está disponível nesta área.</p>
             </div>
           ) : secao === "config" ? (
-            configuracaoSecao === "banners" ? (
+            configuracaoSecao === "loja" ? (
+              <div className="space-y-5">
+                <button
+                  type="button"
+                  onClick={() => setConfiguracaoSecao("inicio")}
+                  className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Voltar para Configurações
+                </button>
+                <LojaCatalogoAdmin />
+              </div>
+            ) : configuracaoSecao === "banners" ? (
               <div className="space-y-5">
                 <button
                   type="button"
@@ -544,15 +556,22 @@ function Admin() {
                     </span>
                   </button>
 
-                  <div className="rounded-3xl border border-dashed border-border bg-card/40 p-6 opacity-80">
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-secondary text-muted-foreground">
+                  <button
+                    type="button"
+                    onClick={() => setConfiguracaoSecao("loja")}
+                    className="group rounded-3xl border border-border bg-card p-6 text-left transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-lg"
+                  >
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/15 text-primary">
                       <ShoppingBag className="h-6 w-6" />
                     </span>
                     <h3 className="mt-4 font-display text-xl font-bold text-foreground">Loja e catálogo</h3>
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      Área preparada para futuras configurações de catálogo, ofertas e organização da vitrine.
+                      Configure ofertas, destaques, ordem da vitrine, publicação dos produtos e o WhatsApp usado nos produtos do /shop.
                     </p>
-                  </div>
+                    <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                      Abrir configuração <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </button>
 
                   <div className="rounded-3xl border border-dashed border-border bg-card/40 p-6 opacity-80">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl bg-secondary text-muted-foreground">
