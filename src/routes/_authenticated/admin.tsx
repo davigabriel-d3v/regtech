@@ -12,6 +12,7 @@ import { ProdutosAdmin } from "@/components/admin/ProdutosAdmin";
 import { PedidosAdmin } from "@/components/admin/PedidosAdmin";
 import { AcessoMaisAdmin } from "@/components/admin/AcessoMaisAdmin";
 import { ClientesAdmin } from "@/components/admin/ClientesAdmin";
+import { BannerPrincipalAdmin } from "@/components/admin/BannerPrincipalAdmin";
 
 // Acesso + é um módulo administrativo real e deve ser renderizado pela seção acesso_plus.
 
@@ -499,9 +500,12 @@ function Admin() {
               <p className="mt-2 text-sm text-muted-foreground">O controle de estoque está disponível nesta área.</p>
             </div>
           ) : secao === "config" ? (
-            <div className="rounded-2xl border border-border bg-card p-8">
-              <h2 className="font-display text-xl font-bold text-foreground">Configurações</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Configurações do painel.</p>
+            <div className="space-y-6">
+              <div>
+                <h2 className="font-display text-2xl font-bold text-foreground">Configurações</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Personalize a experiência da loja sem precisar alterar o código.</p>
+              </div>
+              <BannerPrincipalAdmin />
             </div>
           ) : null}
         </main>
