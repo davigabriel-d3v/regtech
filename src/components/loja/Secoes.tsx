@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { whatsappComMensagem } from "@/lib/contato";
 import { SolicitarPedidoModal } from "@/components/loja/SolicitarPedidoModal";
+import { useCarrinho } from "@/components/loja/CarrinhoContext";
 import type { MarcaLoja, ProdutoLoja } from "@/lib/produtos.functions";
 import { DEFAULT_BANNERS, type BannerPrincipal } from "@/lib/banners";
 
@@ -374,6 +375,7 @@ function Estrelas({ nota }: { nota: number }) {
 
 export function ProdutoCardLoja({ produto, whatsappPhone = "5594992989833" }: { produto: ProdutoLoja; whatsappPhone?: string }) {
   const { favs, alternar } = useFavoritos();
+  const { adicionar, abrirCarrinho } = useCarrinho();
   const [pedidoAberto, setPedidoAberto] = useState(false);
   const fav = favs.includes(produto.id);
   const desconto =
@@ -433,13 +435,26 @@ export function ProdutoCardLoja({ produto, whatsappPhone = "5594992989833" }: { 
         )}
       </div>
 
-      <button
-        type="button"
-        onClick={() => setPedidoAberto(true)}
-        className="mt-3 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent"
-      >
-        <ShoppingCart className="h-4 w-4" /> SOLICITAR PEDIDO
-      </button>
+      {produto.preco != null && produto.emEstoque ? (
+        <button
+          type="button"
+          onClick={() => {
+            adicionar(produto);
+            abrirCarrinho();
+          }}
+          className="mt-3 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent"
+        >
+          <ShoppingCart className="h-4 w-4" /> Adicionar ao carrinho
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setPedidoAberto(true)}
+          className="mt-3 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent"
+        >
+          <ShoppingCart className="h-4 w-4" /> Solicitar pedido
+        </button>
+      )}
       <a
         href={whatsappComMensagem(`Olá! Quero comprar: ${produto.titulo} (${produto.marca}).`, whatsappPhone)}
         target="_blank"
