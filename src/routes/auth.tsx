@@ -36,6 +36,8 @@ function AuthPage() {
   const [nome, setNome] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [aceitaTermos, setAceitaTermos] = useState(false);
+  const termosVersao = "2026-10-02";
 
   async function enviar(event: React.FormEvent) {
     event.preventDefault();
@@ -61,12 +63,23 @@ function AuthPage() {
         toast.success("Login realizado com segurança.");
         navigate({ to: isAdmin || isOperator ? "/admin" : "/conta" });
       } else if (modo === "criar") {
+        if (!aceitaTermos) {
+          toast.error("É necessário aceitar os Termos de Uso e a Política de Privacidade para criar a conta.");
+          return;
+        }
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password: senha,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { nome: nome.trim(), whatsapp: whatsapp.trim() },
+            data: {
+              nome: nome.trim(),
+              whatsapp: whatsapp.trim(),
+              termos_aceitos: true,
+              termos_versao: termosVersao,
+              politica_privacidade_versao: termosVersao,
+              consentimento_aceito_em: new Date().toISOString(),
+            },
           },
         });
         if (error) throw error;
@@ -203,6 +216,28 @@ function AuthPage() {
                 minLength={6}
               />
             )}
+            {modo === "criar" && (
+              <label className="flex items-start gap-3 rounded-2xl border border-border bg-background/60 p-4 text-sm leading-5">
+                <input
+                  type="checkbox"
+                  checked={aceitaTermos}
+                  onChange={(event) => setAceitaTermos(event.target.checked)}
+                  required
+                  className="mt-1 h-4 w-4 shrink-0 accent-primary"
+                />
+                <span className="text-muted-foreground">
+                  Li e aceito os{" "}
+                  <Link to="/termos" target="_blank" className="font-semibold text-primary hover:underline">
+                    Termos de Uso
+                  </Link>{" "}
+                  e a{" "}
+                  <Link to="/privacidade" target="_blank" className="font-semibold text-primary hover:underline">
+                    Política de Privacidade
+                  </Link>
+                  . Estou ciente de como meus dados serão tratados para o funcionamento da conta e dos serviços da RegTech.
+                </span>
+              </label>
+            )}
             <button
               disabled={enviando}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:bg-accent disabled:opacity-60"
@@ -230,7 +265,7 @@ function AuthPage() {
                   Não tem conta?{" "}
                   <button
                     type="button"
-                    onClick={() => setModo("criar")}
+                    onClick={() => { setAceitaTermos(false); setModo("criar"); }}
                     className="font-semibold text-primary"
                   >
                     Criar conta
@@ -243,7 +278,7 @@ function AuthPage() {
                 Já tem conta?{" "}
                 <button
                   type="button"
-                  onClick={() => setModo("entrar")}
+                  onClick={() => { setAceitaTermos(false); setModo("entrar"); }}
                   className="font-semibold text-primary"
                 >
                   Entrar
