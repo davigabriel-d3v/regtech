@@ -180,6 +180,64 @@ export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> 
     .filter((row) => !categoria || row.categoria === categoria);
 }
 
+export async function fetchProdutoPorCodigo(codigo: string): Promise<ProdutoLoja | null> {
+  const normalized = codigo.trim().toUpperCase();
+  if (!normalized) return null;
+
+  const client = createReader();
+  const { data: product, error } = await client
+    .from("products")
+    .select("id,product_code,name,description,category_id,brand_id,price,promotional_price,stock,status,sku,variations,created_at,catalog_featured,catalog_order")
+    .eq("product_code", normalized)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (error || !product) return null;
+
+  const [categoryResult, brandResult, imagesResult] = await Promise.all([
+    product.category_id
+      ? client.from("product_categories").select("id,name").eq("id", product.category_id).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    product.brand_id
+      ? client.from("marcas").select("id,nome").eq("id", product.brand_id).eq("ativo", true).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    client
+      .from("product_images")
+      .select("id,image_url,is_primary,display_order")
+      .eq("product_id", product.id)
+      .order("display_order", { ascending: true }),
+  ]);
+
+  if (brandResult.error) console.error("[loja] falha ao carregar marca do produto:", brandResult.error.message);
+  if (categoryResult.error) console.error("[loja] falha ao carregar categoria do produto:", categoryResult.error.message);
+  if (imagesResult.error) console.error("[loja] falha ao carregar imagens do produto:", imagesResult.error.message);
+
+  const primaryImages = ((imagesResult.data ?? []) as Array<{ id: string; image_url: string; is_primary: boolean; display_order: number }>)
+    .sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order);
+
+  const currentPrice = product.promotional_price ?? product.price;
+
+  return {
+    id: product.id,
+    productCode: product.product_code,
+    slug: product.product_code,
+    titulo: product.name,
+    marca: (brandResult.data as { nome?: string } | null)?.nome ?? "RegTech",
+    categoria: slugify((categoryResult.data as { name?: string } | null)?.name ?? "Outros"),
+    descricao: product.description ?? "",
+    preco: Number.isFinite(Number(currentPrice)) ? Number(currentPrice) : null,
+    emEstoque: Number(product.stock) > 0,
+    destaque: product.catalog_featured,
+    emOferta: product.promotional_price != null,
+    imagemUrl: primaryImages[0]?.image_url ?? null,
+    precoAntigo: product.promotional_price != null ? Number(product.price) : null,
+    avaliacao: 0,
+    avaliacoes: 0,
+    sku: product.sku ?? null,
+    variations: normalizeVariations(product.variations),
+  } satisfies ProdutoLoja;
+}
+
 export async function fetchMarcas(): Promise<MarcaLoja[]> {
   const { data, error } = await comRetentativa(() =>
     createReader()
