@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, Copy, Heart, MessageCircle, Package, Share2, ShoppingCart, Star } from "lucide-react";
 import { toast } from "sonner";
