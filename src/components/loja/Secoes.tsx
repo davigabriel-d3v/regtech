@@ -372,7 +372,7 @@ function Estrelas({ nota }: { nota: number }) {
   );
 }
 
-export function ProdutoCardLoja({ produto }: { produto: ProdutoLoja }) {
+export function ProdutoCardLoja({ produto, whatsappPhone = "5594992989833" }: { produto: ProdutoLoja; whatsappPhone?: string }) {
   const { favs, alternar } = useFavoritos();
   const [pedidoAberto, setPedidoAberto] = useState(false);
   const fav = favs.includes(produto.id);
@@ -431,7 +431,7 @@ export function ProdutoCardLoja({ produto }: { produto: ProdutoLoja }) {
         <ShoppingCart className="h-4 w-4" /> SOLICITAR PEDIDO
       </button>
       <a
-        href={whatsappComMensagem(`Olá! Quero comprar: ${produto.titulo} (${produto.marca}).`)}
+        href={whatsappComMensagem(`Olá! Quero comprar: ${produto.titulo} (${produto.marca}).`, whatsappPhone)}
         target="_blank"
         rel="noreferrer"
         className="mt-2 inline-flex items-center justify-center gap-2 rounded-full border border-primary px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
@@ -466,17 +466,17 @@ function Contador() {
   );
 }
 
-export function OfertasDoDia({ produtos }: { produtos: ProdutoLoja[] }) {
+export function OfertasDoDia({ produtos, titulo = "Ofertas do dia", subtitulo, whatsappPhone = "5594992989833" }: { produtos: ProdutoLoja[]; titulo?: string; subtitulo?: string | null; whatsappPhone?: string }) {
   if (produtos.length === 0) return null;
   return (
     <section id="ofertas" className="mx-auto max-w-6xl scroll-mt-24 px-4 pt-14 sm:px-6">
       <div className="flex flex-wrap items-center gap-3">
-        <h2 className="font-display text-2xl font-bold">Ofertas do dia</h2>
+        <div><h2 className="font-display text-2xl font-bold">{titulo}</h2>{subtitulo && <p className="mt-1 text-sm text-muted-foreground">{subtitulo}</p>}</div>
         <Contador />
       </div>
       <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {produtos.map((p) => (
-          <ProdutoCardLoja key={p.id} produto={p} />
+          <ProdutoCardLoja key={p.id} produto={p} whatsappPhone={whatsappPhone} />
         ))}
       </div>
     </section>
@@ -494,6 +494,7 @@ export function ProdutoCarrossel({
   subtitulo?: string;
   produtos: ProdutoLoja[];
   onVerTodos?: () => void;
+  whatsappPhone?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const rolar = (d: number) => ref.current?.scrollBy({ left: d * ref.current.clientWidth * 0.8, behavior: "smooth" });
@@ -522,7 +523,7 @@ export function ProdutoCarrossel({
       <div ref={ref} className="mt-5 flex snap-x gap-4 overflow-x-auto scroll-smooth pb-4 pt-1">
         {produtos.map((p) => (
           <div key={p.id} className="w-[46%] shrink-0 snap-start sm:w-[31%] lg:w-[23%]">
-            <ProdutoCardLoja produto={p} />
+            <ProdutoCardLoja produto={p} whatsappPhone={whatsappPhone} />
           </div>
         ))}
       </div>
