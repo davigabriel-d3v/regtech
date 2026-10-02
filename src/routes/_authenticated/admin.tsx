@@ -135,6 +135,7 @@ function Admin() {
   }, [navigate]);
   const [secao, setSecao] = useState<Secao>("dashboard");
   const [criarAcessoRequest, setCriarAcessoRequest] = useState(0);
+  const [criarProdutoRequest, setCriarProdutoRequest] = useState(0);
   const [menuAberto, setMenuAberto] = useState(false);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [clientes, setClientes] = useState<any[]>([]);
@@ -284,6 +285,7 @@ function Admin() {
 
   function ir(s: Secao) { setSecao(s); setMenuAberto(false); }
   function novo() {
+    setCriarProdutoRequest((request) => request + 1);
     ir("produtos");
   }
 
@@ -487,7 +489,7 @@ function Admin() {
               </section>
             </div>
           ) : secao === "produtos" ? (
-            <ProdutosAdmin />
+            <ProdutosAdmin openCreateRequest={criarProdutoRequest} />
           ) : secao === "clientes" ? (
             <ClientesAdmin />
           ) : secao === "pedidos" ? (
