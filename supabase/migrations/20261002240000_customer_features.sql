@@ -53,7 +53,8 @@ create policy order_items_customer_select on public.order_items for select to au
   or (select has_permission(auth.uid(),'pedidos'))
 );
 
-create or replace function public.notify_order_customer()
+create schema if not exists private;
+create or replace function private.notify_order_customer()
 returns trigger language plpgsql security invoker as $$
 declare v_user uuid;
 begin
@@ -74,4 +75,4 @@ begin
 end $$;
 drop trigger if exists orders_notify_customer on public.orders;
 create trigger orders_notify_customer after insert or update of status on public.orders
-for each row execute function public.notify_order_customer();
+for each row execute function private.notify_order_customer();
