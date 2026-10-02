@@ -499,6 +499,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      redeem_coupon: {
+        Args: { p_code: string; p_identifier: string }
+        Returns: {
+          success: boolean
+          message: string
+          coupon_id: string | null
+          code: string | null
+          reward_type: string | null
+          reward_value: number
+          reward_text: string | null
+        }[]
+      }
       create_public_order: {
         Args: {
           p_customer: Json
