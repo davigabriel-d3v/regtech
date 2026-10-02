@@ -20,6 +20,7 @@ import {
   Tv,
   Watch,
   X,
+  TicketPercent,
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
 import {
@@ -427,6 +428,18 @@ function CategoriasMenu({
       {aberto && (
         <nav className="absolute left-0 top-full mt-2 max-h-[70vh] w-64 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-xl">
           <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Links rápidos
+          </p>
+          <Link
+            to="/resgatar"
+            onClick={() => setAberto(false)}
+            className="flex w-full items-center gap-2.5 rounded-xl bg-primary/10 px-3 py-2 text-left text-sm font-semibold text-primary transition-colors hover:bg-primary/15"
+          >
+            <TicketPercent className="h-4 w-4" />
+            Resgatar
+          </Link>
+
+          <p className="mt-2 px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Categorias
           </p>
           <button
