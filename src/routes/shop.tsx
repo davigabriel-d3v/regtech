@@ -42,7 +42,7 @@ import { listarBanners } from "@/lib/banners.functions";
 import type { BannerPrincipal as BannerPrincipalData } from "@/lib/banners";
 import { whatsappComMensagem } from "@/lib/contato";
 import { listarConfiguracoesLoja } from "@/lib/loja-settings.functions";
-import { DEFAULT_LOJA_SETTINGS, type LojaSettings } from "@/lib/loja-settings";
+import { DEFAULT_LOJA_SETTINGS } from "@/lib/loja-settings";
 
 export const lojaProdutosQueryOptions = queryOptions({
   queryKey: ["loja", "produtos"],
@@ -227,7 +227,8 @@ function Shop() {
       <BannersSecundarios onEscolher={escolherCategoria} />
       <CompreCategoria onEscolher={escolherCategoria} />
       {lojaSettings.offersEnabled && <OfertasDoDia produtos={ofertas} titulo={lojaSettings.offersTitle} subtitulo={lojaSettings.offersSubtitle} whatsappPhone={lojaSettings.whatsappPhone} />}
-      {lojaSettings.featuredEnabled && <ProdutoCarrossel titulo={lojaSettings.featuredTitle} subtitulo={lojaSettings.featuredSubtitle ?? undefined} produtos={destaques} whatsappPhone={lojaSettings.whatsappPhone} />}\n      <ProdutoCarrossel titulo="Mais vendidos" subtitulo="Os queridinhos dos clientes RegTech" produtos={maisVendidos} whatsappPhone={lojaSettings.whatsappPhone} />
+      {lojaSettings.featuredEnabled && <ProdutoCarrossel titulo={lojaSettings.featuredTitle} subtitulo={lojaSettings.featuredSubtitle ?? undefined} produtos={destaques} whatsappPhone={lojaSettings.whatsappPhone} />}
+      <ProdutoCarrossel titulo="Mais vendidos" subtitulo="Os queridinhos dos clientes RegTech" produtos={maisVendidos} whatsappPhone={lojaSettings.whatsappPhone} />
       <Beneficios />
       <ProdutoCarrossel titulo="Ofertas que você vai amar" produtos={amar} whatsappPhone={lojaSettings.whatsappPhone} />
       {blocos.map((b) =>
