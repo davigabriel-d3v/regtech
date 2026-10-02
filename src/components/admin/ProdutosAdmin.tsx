@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Copy, Eye, ImagePlus, Loader2, Pencil, Plus, Save, Share2, Star, Trash2, Upload, X } from "lucide-react";
+import { Copy, Eye, ImagePlus, Loader2, Pencil, Plus, Save, Share2, Star, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -321,6 +321,21 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
     {formOpen && <div className="fixed inset-0 z-[70] flex items-center justify-center bg-background/80 p-4 backdrop-blur">
       <div className="max-h-[94vh] w-full max-w-4xl overflow-y-auto rounded-3xl border border-border bg-card p-6">
         <div className="flex items-center justify-between"><h3 className="font-display text-xl font-bold">{editing ? "Editar produto" : "Cadastrar produto"}</h3><button onClick={closeForm}><X/></button></div>
+        {editing?.product_code && (
+          <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Link único do produto</p>
+            <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <p className="min-w-0 flex-1 break-all font-mono text-xs text-muted-foreground">{productShareLink(editing.product_code)}</p>
+              <button type="button" onClick={() => {
+                const link = productShareLink(editing.product_code!);
+                void navigator.clipboard.writeText(link).then(() => toast.success("Link de compartilhamento copiado!")).catch(() => toast.error("Não foi possível copiar o link."));
+              }} className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-primary/30 bg-background px-3 py-2 text-xs font-semibold text-primary">
+                <Copy className="h-3.5 w-3.5" /> Copiar link
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">Esse endereço é gerado automaticamente a partir do ID único do produto e pode ser enviado para qualquer cliente.</p>
+          </div>
+        )}
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <div className="space-y-4">
             {field("Nome do produto","name")}
