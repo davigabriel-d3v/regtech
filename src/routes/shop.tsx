@@ -16,6 +16,7 @@ import {
   Plane,
   SatelliteDish,
   Search,
+  ShoppingCart,
   Smartphone,
   Tv,
   Watch,
@@ -43,6 +44,7 @@ import type { BannerPrincipal as BannerPrincipalData } from "@/lib/banners";
 import { whatsappComMensagem } from "@/lib/contato";
 import { listarConfiguracoesLoja } from "@/lib/loja-settings.functions";
 import { DEFAULT_LOJA_SETTINGS } from "@/lib/loja-settings";
+import { useCarrinho } from "@/components/loja/CarrinhoContext";
 
 export const lojaProdutosQueryOptions = queryOptions({
   queryKey: ["loja", "produtos"],
@@ -126,6 +128,7 @@ function precoTexto(preco: number | null): string {
 }
 
 function Shop() {
+  const { totalItens } = useCarrinho();
   const { data: produtos } = useSuspenseQuery(lojaProdutosQueryOptions);
   const { data: marcas } = useSuspenseQuery(lojaMarcasQueryOptions);
   const { data: banners } = useSuspenseQuery(lojaBannersQueryOptions);
@@ -210,14 +213,26 @@ function Shop() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2 md:ml-0">
+            <Link
+              to="/carrinho"
+              aria-label={`Abrir carrinho com ${totalItens} itens`}
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card/80 hover:bg-secondary"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              {totalItens > 0 && (
+                <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-primary px-1.5 py-0.5 text-center text-[10px] font-bold text-primary-foreground">
+                  {totalItens > 99 ? "99+" : totalItens}
+                </span>
+              )}
+            </Link>
             <ContaBotao />
-          <Link
-            to="/"
-            className="ml-auto inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary md:ml-0"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Voltar ao site</span>
-          </Link>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary sm:px-4"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Voltar ao site</span>
+            </Link>
           </div>
         </div>
       </header>
