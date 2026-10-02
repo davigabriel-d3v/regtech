@@ -37,6 +37,8 @@ import {
 } from "@/components/loja/Secoes";
 import logo from "@/assets/regtech-logo.png";
 import { listarMarcas, listarProdutos, type ProdutoLoja } from "@/lib/produtos.functions";
+import { listarBanners } from "@/lib/banners.functions";
+import type { BannerPrincipal } from "@/lib/banners";
 import { whatsappComMensagem } from "@/lib/contato";
 
 export const lojaProdutosQueryOptions = queryOptions({
@@ -49,11 +51,18 @@ export const lojaMarcasQueryOptions = queryOptions({
   queryFn: async () => (await listarMarcas().catch(() => null)) ?? [],
 });
 
+export const lojaBannersQueryOptions = queryOptions({
+  queryKey: ["loja", "banners"],
+  queryFn: async () => (await listarBanners().catch(() => null)) ?? [],
+});
+
+
 export const Route = createFileRoute("/shop")({
   loader: async ({ context: { queryClient } }) => {
     await Promise.all([
       queryClient.ensureQueryData(lojaProdutosQueryOptions),
       queryClient.ensureQueryData(lojaMarcasQueryOptions),
+      queryClient.ensureQueryData(lojaBannersQueryOptions),
     ]);
   },
   head: () => ({
@@ -110,6 +119,7 @@ function precoTexto(preco: number | null): string {
 function Shop() {
   const { data: produtos } = useSuspenseQuery(lojaProdutosQueryOptions);
   const { data: marcas } = useSuspenseQuery(lojaMarcasQueryOptions);
+  const { data: banners } = useSuspenseQuery(lojaBannersQueryOptions);
   const ofertas = useMemo(() => {
     const d = produtos.filter((p) => p.destaque);
     return d.length >= 4 ? d : [...d, ...produtos.filter((p) => !p.destaque)];
@@ -205,7 +215,7 @@ function Shop() {
       </header>
 
       <NavCategorias onEscolher={escolherCategoria} />
-      <BannerPrincipal onEscolher={escolherCategoria} />
+      <BannerPrincipal onEscolher={escolherCategoria} banners={banners as BannerPrincipal[]} />
       <BannersSecundarios onEscolher={escolherCategoria} />
       <CompreCategoria onEscolher={escolherCategoria} />
       <OfertasDoDia produtos={ofertas.slice(0, 4)} />
