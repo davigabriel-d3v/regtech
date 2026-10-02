@@ -40,6 +40,7 @@ import {
 import logo from "@/assets/regtech-logo.png";
 import { listarMarcas, listarProdutos, type ProdutoLoja } from "@/lib/produtos.functions";
 import { listarBanners } from "@/lib/banners.functions";
+import { supabase } from "@/integrations/supabase/client";
 import type { BannerPrincipal as BannerPrincipalData } from "@/lib/banners";
 import { whatsappComMensagem } from "@/lib/contato";
 import { listarConfiguracoesLoja } from "@/lib/loja-settings.functions";
@@ -60,8 +61,35 @@ export const lojaMarcasQueryOptions = queryOptions({
 export const lojaBannersQueryOptions = queryOptions({
   queryKey: ["loja", "banners"],
   queryFn: async () => {
-    const banners = await listarBanners().catch(() => null);
-    return banners && banners.length > 0 ? banners : DEFAULT_BANNERS;
+    const { data, error } = await supabase
+      .from("shop_banners")
+      .select(
+        "id,title,subtitle,badge,button_label,action_type,action_value,icon_name,background_image_url,background_mobile_image_url,overlay_opacity,text_align,active,display_order,autoplay_seconds",
+      )
+      .eq("active", true)
+      .order("display_order", { ascending: true });
+
+    if (!error && data?.length) {
+      return data.map((row) => ({
+        id: row.id,
+        title: row.title,
+        subtitle: row.subtitle,
+        badge: row.badge,
+        buttonLabel: row.button_label,
+        actionType: row.action_type as BannerPrincipalData["actionType"],
+        actionValue: row.action_value,
+        iconName: row.icon_name,
+        backgroundImageUrl: row.background_image_url,
+        backgroundMobileImageUrl: row.background_mobile_image_url,
+        overlayOpacity: Number(row.overlay_opacity),
+        textAlign: row.text_align as BannerPrincipalData["textAlign"],
+        active: row.active,
+        displayOrder: row.display_order,
+        autoplaySeconds: row.autoplay_seconds,
+      }));
+    }
+
+    return (await listarBanners().catch(() => null))?.length ? await listarBanners() : DEFAULT_BANNERS;
   },
 });
 
