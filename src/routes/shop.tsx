@@ -89,7 +89,7 @@ export const lojaBannersQueryOptions = queryOptions({
       }));
     }
 
-    return (await listarBanners().catch(() => null))?.length ? await listarBanners() : DEFAULT_BANNERS;
+    const fallback = await listarBanners().catch(() => null);\n    return fallback && fallback.length ? fallback : DEFAULT_BANNERS;
   },
 });
 
