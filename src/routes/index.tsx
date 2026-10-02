@@ -178,6 +178,7 @@ const quickLinks = [
   { label: "Quem somos", href: "#quem-somos" },
   { label: "Serviços", href: "#servicos" },
   { label: "Contato", href: "#contato" },
+  { label: "Resgatar", href: "/resgatar" },
 ];
 
 const contatosWhatsapp = [
