@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Customer = {
   id: string; name: string; email: string | null; phone: string; whatsapp: string | null;
-  status: "active" | "inactive"; created_at: string; updated_at: string;
+  status: "active" | "inactive"; created_at: string; updated_at: string; avatar_url?: string | null;
 };
 type Order = {
   id: string; order_number: number; customer_id: string; status: string;
@@ -26,7 +26,7 @@ const dateTime = (v: string) => new Date(v).toLocaleString("pt-BR", { dateStyle:
 const inputClass = "w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50";
 
 export function ClientesAdmin() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);\n  const [profiles, setProfiles] = useState<any[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +47,7 @@ export function ClientesAdmin() {
       supabase.from("orders").select("id,order_number,customer_id,status,created_at,updated_at").order("created_at", { ascending: false }),
     ]);
     if (c.error) toast.error("Não foi possível carregar os clientes: " + c.error.message);
-    if (o.error) toast.error("Não foi possível carregar os pedidos: " + o.error.message);
+    if (o.error) toast.error("Não foi possível carregar os pedidos: " + o.error.message);\n    if (p.error) toast.error("Não foi possível carregar os perfis: " + p.error.message);
     setCustomers((c.data ?? []) as Customer[]);
     setOrders((o.data ?? []) as Order[]);
     setLoading(false);
@@ -145,11 +145,11 @@ export function ClientesAdmin() {
         rows.length === 0 ? <div className="px-6 py-16 text-center"><UsersEmpty /><p className="mt-3 font-medium text-foreground">Nenhum cliente encontrado</p><p className="mt-1 text-sm text-muted-foreground">Os clientes aparecem aqui automaticamente quando fazem pedidos.</p></div> :
         <div className="overflow-x-auto"><table className="w-full min-w-[980px] text-sm">
           <thead className="bg-secondary/40 text-left text-xs text-muted-foreground"><tr>
-            <th className="p-3">Nome</th><th className="p-3">E-mail</th><th className="p-3">Telefone</th><th className="p-3">WhatsApp</th>
+            <th className="p-3">Cliente</th><th className="p-3">E-mail</th><th className="p-3">Telefone</th><th className="p-3">WhatsApp</th>
             <th className="p-3">Cadastro</th><th className="p-3">Pedidos</th><th className="p-3">Status</th><th className="p-3 text-right">Ações</th>
           </tr></thead>
           <tbody>{rows.map(c => <tr key={c.id} className="border-t border-border text-foreground">
-            <td className="p-3 font-medium">{c.name}</td><td className="p-3">{c.email || "—"}</td><td className="p-3">{c.phone || "—"}</td><td className="p-3">{c.whatsapp || "—"}</td>
+            <td className="p-3"><div className="flex items-center gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary">{c.avatar_url ? <img src={c.avatar_url} alt="" className="h-full w-full object-cover" /> : <span className="text-xs font-semibold text-muted-foreground">{(c.name || "U").slice(0, 1).toUpperCase()}</span>}</div><span className="font-medium">{c.name}</span></div></td><td className="p-3">{c.email || "—"}</td><td className="p-3">{c.phone || "—"}</td><td className="p-3">{c.whatsapp || "—"}</td>
             <td className="p-3 text-muted-foreground">{dateOnly(c.created_at)}</td><td className="p-3">{orderCount.get(c.id) ?? 0}</td>
             <td className="p-3"><span className={`rounded-full px-2 py-1 text-xs ${c.status === "active" ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"}`}>{statusLabel(c.status)}</span></td>
             <td className="p-3"><div className="flex justify-end gap-1">
@@ -169,7 +169,7 @@ export function ClientesAdmin() {
 
       {selected && <Modal title="Detalhes do cliente" onClose={() => setSelected(null)}>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Info label="Nome" value={selected.name}/><Info label="E-mail" value={selected.email || "—"}/>
+          <div className="sm:col-span-2 flex items-center gap-4">{selected.avatar_url ? <img src={selected.avatar_url} alt="" className="h-20 w-20 rounded-full object-cover" /> : <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-xl font-bold text-muted-foreground">{(selected.name || "U").slice(0, 1).toUpperCase()}</div>}<Info label="Nome" value={selected.name}/></div><Info label="E-mail" value={selected.email || "—"}/>
           <Info label="Telefone" value={selected.phone || "—"}/><Info label="WhatsApp" value={selected.whatsapp || "—"}/>
           <Info label="Status" value={statusLabel(selected.status)}/><Info label="Data de cadastro" value={dateTime(selected.created_at)}/>
           <Info label="Última atualização" value={dateTime(selected.updated_at)}/>
