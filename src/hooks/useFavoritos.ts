@@ -38,7 +38,8 @@ export function useFavoritos() {
     carregar().then(({ ids }) => { if (ativo) setFavs(ids); }).catch(() => {});
     const sync = () => carregar().then(({ ids }) => { if (ativo) setFavs(ids); }).catch(() => {});
     window.addEventListener("regtech-favs", sync);
-    return () => { ativo = false; window.removeEventListener("regtech-favs", sync); };
+    const { data: authSub } = supabase.auth.onAuthStateChange(() => { cache.clear(); sync(); });
+    return () => { ativo = false; window.removeEventListener("regtech-favs", sync); authSub.subscription.unsubscribe(); };
   }, []);
 
   const alternar = async (id: string, produto?: ProdutoLoja) => {
