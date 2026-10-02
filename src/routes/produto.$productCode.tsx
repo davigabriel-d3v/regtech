@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Check, ChevronLeft, ChevronRight, Copy, MessageCircle, Package, Share2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Copy, MessageCircle, Package, Share2, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { buscarProdutoPorCodigo } from "@/lib/produtos.functions";
 import { whatsappComMensagem } from "@/lib/contato";
+import { useCarrinho } from "@/components/loja/CarrinhoContext";
 
 export const Route = createFileRoute("/produto/$productCode")({
   loader: async ({ params }) => buscarProdutoPorCodigo({ data: { codigo: params.productCode } }),
@@ -29,6 +30,7 @@ function ProdutoCompartilhado() {
   const product = Route.useLoaderData();
   const [imageIndex, setImageIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+  const { adicionar, abrirCarrinho } = useCarrinho();
 
   const images = useMemo(() => {
     if (!product) return [];
@@ -115,7 +117,19 @@ function ProdutoCompartilhado() {
             {product.descricao && <div className="mt-7"><h2 className="font-display text-lg font-bold">Descrição</h2><p className="mt-2 whitespace-pre-line text-sm leading-7 text-muted-foreground">{product.descricao}</p></div>}
 
             <div className="mt-8 grid gap-2 sm:grid-cols-2">
-              <a href={whatsapp} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground hover:bg-accent">
+              {product.preco != null && product.emEstoque && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    adicionar(product);
+                    abrirCarrinho();
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground hover:bg-accent"
+                >
+                  <ShoppingCart className="h-4 w-4" /> Adicionar ao carrinho
+                </button>
+              )}
+              <a href={whatsapp} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-primary px-5 py-3.5 text-sm font-semibold text-primary hover:bg-primary hover:text-primary-foreground">
                 <MessageCircle className="h-4 w-4" /> Falar no WhatsApp
               </a>
               <button onClick={() => void copyLink()} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border px-5 py-3.5 text-sm font-semibold hover:bg-secondary">
