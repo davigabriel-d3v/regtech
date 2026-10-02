@@ -429,32 +429,52 @@ function Index() {
             </a>
           </div>
 
-          {/* Fale conosco + Chave PIX */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          {/* Ações principais */}
+          <div className="mt-7 grid w-full max-w-3xl gap-3 sm:grid-cols-3">
             <button
               type="button"
               onClick={() => setModalAberto("contato")}
-              className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+              aria-label="Abrir opções de contato"
+              className="group flex min-h-16 items-center justify-center gap-3 rounded-2xl border-2 border-primary bg-primary px-5 py-4 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent hover:shadow-xl hover:shadow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
-              <MessageCircle className="h-4 w-4" />
-              Fale conosco
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-foreground/15">
+                <MessageCircle className="h-5 w-5" />
+              </span>
+              <span className="flex flex-col items-start leading-tight">
+                <span>Fale conosco</span>
+                <span className="mt-0.5 text-[11px] font-medium text-primary-foreground/75">WhatsApp e atendimento</span>
+              </span>
             </button>
+
             <button
               type="button"
               onClick={() => setModalAberto("pix")}
-              className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+              aria-label="Abrir informações da chave PIX"
+              className="group flex min-h-16 items-center justify-center gap-3 rounded-2xl border-2 border-primary bg-card px-5 py-4 text-sm font-bold text-foreground shadow-lg shadow-primary/10 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:bg-primary/10 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
-              <Landmark className="h-4 w-4" />
-              Chave PIX
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+                <Landmark className="h-5 w-5" />
+              </span>
+              <span className="flex flex-col items-start leading-tight">
+                <span>Chave PIX</span>
+                <span className="mt-0.5 text-[11px] font-medium text-muted-foreground">Ver dados para pagamento</span>
+              </span>
             </button>
+
             <a
               href={dadosPix.instagram}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+              aria-label="Abrir Instagram da RegTech"
+              className="group flex min-h-16 items-center justify-center gap-3 rounded-2xl border-2 border-primary bg-card px-5 py-4 text-sm font-bold text-foreground shadow-lg shadow-primary/10 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:bg-primary/10 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
-              <Instagram className="h-4 w-4" />
-              Instagram
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+                <Instagram className="h-5 w-5" />
+              </span>
+              <span className="flex flex-col items-start leading-tight">
+                <span>Instagram</span>
+                <span className="mt-0.5 text-[11px] font-medium text-muted-foreground">Visitar @regtechcellshop</span>
+              </span>
             </a>
           </div>
 
