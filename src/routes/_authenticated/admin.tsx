@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   Package, Users, Plus, Eye, EyeOff, Star, Pencil, Trash2, ArrowLeft, ArrowRight, ImageIcon, Loader2,
   LayoutDashboard, ShoppingBag, Boxes, Settings, Menu, X, LogOut, Inbox, Search,
-  Truck, CheckCircle2, XCircle, PackageCheck, PackageX, Activity, UserPlus, FilePen, FilePlus2, RefreshCw, Bell,
+  Truck, CheckCircle2, XCircle, PackageCheck, PackageX, Activity, UserPlus, FilePen, FilePlus2, RefreshCw, Bell, TicketPercent,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { PedidosAdmin } from "@/components/admin/PedidosAdmin";
 import { AcessoMaisAdmin } from "@/components/admin/AcessoMaisAdmin";
 import { ClientesAdmin } from "@/components/admin/ClientesAdmin";
 import { BannerPrincipalAdmin } from "@/components/admin/BannerPrincipalAdmin";
+import { CuponsAdmin } from "@/components/admin/CuponsAdmin";
 
 // Acesso + é um módulo administrativo real e deve ser renderizado pela seção acesso_plus.
 
@@ -76,7 +77,7 @@ type Pedido = {
 };
 type Atividade = { id: string; tipo: string; descricao: string; criado_em: string };
 type StatusPedido = "novo" | "analise" | "andamento" | "concluido" | "cancelado";
-type Secao = "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "acesso_plus" | "config";
+type Secao = "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "cupons" | "acesso_plus" | "config";
 type ConfiguracaoSecao = "inicio" | "banners";
 
 const statusInfo: Record<StatusPedido, { label: string; cls: string }> = {
@@ -103,6 +104,7 @@ const menu: { id: Secao; label: string; icon: typeof Activity }[] = [
   { id: "pedidos", label: "Pedidos", icon: ShoppingBag },
   { id: "clientes", label: "Clientes", icon: Users },
   { id: "estoque", label: "Estoque", icon: Boxes },
+  { id: "cupons", label: "Cupons", icon: TicketPercent },
   { id: "acesso_plus", label: "Acesso +", icon: UserPlus },
   { id: "config", label: "Configurações", icon: Settings },
 ];
@@ -494,6 +496,8 @@ function Admin() {
             <ClientesAdmin />
           ) : secao === "pedidos" ? (
             <PedidosAdmin />
+          ) : secao === "cupons" ? (
+            <CuponsAdmin />
           ) : secao === "acesso_plus" ? (
             <AcessoMaisAdmin openCreateRequest={criarAcessoRequest} />
           ) : secao === "estoque" ? (
