@@ -499,6 +499,7 @@ export function ProdutoCarrossel({
   subtitulo,
   produtos,
   onVerTodos,
+  whatsappPhone = "5594992989833",
 }: {
   titulo: string;
   subtitulo?: string;
