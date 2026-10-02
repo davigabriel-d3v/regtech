@@ -41,6 +41,8 @@ import { listarMarcas, listarProdutos, type ProdutoLoja } from "@/lib/produtos.f
 import { listarBanners } from "@/lib/banners.functions";
 import type { BannerPrincipal as BannerPrincipalData } from "@/lib/banners";
 import { whatsappComMensagem } from "@/lib/contato";
+import { listarConfiguracoesLoja } from "@/lib/loja-settings.functions";
+import { DEFAULT_LOJA_SETTINGS, type LojaSettings } from "@/lib/loja-settings";
 
 export const lojaProdutosQueryOptions = queryOptions({
   queryKey: ["loja", "produtos"],
@@ -57,6 +59,11 @@ export const lojaBannersQueryOptions = queryOptions({
   queryFn: async () => (await listarBanners().catch(() => null)) ?? [],
 });
 
+export const lojaSettingsQueryOptions = queryOptions({
+  queryKey: ["loja", "settings"],
+  queryFn: async () => (await listarConfiguracoesLoja().catch(() => null)) ?? DEFAULT_LOJA_SETTINGS,
+});
+
 
 export const Route = createFileRoute("/shop")({
   loader: async ({ context: { queryClient } }) => {
@@ -64,6 +71,7 @@ export const Route = createFileRoute("/shop")({
       queryClient.ensureQueryData(lojaProdutosQueryOptions),
       queryClient.ensureQueryData(lojaMarcasQueryOptions),
       queryClient.ensureQueryData(lojaBannersQueryOptions),
+      queryClient.ensureQueryData(lojaSettingsQueryOptions),
     ]);
   },
   head: () => ({
@@ -121,10 +129,9 @@ function Shop() {
   const { data: produtos } = useSuspenseQuery(lojaProdutosQueryOptions);
   const { data: marcas } = useSuspenseQuery(lojaMarcasQueryOptions);
   const { data: banners } = useSuspenseQuery(lojaBannersQueryOptions);
-  const ofertas = useMemo(() => {
-    const d = produtos.filter((p) => p.destaque);
-    return d.length >= 4 ? d : [...d, ...produtos.filter((p) => !p.destaque)];
-  }, [produtos]);
+  const { data: lojaSettings } = useSuspenseQuery(lojaSettingsQueryOptions);
+  const ofertas = useMemo(() => produtos.filter((p) => p.emOferta).slice(0, lojaSettings.offersLimit), [produtos, lojaSettings.offersLimit]);
+  const destaques = useMemo(() => produtos.filter((p) => p.destaque).slice(0, lojaSettings.featuredLimit), [produtos, lojaSettings.featuredLimit]);
   const maisVendidos = useMemo(() => [...produtos].sort((a, b) => b.avaliacoes - a.avaliacoes).slice(0, 10), [produtos]);
   const amar = useMemo(() => [...produtos].sort((a, b) => a.avaliacoes - b.avaliacoes).slice(0, 10), [produtos]);
   const blocos = useMemo(
@@ -219,10 +226,10 @@ function Shop() {
       <BannerPrincipal onEscolher={escolherCategoria} banners={banners as BannerPrincipalData[]} />
       <BannersSecundarios onEscolher={escolherCategoria} />
       <CompreCategoria onEscolher={escolherCategoria} />
-      <OfertasDoDia produtos={ofertas.slice(0, 4)} />
-      <ProdutoCarrossel titulo="Mais vendidos" subtitulo="Os queridinhos dos clientes RegTech" produtos={maisVendidos} />
+      {lojaSettings.offersEnabled && <OfertasDoDia produtos={ofertas} titulo={lojaSettings.offersTitle} subtitulo={lojaSettings.offersSubtitle} whatsappPhone={lojaSettings.whatsappPhone} />}
+      {lojaSettings.featuredEnabled && <ProdutoCarrossel titulo={lojaSettings.featuredTitle} subtitulo={lojaSettings.featuredSubtitle ?? undefined} produtos={destaques} whatsappPhone={lojaSettings.whatsappPhone} />}\n      <ProdutoCarrossel titulo="Mais vendidos" subtitulo="Os queridinhos dos clientes RegTech" produtos={maisVendidos} whatsappPhone={lojaSettings.whatsappPhone} />
       <Beneficios />
-      <ProdutoCarrossel titulo="Ofertas que você vai amar" produtos={amar} />
+      <ProdutoCarrossel titulo="Ofertas que você vai amar" produtos={amar} whatsappPhone={lojaSettings.whatsappPhone} />
       {blocos.map((b) =>
         b.produtos.length > 0 ? (
           <ProdutoCarrossel
@@ -230,6 +237,7 @@ function Shop() {
             titulo={b.titulo}
             produtos={b.produtos}
             onVerTodos={() => escolherCategoria(b.chave)}
+            whatsappPhone={lojaSettings.whatsappPhone}
           />
         ) : null,
       )}
@@ -318,7 +326,7 @@ function Shop() {
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {visiveis.map((produto) => (
-              <ProdutoCardLoja key={produto.id} produto={produto} />
+              <ProdutoCardLoja key={produto.id} produto={produto} whatsappPhone={lojaSettings.whatsappPhone} />
             ))}
           </div>
         )}
