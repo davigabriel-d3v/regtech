@@ -413,6 +413,66 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_banners: {
+        Row: {
+          action_type: string
+          action_value: string | null
+          active: boolean
+          autoplay_seconds: number
+          background_image_url: string | null
+          background_mobile_image_url: string | null
+          badge: string
+          button_label: string
+          created_at: string
+          display_order: number
+          icon_name: string
+          id: string
+          overlay_opacity: number
+          subtitle: string
+          text_align: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_type?: string
+          action_value?: string | null
+          active?: boolean
+          autoplay_seconds?: number
+          background_image_url?: string | null
+          background_mobile_image_url?: string | null
+          badge?: string
+          button_label?: string
+          created_at?: string
+          display_order?: number
+          icon_name?: string
+          id?: string
+          overlay_opacity?: number
+          subtitle?: string
+          text_align?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          action_value?: string | null
+          active?: boolean
+          autoplay_seconds?: number
+          background_image_url?: string | null
+          background_mobile_image_url?: string | null
+          badge?: string
+          button_label?: string
+          created_at?: string
+          display_order?: number
+          icon_name?: string
+          id?: string
+          overlay_opacity?: number
+          subtitle?: string
+          text_align?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
