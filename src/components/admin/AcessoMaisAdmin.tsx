@@ -11,7 +11,7 @@ const modules = [
   ["clientes", "Clientes"], ["estoque", "Estoque"], ["acesso_plus", "Acesso +"], ["configuracoes", "Configurações"],
 ] as const;
 
-export function AcessoMaisAdmin() {
+export function AcessoMaisAdmin({ openCreateRequest = 0 }: { openCreateRequest?: number }) {
   const [items, setItems] = useState<Access[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -21,6 +21,7 @@ export function AcessoMaisAdmin() {
   const [role, setRole] = useState<Role>("operator");
   const [permissions, setPermissions] = useState<string[]>(["dashboard", "produtos", "pedidos", "clientes", "estoque"]);
   const [editing, setEditing] = useState<Access | null>(null);
+  const [lastCreateRequest, setLastCreateRequest] = useState(0);
   const gerenciar = useServerFn(gerenciarAcesso);
   const call = async (body: any): Promise<{ data: any; error: Error | null }> => { try { return { data: await gerenciar({ data: body }), error: null }; } catch (e) { return { data: null, error: e as Error }; } };
 
@@ -32,6 +33,12 @@ export function AcessoMaisAdmin() {
     setLoading(false);
   }
   useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    if (openCreateRequest > 0 && openCreateRequest !== lastCreateRequest) {
+      setOpen(true);
+      setLastCreateRequest(openCreateRequest);
+    }
+  }, [openCreateRequest, lastCreateRequest]);
 
   function toggle(module: string) {
     setPermissions((p) => p.includes(module) ? p.filter((x) => x !== module) : [...p, module]);
