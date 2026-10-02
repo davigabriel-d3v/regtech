@@ -405,7 +405,17 @@ export function ProdutoCardLoja({ produto, whatsappPhone = "5594992989833" }: { 
       </div>
 
       <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{produto.marca}</p>
-      <h3 className="mt-1 line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug">{produto.titulo}</h3>
+      <h3 className="mt-1 line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug">
+        <a href={`/produto/${encodeURIComponent(produto.productCode)}`} className="hover:text-primary">
+          {produto.titulo}
+        </a>
+      </h3>
+      <a
+        href={`/produto/${encodeURIComponent(produto.productCode)}`}
+        className="mt-1 inline-flex text-xs font-semibold text-primary hover:underline"
+      >
+        Ver produto e compartilhar
+      </a>
       <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
         <Estrelas nota={produto.avaliacao} />
         {produto.avaliacao.toFixed(1).replace(".", ",")} ({produto.avaliacoes})
