@@ -342,27 +342,6 @@ export function CompreCategoria({ onEscolher }: { onEscolher: Escolher }) {
 }
 
 /* ---------------- Card de produto ---------------- */
-function useFavoritos() {
-  const [favs, setFavs] = useState<string[]>([]);
-  useEffect(() => {
-    try {
-      setFavs(JSON.parse(localStorage.getItem("regtech-favs") ?? "[]"));
-    } catch {
-      setFavs([]);
-    }
-    const sync = () => setFavs(JSON.parse(localStorage.getItem("regtech-favs") ?? "[]"));
-    window.addEventListener("regtech-favs", sync);
-    return () => window.removeEventListener("regtech-favs", sync);
-  }, []);
-  const alternar = (id: string) => {
-    const atual: string[] = JSON.parse(localStorage.getItem("regtech-favs") ?? "[]");
-    const novo = atual.includes(id) ? atual.filter((f) => f !== id) : [...atual, id];
-    localStorage.setItem("regtech-favs", JSON.stringify(novo));
-    window.dispatchEvent(new Event("regtech-favs"));
-  };
-  return { favs, alternar };
-}
-
 function Estrelas({ nota }: { nota: number }) {
   return (
     <span className="flex">
@@ -399,7 +378,7 @@ export function ProdutoCardLoja({ produto, whatsappPhone = "5594992989833" }: { 
         <button
           type="button"
           aria-label={fav ? "Remover dos favoritos" : "Favoritar"}
-          onClick={() => alternar(produto.id)}
+          onClick={() => void alternar(produto.id, produto)}
           className="absolute right-2 top-2 rounded-full bg-background/80 p-1.5 backdrop-blur transition-colors hover:bg-background"
         >
           <Heart className={`h-4 w-4 ${fav ? "fill-destructive text-destructive" : ""}`} />
