@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_PROJECT_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/config";
 import type { Database } from "@/integrations/supabase/types";
-import type { BannerPrincipal } from "./banners";
+import { DEFAULT_BANNERS, type BannerPrincipal } from "./banners";
 
 function createReader(): SupabaseClient<Database> {
   const configuredUrl = process.env.SUPABASE_URL;
@@ -18,7 +18,7 @@ export async function fetchBanners(): Promise<BannerPrincipal[]> {
     .eq("active", true)
     .order("display_order", { ascending: true });
 
-  if (error || !data?.length) return [];
+  if (error) return DEFAULT_BANNERS;
   return data.map((row) => ({
     id: row.id,
     title: row.title,
