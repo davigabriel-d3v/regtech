@@ -22,7 +22,7 @@ const emptyForm = {
 const pageSize = 10;
 const money = (v: number | null) => v == null ? "—" : Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-export function ProdutosAdmin() {
+export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: number }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -42,6 +42,7 @@ export function ProdutosAdmin() {
   const fileInput = useRef<HTMLInputElement>(null);
   const replaceInput = useRef<HTMLInputElement>(null);
   const [replaceTarget, setReplaceTarget] = useState<ProductImage | null>(null);
+  const [lastCreateRequest, setLastCreateRequest] = useState(0);
   const dragIndex = useRef<number | null>(null);
 
   async function load() {
@@ -71,6 +72,12 @@ export function ProdutosAdmin() {
   }
 
   useEffect(() => { load(); }, []);
+  useEffect(() => {
+    if (openCreateRequest > 0 && openCreateRequest !== lastCreateRequest) {
+      openCreate();
+      setLastCreateRequest(openCreateRequest);
+    }
+  }, [openCreateRequest, lastCreateRequest]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
