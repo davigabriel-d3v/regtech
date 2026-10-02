@@ -137,7 +137,26 @@ function Conta() {
           <ArrowLeft className="h-4 w-4" /> Voltar ao site
         </Link>
         <div className="rounded-3xl border border-border bg-card p-8">
-          <div className="flex flex-col items-center text-center sm:flex-row sm:items-center sm:text-left">\n            <div className="relative mb-4 sm:mb-0 sm:mr-5">\n              <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-background bg-secondary shadow-lg ring-2 ring-primary/20">\n                {avatarUrl ? <img src={avatarUrl} alt="Foto de perfil" className="h-full w-full object-cover" /> : <span className="text-3xl font-bold text-muted-foreground">{(nome || user.email || "U").slice(0, 1).toUpperCase()}</span>}\n              </div>\n              <label className="absolute bottom-0 right-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md hover:bg-accent">\n                <Camera className="h-4 w-4" />\n                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" disabled={uploadingAvatar} onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} />\n              </label>\n            </div>\n            <div>\n              <h1 className="font-display text-2xl font-bold text-foreground">Minha conta</h1>\n              <p className="mt-1 text-sm text-muted-foreground">{user.email}</p>\n              <p className="mt-2 text-xs text-muted-foreground">JPG, PNG, WEBP ou GIF · até 5 MB</p>\n              <div className="mt-2 flex flex-wrap justify-center gap-2 sm:justify-start">\n                {avatarFile && <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">{avatarFile.name}</span>}\n                {avatarUrl && <button type="button" onClick={() => void removerFoto()} disabled={uploadingAvatar} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs text-destructive hover:bg-secondary"><Trash2 className="h-3 w-3" /> Remover foto</button>}\n              </div>\n            </div>\n          </div>
+          <div className="flex flex-col items-center text-center sm:flex-row sm:items-center sm:text-left">
+            <div className="relative mb-4 sm:mb-0 sm:mr-5">
+              <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-background bg-secondary shadow-lg ring-2 ring-primary/20">
+                {avatarUrl ? <img src={avatarUrl} alt="Foto de perfil" className="h-full w-full object-cover" /> : <span className="text-3xl font-bold text-muted-foreground">{(nome || user.email || "U").slice(0, 1).toUpperCase()}</span>}
+              </div>
+              <label className="absolute bottom-0 right-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md hover:bg-accent">
+                <Camera className="h-4 w-4" />
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" disabled={uploadingAvatar} onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} />
+              </label>
+            </div>
+            <div>
+              <h1 className="font-display text-2xl font-bold text-foreground">Minha conta</h1>
+              <p className="mt-1 text-sm text-muted-foreground">{user.email}</p>
+              <p className="mt-2 text-xs text-muted-foreground">JPG, PNG, WEBP ou GIF · até 5 MB</p>
+              <div className="mt-2 flex flex-wrap justify-center gap-2 sm:justify-start">
+                {avatarFile && <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">{avatarFile.name}</span>}
+                {avatarUrl && <button type="button" onClick={() => void removerFoto()} disabled={uploadingAvatar} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs text-destructive hover:bg-secondary"><Trash2 className="h-3 w-3" /> Remover foto</button>}
+              </div>
+            </div>
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">{user.email}</p>
 
           <form onSubmit={salvar} className="mt-6 space-y-3">
