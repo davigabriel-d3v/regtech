@@ -220,7 +220,7 @@ begin
 
   insert into public.orders(customer_id, status, notes)
   values (v_customer_id, 'new', nullif(btrim(coalesce(p_notes, '')), ''))
-  returning id, order_number into v_order_id, v_order_number;
+  returning public.orders.id, public.orders.order_number into v_order_id, v_order_number;
 
   insert into public.order_items(
     order_id, product_id, product_code, product_name, product_image, product_sku,
