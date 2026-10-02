@@ -34,6 +34,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { whatsappComMensagem } from "@/lib/contato";
 import { SolicitarPedidoModal } from "@/components/loja/SolicitarPedidoModal";
 import type { MarcaLoja, ProdutoLoja } from "@/lib/produtos.functions";
+import { DEFAULT_BANNERS, type BannerPrincipal } from "@/lib/banners";
 
 type Icone = ComponentType<{ className?: string }>;
 type Escolher = (chave: string) => void;
@@ -95,22 +96,66 @@ export function NavCategorias({ onEscolher }: { onEscolher: Escolher }) {
 }
 
 /* ---------------- 2. Banner principal ---------------- */
-const banners: { titulo: string; sub: string; botao: string; chave: string; icone: Icone }[] = [
-  { titulo: "Ofertas que cabem no seu bolso", sub: "Os melhores produtos com condições especiais.", botao: "Ver ofertas", chave: "ofertas", icone: Tag },
-  { titulo: "Smartphones com suporte RegTech", sub: "Apple, Samsung, Xiaomi e Realme configurados para você.", botao: "Comprar agora", chave: "celulares", icone: Smartphone },
-  { titulo: "Internet Starlink onde você estiver", sub: "Instalação completa em Tucumã e Ourilândia.", botao: "Comprar agora", chave: "informatica", icone: SatelliteDish },
-  { titulo: "Mobilidade elétrica e drones", sub: "Motos elétricas e DJI com orientação especializada.", botao: "Comprar agora", chave: "eletronicos", icone: Bike },
-];
+const iconMap: Record<string, Icone> = {
+  Tag,
+  Smartphone,
+  SatelliteDish,
+  Bike,
+  Plane,
+  Tv,
+  Star,
+  Zap,
+};
 
-export function BannerPrincipal({ onEscolher }: { onEscolher: Escolher }) {
+function BannerIcon({ name }: { name: string }) {
+  const Icon = iconMap[name] ?? Tag;
+  return <Icon className="h-48 w-48 text-primary-foreground/20" />;
+}
+
+export function BannerPrincipal({
+  onEscolher,
+  banners = DEFAULT_BANNERS,
+}: {
+  onEscolher: Escolher;
+  banners?: BannerPrincipal[];
+}) {
+  const activeBanners = banners.filter((banner) => banner.active);
   const [atual, setAtual] = useState(0);
   const [pausa, setPausa] = useState(false);
+
   useEffect(() => {
-    if (pausa) return;
-    const t = setInterval(() => setAtual((a) => (a + 1) % banners.length), 5000);
-    return () => clearInterval(t);
-  }, [pausa]);
-  const mover = (d: number) => setAtual((a) => (a + d + banners.length) % banners.length);
+    if (atual >= activeBanners.length && activeBanners.length > 0) setAtual(0);
+  }, [activeBanners.length, atual]);
+
+  useEffect(() => {
+    if (pausa || activeBanners.length <= 1) return;
+    const seconds = Math.max(2, activeBanners[atual]?.autoplaySeconds ?? 5);
+    const t = setTimeout(
+      () => setAtual((index) => (index + 1) % activeBanners.length),
+      seconds * 1000,
+    );
+    return () => clearTimeout(t);
+  }, [pausa, atual, activeBanners]);
+
+  const mover = (d: number) => {
+    if (activeBanners.length <= 1) return;
+    setAtual((index) => (index + d + activeBanners.length) % activeBanners.length);
+  };
+
+  const executarAcao = (banner: BannerPrincipal) => {
+    if (banner.actionType === "none" || !banner.actionValue) return;
+    if (banner.actionType === "url") {
+      window.open(banner.actionValue, "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (banner.actionValue === "ofertas") {
+      irPara("ofertas");
+      return;
+    }
+    onEscolher(banner.actionValue);
+  };
+
+  if (activeBanners.length === 0) return null;
 
   return (
     <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
@@ -123,53 +168,102 @@ export function BannerPrincipal({ onEscolher }: { onEscolher: Escolher }) {
           className="flex transition-transform duration-700 ease-out"
           style={{ transform: `translateX(-${atual * 100}%)` }}
         >
-          {banners.map((b) => {
-            const I = b.icone;
+          {activeBanners.map((banner) => {
+            const textAlign =
+              banner.textAlign === "center"
+                ? "justify-center text-center"
+                : banner.textAlign === "right"
+                  ? "justify-end text-right"
+                  : "justify-start text-left";
             return (
               <div
-                key={b.titulo}
-                className="relative flex min-h-[260px] w-full shrink-0 items-center px-8 py-10 sm:min-h-[340px] sm:px-16"
-                style={{
-                  background:
-                    "radial-gradient(70% 120% at 85% 50%, var(--color-brand) 0%, var(--color-card) 70%)",
-                }}
+                key={banner.id}
+                className="relative flex min-h-[260px] w-full shrink-0 items-center overflow-hidden px-8 py-10 sm:min-h-[340px] sm:px-16"
               >
-                <div className="relative z-10 max-w-lg">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
-                    <Sparkles className="h-3.5 w-3.5" /> RegTech Shop
-                  </span>
-                  <h2 className="mt-4 font-display text-3xl font-bold leading-tight sm:text-5xl">{b.titulo}</h2>
-                  <p className="mt-3 text-muted-foreground sm:text-lg">{b.sub}</p>
-                  <button
-                    type="button"
-                    onClick={() => (b.chave === "ofertas" ? irPara("ofertas") : onEscolher(b.chave))}
-                    className="mt-6 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105"
-                  >
-                    {b.botao}
-                  </button>
+                {banner.backgroundImageUrl && (
+                  <div
+                    className="absolute inset-0 hidden bg-cover bg-center md:block"
+                    style={{ backgroundImage: `url(${banner.backgroundImageUrl})` }}
+                  />
+                )}
+                {banner.backgroundMobileImageUrl ? (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center md:hidden"
+                    style={{ backgroundImage: `url(${banner.backgroundMobileImageUrl})` }}
+                  />
+                ) : banner.backgroundImageUrl ? (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center md:hidden"
+                    style={{ backgroundImage: `url(${banner.backgroundImageUrl})` }}
+                  />
+                ) : null}
+                {!banner.backgroundImageUrl && (
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "radial-gradient(70% 120% at 85% 50%, var(--color-brand) 0%, var(--color-card) 70%)",
+                    }}
+                  />
+                )}
+                <div
+                  className="absolute inset-0 bg-black"
+                  style={{ opacity: Math.max(0.08, Math.min(1, banner.overlayOpacity)) }}
+                />
+                <div className={`relative z-10 flex w-full min-h-[220px] items-center ${textAlign}`}>
+                  <div className="max-w-2xl text-white">
+                    {banner.badge && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
+                        <Sparkles className="h-3.5 w-3.5" /> {banner.badge}
+                      </span>
+                    )}
+                    <h2 className="mt-4 font-display text-3xl font-bold leading-tight sm:text-5xl">
+                      {banner.title}
+                    </h2>
+                    {banner.subtitle && (
+                      <p className="mt-3 text-muted-foreground sm:text-lg">{banner.subtitle}</p>
+                    )}
+                    {banner.buttonLabel && (
+                      <button
+                        type="button"
+                        onClick={() => executarAcao(banner)}
+                        disabled={banner.actionType === "none"}
+                        className="mt-6 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 disabled:cursor-default disabled:opacity-90"
+                      >
+                        {banner.buttonLabel}
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <I className="absolute right-8 top-1/2 hidden h-48 w-48 -translate-y-1/2 text-primary-foreground/20 md:block" />
+                <div className="absolute right-8 top-1/2 hidden -translate-y-1/2 md:block">
+                  <BannerIcon name={banner.iconName} />
+                </div>
               </div>
             );
           })}
         </div>
-        <button type="button" aria-label="Anterior" onClick={() => mover(-1)} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-border bg-background/70 p-2 backdrop-blur hover:bg-secondary">
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-        <button type="button" aria-label="Próximo" onClick={() => mover(1)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-border bg-background/70 p-2 backdrop-blur hover:bg-secondary">
-          <ChevronRight className="h-5 w-5" />
-        </button>
-        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-          {banners.map((b, i) => (
-            <button
-              key={b.titulo}
-              type="button"
-              aria-label={`Banner ${i + 1}`}
-              onClick={() => setAtual(i)}
-              className={`h-2 rounded-full transition-all ${i === atual ? "w-6 bg-primary" : "w-2 bg-muted-foreground/50"}`}
-            />
-          ))}
-        </div>
+
+        {activeBanners.length > 1 && (
+          <>
+            <button type="button" aria-label="Anterior" onClick={() => mover(-1)} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-border bg-background/70 p-2 backdrop-blur hover:bg-secondary">
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button type="button" aria-label="Próximo" onClick={() => mover(1)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-border bg-background/70 p-2 backdrop-blur hover:bg-secondary">
+              <ChevronRight className="h-5 w-5" />
+            </button>
+            <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+              {activeBanners.map((banner, i) => (
+                <button
+                  key={banner.id}
+                  type="button"
+                  aria-label={`Banner ${i + 1}`}
+                  onClick={() => setAtual(i)}
+                  className={`h-2 rounded-full transition-all ${i === atual ? "w-6 bg-primary" : "w-2 bg-muted-foreground/50"}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
