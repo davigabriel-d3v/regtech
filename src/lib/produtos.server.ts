@@ -16,6 +16,7 @@ export type ProdutoLoja = {
   preco: number | null;
   emEstoque: boolean;
   destaque: boolean;
+  emOferta: boolean;
   imagemUrl: string | null;
   precoAntigo: number | null;
   avaliacao: number;
@@ -44,6 +45,8 @@ type ProductRow = {
   sku: string | null;
   variations: Record<string, unknown> | null;
   created_at: string;
+  catalog_featured: boolean;
+  catalog_order: number;
 };
 
 type CategoryRow = { id: string; name: string };
@@ -81,7 +84,7 @@ export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> 
   const { data: productData, error: productError } = await client
     .from("products")
     .select(
-      "id,product_code,name,description,category_id,brand_id,price,promotional_price,stock,status,sku,variations,created_at",
+      "id,product_code,name,description,category_id,brand_id,price,promotional_price,stock,status,sku,variations,created_at,catalog_featured,catalog_order",
     )
     .eq("status", "active")
     .order("created_at", { ascending: false });
@@ -163,7 +166,8 @@ export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> 
           ? Number(currentPrice)
           : null,
         emEstoque: Number(row.stock) > 0,
-        destaque: row.promotional_price != null,
+        destaque: row.catalog_featured,
+        emOferta: row.promotional_price != null,
         imagemUrl: primary?.image_url ?? null,
         precoAntigo:
           row.promotional_price != null ? Number(row.price) : null,
