@@ -38,7 +38,7 @@ import {
 import logo from "@/assets/regtech-logo.png";
 import { listarMarcas, listarProdutos, type ProdutoLoja } from "@/lib/produtos.functions";
 import { listarBanners } from "@/lib/banners.functions";
-import type { BannerPrincipal } from "@/lib/banners";
+import type { BannerPrincipal as BannerPrincipalData } from "@/lib/banners";
 import { whatsappComMensagem } from "@/lib/contato";
 
 export const lojaProdutosQueryOptions = queryOptions({
@@ -215,7 +215,7 @@ function Shop() {
       </header>
 
       <NavCategorias onEscolher={escolherCategoria} />
-      <BannerPrincipal onEscolher={escolherCategoria} banners={banners as BannerPrincipal[]} />
+      <BannerPrincipal onEscolher={escolherCategoria} banners={banners as BannerPrincipalData[]} />
       <BannersSecundarios onEscolher={escolherCategoria} />
       <CompreCategoria onEscolher={escolherCategoria} />
       <OfertasDoDia produtos={ofertas.slice(0, 4)} />
