@@ -38,6 +38,89 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          id: string
+          max_redemptions: number | null
+          max_redemptions_per_identifier: number
+          name: string
+          resettable: boolean
+          reward_text: string | null
+          reward_type: string
+          reward_value: number
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          max_redemptions?: number | null
+          max_redemptions_per_identifier?: number
+          name: string
+          resettable?: boolean
+          reward_text?: string | null
+          reward_type?: string
+          reward_value?: number
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          max_redemptions?: number | null
+          max_redemptions_per_identifier?: number
+          name?: string
+          resettable?: boolean
+          reward_text?: string | null
+          reward_type?: string
+          reward_value?: number
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      coupon_redemptions: {
+        Row: {
+          coupon_id: string
+          id: string
+          identifier: string
+          redeemed_at: string
+        }
+        Insert: {
+          coupon_id: string
+          id?: string
+          identifier: string
+          redeemed_at?: string
+        }
+        Update: {
+          coupon_id?: string
+          id?: string
+          identifier?: string
+          redeemed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           created_at: string
