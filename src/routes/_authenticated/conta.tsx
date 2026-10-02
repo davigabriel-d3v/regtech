@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Camera, LogOut, ShieldCheck, Store, Trash2 } from "lucide-react";
+import { ArrowLeft, Bell, Camera, Heart, LogOut, Package, ShieldCheck, Store, Trash2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useFavoritos } from "@/hooks/useFavoritos";
 
 export const Route = createFileRoute("/_authenticated/conta")({
   head: () => ({
@@ -33,6 +34,9 @@ function Conta() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [orders, setOrders] = useState<Array<{ id: string; order_number: number; status: string; created_at: string }>>([]);
+  const [notifications, setNotifications] = useState<Array<{ id: string; title: string; message: string; type: string; read_at: string | null; created_at: string }>>([]);
+  const { favs } = useFavoritos();
 
   useEffect(() => {
     supabase.from("profiles").select("nome, whatsapp, avatar_url").eq("id", user.id).maybeSingle().then(({ data }) => {
@@ -43,6 +47,27 @@ function Conta() {
       }
     });
   }, [user.id]);
+
+  useEffect(() => {
+    let ativo = true;
+    Promise.all([
+      supabase.from("orders").select("id,order_number,status,created_at").order("created_at", { ascending: false }).limit(8),
+      (supabase as any).from("user_notifications").select("id,title,message,type,read_at,created_at").order("created_at", { ascending: false }).limit(8),
+    ]).then(([ordersResult, notificationsResult]) => {
+      if (!ativo) return;
+      setOrders((ordersResult.data ?? []) as typeof orders);
+      setNotifications((notificationsResult.data ?? []) as typeof notifications);
+    });
+    return () => { ativo = false; };
+  }, [user.id]);
+
+  const unreadCount = useMemo(() => notifications.filter((n) => !n.read_at).length, [notifications]);
+
+  async function marcarNotificacao(id: string) {
+    const now = new Date().toISOString();
+    const { error } = await (supabase as any).from("user_notifications").update({ read_at: now }).eq("id", id).eq("user_id", user.id);
+    if (!error) setNotifications((items) => items.map((item) => item.id === id ? { ...item, read_at: now } : item));
+  }
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
@@ -120,6 +145,28 @@ function Conta() {
             <input className={campo} placeholder="WhatsApp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} maxLength={20} />
             <button disabled={uploadingAvatar} className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:bg-accent disabled:opacity-60">{uploadingAvatar ? "Salvando..." : "Salvar dados"}</button>
           </form>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-border bg-secondary/20 p-4"><div className="flex items-center gap-2 text-primary"><Package className="h-4 w-4" /><span className="text-xs font-semibold uppercase">Pedidos</span></div><p className="mt-2 text-2xl font-bold">{orders.length}</p><p className="text-xs text-muted-foreground">últimos pedidos</p></div>
+            <div className="rounded-2xl border border-border bg-secondary/20 p-4"><div className="flex items-center gap-2 text-primary"><Heart className="h-4 w-4" /><span className="text-xs font-semibold uppercase">Favoritos</span></div><p className="mt-2 text-2xl font-bold">{favs.length}</p><p className="text-xs text-muted-foreground">produtos salvos</p></div>
+            <div className="rounded-2xl border border-border bg-secondary/20 p-4"><div className="flex items-center gap-2 text-primary"><Bell className="h-4 w-4" /><span className="text-xs font-semibold uppercase">Notificações</span></div><p className="mt-2 text-2xl font-bold">{unreadCount}</p><p className="text-xs text-muted-foreground">não lidas</p></div>
+          </div>
+
+          <section className="mt-8 rounded-2xl border border-border p-5">
+            <h2 className="font-display text-lg font-bold">Meus pedidos</h2><p className="text-xs text-muted-foreground">Acompanhe seus pedidos recentes.</p>
+            <div className="mt-4 space-y-2">{orders.length ? orders.map((order) => (
+              <div key={order.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-secondary/30 px-4 py-3"><div><p className="text-sm font-semibold">PED-{String(order.order_number).padStart(6, "0")}</p><p className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleDateString("pt-BR")}</p></div><span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{order.status}</span></div>
+            )) : <p className="py-4 text-sm text-muted-foreground">Você ainda não possui pedidos vinculados a este e-mail.</p>}</div>
+          </section>
+
+          <section className="mt-5 rounded-2xl border border-border p-5">
+            <div className="flex items-center gap-2"><Bell className="h-5 w-5 text-primary" /><h2 className="font-display text-lg font-bold">Notificações</h2></div>
+            <div className="mt-4 space-y-2">{notifications.length ? notifications.map((item) => (
+              <button key={item.id} type="button" onClick={() => !item.read_at && void marcarNotificacao(item.id)} className={`w-full rounded-xl border p-4 text-left transition-colors hover:bg-secondary/40 ${item.read_at ? "border-border" : "border-primary/40 bg-primary/5"}`}>
+                <div className="flex items-start gap-3"><CheckCircle2 className={`mt-0.5 h-4 w-4 ${item.read_at ? "text-muted-foreground" : "text-primary"}`} /><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{item.title}</p><p className="mt-1 text-xs text-muted-foreground">{item.message}</p><p className="mt-1 text-[11px] text-muted-foreground">{new Date(item.created_at).toLocaleString("pt-BR")}</p></div></div>
+              </button>
+            )) : <p className="py-4 text-sm text-muted-foreground">Nenhuma notificação por enquanto.</p>}</div>
+          </section>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <Link to="/shop" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm text-foreground hover:bg-secondary">
