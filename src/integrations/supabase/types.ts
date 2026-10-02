@@ -406,6 +406,8 @@ export type Database = {
           brand_id: string | null
           category_id: string | null
           created_at: string
+          catalog_featured: boolean
+          catalog_order: number
           description: string | null
           id: string
           minimum_stock: number
@@ -425,6 +427,8 @@ export type Database = {
           brand_id?: string | null
           category_id?: string | null
           created_at?: string
+          catalog_featured?: boolean
+          catalog_order?: number
           description?: string | null
           id?: string
           minimum_stock?: number
@@ -444,6 +448,8 @@ export type Database = {
           brand_id?: string | null
           category_id?: string | null
           created_at?: string
+          catalog_featured?: boolean
+          catalog_order?: number
           description?: string | null
           id?: string
           minimum_stock?: number
@@ -552,6 +558,48 @@ export type Database = {
           subtitle?: string
           text_align?: string
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shop_settings: {
+        Row: {
+          id: string
+          whatsapp_phone: string
+          offers_enabled: boolean
+          offers_title: string
+          offers_subtitle: string | null
+          offers_limit: number
+          featured_enabled: boolean
+          featured_title: string
+          featured_subtitle: string | null
+          featured_limit: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          whatsapp_phone?: string
+          offers_enabled?: boolean
+          offers_title?: string
+          offers_subtitle?: string | null
+          offers_limit?: number
+          featured_enabled?: boolean
+          featured_title?: string
+          featured_subtitle?: string | null
+          featured_limit?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          whatsapp_phone?: string
+          offers_enabled?: boolean
+          offers_title?: string
+          offers_subtitle?: string | null
+          offers_limit?: number
+          featured_enabled?: boolean
+          featured_title?: string
+          featured_subtitle?: string | null
+          featured_limit?: number
           updated_at?: string
         }
         Relationships: []
