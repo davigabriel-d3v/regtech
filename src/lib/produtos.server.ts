@@ -1,6 +1,8 @@
-// Server-only helpers for the RegTech store catalogue.
-// Read-only: uses the publishable backend key so row-level security still applies.
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  SUPABASE_PROJECT_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+} from "@/integrations/supabase/config";
 import type { Database } from "@/integrations/supabase/types";
 
 export type ProdutoLoja = {
@@ -22,108 +24,208 @@ export type ProdutoLoja = {
   variations: Record<string, string[]> | null;
 };
 
-export type MarcaLoja = { id: string; nome: string; logoUrl: string | null };
+export type MarcaLoja = {
+  id: string;
+  nome: string;
+  logoUrl: string | null;
+};
 
-
-type ProdutoCatalogoRow = {
+type ProductRow = {
   id: string;
   product_code: string;
   name: string;
   description: string | null;
+  category_id: string | null;
+  brand_id: string | null;
   price: number;
   promotional_price: number | null;
   stock: number;
   status: "active" | "inactive";
   sku: string | null;
   variations: Record<string, unknown> | null;
-  product_categories: { name: string } | { name: string }[] | null;
-  marcas: { nome: string } | { nome: string }[] | null;
-  product_images: Array<{ image_url: string; is_primary: boolean; display_order: number }>;
+  created_at: string;
 };
 
-export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> {
-  const supabase = createReader();
+type CategoryRow = { id: string; name: string };
+type BrandRow = { id: string; nome: string };
+type ImageRow = {
+  product_id: string;
+  image_url: string;
+  is_primary: boolean;
+  display_order: number;
+};
 
-  let query = supabase
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+function normalizeVariations(
+  value: Record<string, unknown> | null,
+): Record<string, string[]> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const result = Object.fromEntries(
+    Object.entries(value)
+      .filter(([, raw]) => Array.isArray(raw))
+      .map(([key, raw]) => [key, (raw as unknown[]).map(String)]),
+  );
+  return Object.keys(result).length ? result : null;
+}
+
+export async function fetchProdutos(categoria?: string): Promise<ProdutoLoja[]> {
+  const client = createReader();
+
+  const { data: productData, error: productError } = await client
     .from("products")
-    .select("id, product_code, name, description, price, promotional_price, stock, status, variations, created_at, product_categories(name), marcas(nome), product_images(image_url,is_primary,display_order)")
+    .select(
+      "id,product_code,name,description,category_id,brand_id,price,promotional_price,stock,status,sku,variations,created_at",
+    )
     .eq("status", "active")
     .order("created_at", { ascending: false });
 
-  const { data, error } = await comRetentativa(() => query);
-  if (error) {
-    console.error("[loja] falha ao carregar produtos:", error.message);
+  if (productError) {
+    console.error("[loja] falha ao carregar produtos:", productError.message);
     return [];
   }
 
-  const rows = (data ?? []) as unknown as ProdutoCatalogoRow[];
-  const toSlug = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const [categoriesResult, brandsResult, imagesResult] = await Promise.all([
+    client.from("product_categories").select("id,name"),
+    client.from("marcas").select("id,nome").eq("ativo", true),
+    client
+      .from("product_images")
+      .select("product_id,image_url,is_primary,display_order")
+      .order("display_order"),
+  ]);
 
-  return rows
+  if (categoriesResult.error) {
+    console.error(
+      "[loja] falha ao carregar categorias:",
+      categoriesResult.error.message,
+    );
+  }
+  if (brandsResult.error) {
+    console.error(
+      "[loja] falha ao carregar marcas:",
+      brandsResult.error.message,
+    );
+  }
+  if (imagesResult.error) {
+    console.error(
+      "[loja] falha ao carregar imagens:",
+      imagesResult.error.message,
+    );
+  }
+
+  const categories = new Map(
+    ((categoriesResult.data ?? []) as CategoryRow[]).map((row) => [
+      row.id,
+      row.name,
+    ]),
+  );
+  const brands = new Map(
+    ((brandsResult.data ?? []) as BrandRow[]).map((row) => [
+      row.id,
+      row.nome,
+    ]),
+  );
+
+  const imagesByProduct = new Map<string, ImageRow[]>();
+  for (const image of (imagesResult.data ?? []) as ImageRow[]) {
+    const list = imagesByProduct.get(image.product_id) ?? [];
+    list.push(image);
+    imagesByProduct.set(image.product_id, list);
+  }
+
+  return ((productData ?? []) as ProductRow[])
     .map((row) => {
-      const category = Array.isArray(row.product_categories) ? row.product_categories[0] : row.product_categories;
-      const brand = Array.isArray(row.marcas) ? row.marcas[0] : row.marcas;
-      const images = Array.isArray(row.product_images) ? row.product_images : [];
-      const primary = [...images].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order)[0];
-      const variations = row.variations && typeof row.variations === "object" && !Array.isArray(row.variations)
-        ? Object.fromEntries(Object.entries(row.variations).filter(([, value]) => Array.isArray(value)).map(([key, value]) => [key, (value as unknown[]).map(String)]))
-        : null;
+      const categoryName = categories.get(row.category_id ?? "") ?? "Outros";
+      const brandName = brands.get(row.brand_id ?? "") ?? "RegTech";
+      const images = imagesByProduct.get(row.id) ?? [];
+      const primary = [...images].sort(
+        (a, b) =>
+          Number(b.is_primary) - Number(a.is_primary) ||
+          a.display_order - b.display_order,
+      )[0];
       const currentPrice = row.promotional_price ?? row.price;
+
       return {
         id: row.id,
         productCode: row.product_code,
         slug: row.product_code,
         titulo: row.name,
-        marca: brand?.nome ?? "RegTech",
-        categoria: toSlug(category?.name ?? "outros"),
+        marca: brandName,
+        categoria: slugify(categoryName),
         descricao: row.description ?? "",
-        preco: currentPrice == null ? null : Number(currentPrice),
+        preco: Number.isFinite(Number(currentPrice))
+          ? Number(currentPrice)
+          : null,
         emEstoque: Number(row.stock) > 0,
-        destaque: false,
+        destaque: row.promotional_price != null,
         imagemUrl: primary?.image_url ?? null,
-        precoAntigo: row.promotional_price != null ? Number(row.price) : null,
+        precoAntigo:
+          row.promotional_price != null ? Number(row.price) : null,
         avaliacao: 0,
         avaliacoes: 0,
         sku: row.sku ?? null,
-        variations,
+        variations: normalizeVariations(row.variations),
       } satisfies ProdutoLoja;
     })
     .filter((row) => !categoria || row.categoria === categoria);
 }
 
-
-
-
 export async function fetchMarcas(): Promise<MarcaLoja[]> {
   const { data, error } = await comRetentativa(() =>
     createReader()
       .from("marcas")
-      .select("id, nome, logo_url")
+      .select("id,nome,logo_url")
       .eq("ativo", true)
       .order("ordem", { ascending: true }),
   );
+
   if (error) {
     console.error("[loja] falha ao carregar marcas:", error.message);
     return [];
   }
-  return (data ?? []).map((m) => ({ id: m.id, nome: m.nome, logoUrl: m.logo_url }));
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    nome: row.nome,
+    logoUrl: row.logo_url,
+  }));
 }
 
-// Temporary clock drift on the backend ("JWT issued at future") resolves in a
-// second or two, so retry a few times before giving up.
 async function comRetentativa<T extends { error: { message: string } | null }>(
   fn: () => PromiseLike<T>,
 ): Promise<T> {
-  let r = await fn();
-  for (let i = 0; i < 3 && r.error && /future|JWT/i.test(r.error.message); i++) {
-    await new Promise((res) => setTimeout(res, 1000));
-    r = await fn();
+  let result = await fn();
+  for (
+    let attempt = 0;
+    attempt < 3 && result.error && /future|JWT/i.test(result.error.message);
+    attempt++
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    result = await fn();
   }
-  return r;
+  return result;
 }
 
 function createReader(): SupabaseClient<Database> {
-  return createClient<Database>(process.env['SUPABASE_URL']!, process.env['SUPABASE_PUBLISHABLE_KEY']!, {
+  const configuredUrl = process.env.SUPABASE_URL;
+  const configuredKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+
+  const url =
+    configuredUrl === SUPABASE_PROJECT_URL
+      ? configuredUrl
+      : SUPABASE_PROJECT_URL;
+  const key =
+    configuredKey === SUPABASE_PUBLISHABLE_KEY
+      ? configuredKey
+      : SUPABASE_PUBLISHABLE_KEY;
+
+  return createClient<Database>(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
