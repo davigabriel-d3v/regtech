@@ -824,13 +824,18 @@ function Index() {
             <MapPin className="h-4 w-4" />
             Tucumã-PA / Ourilândia-PA · Referência em Tecnologia há +14 anos
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:justify-end">
-            <Link to="/termos" className="text-muted-foreground hover:text-foreground hover:underline">Termos de Uso</Link>
+          <div className="flex flex-col items-center gap-3 sm:items-end">
+            <a href="https://www.instagram.com/_davhz.xn/" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground transition-colors hover:text-foreground hover:underline">
+              By @_davhz.xn
+            </a>
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:justify-end">
+              <Link to="/termos" className="text-muted-foreground hover:text-foreground hover:underline">Termos de Uso</Link>
             <Link to="/privacidade" className="text-muted-foreground hover:text-foreground hover:underline">Privacidade</Link>
             <Link to="/cookies" className="text-muted-foreground hover:text-foreground hover:underline">Cookies</Link>
-            <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} RegTech. Todos os direitos reservados.
-            </p>
+              <p className="text-xs text-muted-foreground">
+                © {new Date().getFullYear()} RegTech. Todos os direitos reservados.
+              </p>
+            </div>
           </div>
         </div>
       </footer>
