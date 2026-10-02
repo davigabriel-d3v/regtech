@@ -134,6 +134,7 @@ function Admin() {
     return () => data.subscription.unsubscribe();
   }, [navigate]);
   const [secao, setSecao] = useState<Secao>("dashboard");
+  const [criarAcessoRequest, setCriarAcessoRequest] = useState(0);
   const [menuAberto, setMenuAberto] = useState(false);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [clientes, setClientes] = useState<any[]>([]);
@@ -286,6 +287,11 @@ function Admin() {
     ir("produtos");
   }
 
+  function novoAcesso() {
+    setCriarAcessoRequest((request) => request + 1);
+    ir("acesso_plus");
+  }
+
   const conta = (s: StatusPedido) => pedidos.filter((p) => p.status === s).length;
   const cards = [
     { l: "Novos pedidos", v: conta("novo"), i: Inbox },
@@ -407,9 +413,10 @@ function Admin() {
                 </button>
               )}
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                 {[
                   { l: "Cadastrar produto", i: Plus, f: novo },
+                  { l: "Criar Acesso", i: UserPlus, f: novoAcesso },
                   { l: "Ver pedidos", i: ShoppingBag, f: () => ir("pedidos") },
                   { l: "Ver clientes", i: Users, f: () => ir("clientes") },
                   { l: "Ver produtos", i: Package, f: () => ir("produtos") },
@@ -486,7 +493,7 @@ function Admin() {
           ) : secao === "pedidos" ? (
             <PedidosAdmin />
           ) : secao === "acesso_plus" ? (
-            <AcessoMaisAdmin />
+            <AcessoMaisAdmin openCreateRequest={criarAcessoRequest} />
           ) : secao === "estoque" ? (
             <div className="rounded-2xl border border-border bg-card p-8">
               <h2 className="font-display text-xl font-bold text-foreground">Estoque</h2>
