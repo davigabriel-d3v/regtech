@@ -150,30 +150,129 @@ function Admin() {
 
   async function carregar() {
     setCarregando(true);
-    const [p, pe] = await Promise.all([
-      supabase.from("products").select("id,product_code,name,description,price,promotional_price,stock,status,created_at,marcas(nome),product_categories(name),product_images(image_url,is_primary,display_order)").order("created_at", { ascending: false }),
-      supabase.from("orders").select("id,order_number,status,created_at,customers(name),order_items(product_id,product_name,product_code)").order("created_at", { ascending: false }),
-    ]);
-    const statusMap: Record<string, StatusPedido> = { new: "novo", review: "analise", in_progress: "andamento", completed: "concluido", cancelled: "cancelado" };
-    const pedidosNovos = (pe.data ?? []).map((row: any) => {
-      const customer = Array.isArray(row.customers) ? row.customers[0] : row.customers;
-      const item = Array.isArray(row.order_items) ? row.order_items[0] : row.order_items;
-      return { id: row.id, numero: row.order_number, cliente_nome: customer?.name ?? "—", produto_id: item?.product_id ?? null, produto_codigo: item?.product_code ?? null, produto_titulo: item?.product_name ?? "—", status: statusMap[row.status] ?? "novo", criado_em: row.created_at } satisfies Pedido;
-    });
-    if (p.error) { toast.error("Não foi possível carregar os produtos: " + p.error.message); setProdutos([]); }
-    else {
-      setProdutos((p.data ?? []).map((row: any) => {
-        const brand = Array.isArray(row.marcas) ? row.marcas[0] : row.marcas;
-        const category = Array.isArray(row.product_categories) ? row.product_categories[0] : row.product_categories;
-        const images = Array.isArray(row.product_images) ? row.product_images : [];
-        const primary = [...images].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order)[0];
-        return { id: row.id, titulo: row.name, marca: brand?.nome ?? "—", categoria: category?.name ?? "Outros", descricao: row.description, preco: row.promotional_price ?? row.price, imagem_url: primary?.image_url ?? null, em_estoque: Number(row.stock) > 0, destaque: false, publicado: row.status === "active", ordem: 0, criado_em: row.created_at } satisfies Produto;
-      }));
-    }
-    if (pe.error) { toast.error("Não foi possível carregar os pedidos: " + pe.error.message); setPedidos([]); } else setPedidos(pedidosNovos);
-    setClientes([]); setAtividades([]); setCarregando(false); qc.invalidateQueries({ queryKey: ["loja"] });
-  }
 
+    const canProducts =
+      isAdmin || (isOperator && (permissions.includes("produtos") || permissions.includes("dashboard")));
+    const canOrders =
+      isAdmin || (isOperator && (permissions.includes("pedidos") || permissions.includes("dashboard")));
+
+    const [productsResult, imagesResult, categoriesResult, brandsResult, ordersResult, customersResult, itemsResult] =
+      await Promise.all([
+        canProducts
+          ? supabase
+              .from("products")
+              .select("id,product_code,name,description,price,promotional_price,stock,status,created_at,brand_id,category_id")
+              .order("created_at", { ascending: false })
+          : Promise.resolve({ data: [], error: null }),
+        canProducts
+          ? supabase.from("product_images").select("product_id,image_url,is_primary,display_order").order("display_order")
+          : Promise.resolve({ data: [], error: null }),
+        canProducts
+          ? supabase.from("product_categories").select("id,name")
+          : Promise.resolve({ data: [], error: null }),
+        canProducts
+          ? supabase.from("marcas").select("id,nome")
+          : Promise.resolve({ data: [], error: null }),
+        canOrders
+          ? supabase
+              .from("orders")
+              .select("id,order_number,status,created_at,customer_id")
+              .order("created_at", { ascending: false })
+          : Promise.resolve({ data: [], error: null }),
+        canOrders
+          ? supabase.from("customers").select("id,name")
+          : Promise.resolve({ data: [], error: null }),
+        canOrders
+          ? supabase
+              .from("order_items")
+              .select("order_id,product_id,product_code,product_name")
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+
+    const productsById = new Map((productsResult.data ?? []).map((p: any) => [p.id, p]));
+    const imagesByProduct = new Map<string, any[]>();
+    for (const image of (imagesResult.data ?? []) as any[]) {
+      const list = imagesByProduct.get(image.product_id) ?? [];
+      list.push(image);
+      imagesByProduct.set(image.product_id, list);
+    }
+    const categoriesById = new Map((categoriesResult.data ?? []).map((c: any) => [c.id, c.name]));
+    const brandsById = new Map((brandsResult.data ?? []).map((b: any) => [b.id, b.nome]));
+
+    const statusMap: Record<string, StatusPedido> = {
+      new: "novo",
+      review: "analise",
+      in_progress: "andamento",
+      completed: "concluido",
+      cancelled: "cancelado",
+    };
+
+    setProdutos(
+      (productsResult.data ?? []).map((row: any) => {
+        const images = imagesByProduct.get(row.id) ?? [];
+        const primary = [...images].sort(
+          (a, b) =>
+            Number(b.is_primary) - Number(a.is_primary) ||
+            a.display_order - b.display_order,
+        )[0];
+        return {
+          id: row.id,
+          titulo: row.name,
+          marca: brandsById.get(row.brand_id) ?? "—",
+          categoria: categoriesById.get(row.category_id) ?? "Outros",
+          descricao: row.description,
+          preco: row.promotional_price ?? row.price,
+          imagem_url: primary?.image_url ?? null,
+          em_estoque: Number(row.stock) > 0,
+          destaque: row.promotional_price != null,
+          publicado: row.status === "active",
+          ordem: 0,
+          criado_em: row.created_at,
+        } satisfies Produto;
+      }),
+    );
+
+    const customersById = new Map(
+      (customersResult.data ?? []).map((customer: any) => [customer.id, customer.name]),
+    );
+    const itemsByOrder = new Map<string, any>();
+    for (const item of (itemsResult.data ?? []) as any[]) {
+      if (!itemsByOrder.has(item.order_id)) itemsByOrder.set(item.order_id, item);
+    }
+
+    setPedidos(
+      (ordersResult.data ?? []).map((row: any) => {
+        const item = itemsByOrder.get(row.id);
+        return {
+          id: row.id,
+          numero: row.order_number,
+          cliente_nome: customersById.get(row.customer_id) ?? "—",
+          produto_id: item?.product_id ?? null,
+          produto_codigo: item?.product_code ?? null,
+          produto_titulo: item?.product_name ?? "—",
+          status: statusMap[row.status] ?? "novo",
+          criado_em: row.created_at,
+        } satisfies Pedido;
+      }),
+    );
+
+    const errors = [
+      productsResult.error ? `produtos: ${productsResult.error.message}` : null,
+      imagesResult.error ? `imagens: ${imagesResult.error.message}` : null,
+      categoriesResult.error ? `categorias: ${categoriesResult.error.message}` : null,
+      brandsResult.error ? `marcas: ${brandsResult.error.message}` : null,
+      ordersResult.error ? `pedidos: ${ordersResult.error.message}` : null,
+      customersResult.error ? `clientes: ${customersResult.error.message}` : null,
+      itemsResult.error ? `itens: ${itemsResult.error.message}` : null,
+    ].filter(Boolean);
+
+    if (errors.length) toast.error(`Alguns dados não puderam ser carregados: ${errors.join(" · ")}`);
+
+    setClientes([]);
+    setAtividades([]);
+    setCarregando(false);
+    void qc.invalidateQueries({ queryKey: ["loja"] });
+  }
   useEffect(() => { void carregar(); }, [user.id]);
   useEffect(() => {
     const channel = supabase.channel("admin-dashboard-orders")
