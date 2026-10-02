@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useCallback, useMemo, useReducer } from "react";
+import { createContext, useContext, useCallback, useEffect, useMemo, useReducer } from "react";
 import { ProdutoLoja } from "@/lib/produtos.functions";
 import { toast } from "sonner";
 
@@ -76,6 +76,34 @@ const CarrinhoContext = createContext<CarrinhoContextType | null>(null);
 
 export function CarrinhoProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(carrinhoReducer, { itens: [], aberto: false });
+
+  useEffect(() => {
+    try {
+      const salvo = localStorage.getItem("regtech-cart");
+      if (!salvo) return;
+      const itens = JSON.parse(salvo) as ItemCarrinho[];
+      if (Array.isArray(itens)) {
+        for (const item of itens) {
+          if (item?.produto?.id && item.quantidade > 0) {
+            dispatch({ type: "ADICIONAR", produto: item.produto });
+            for (let i = 1; i < item.quantidade; i += 1) {
+              dispatch({ type: "ADICIONAR", produto: item.produto });
+            }
+          }
+        }
+      }
+    } catch {
+      localStorage.removeItem("regtech-cart");
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("regtech-cart", JSON.stringify(state.itens));
+    } catch {
+      // O carrinho continua funcionando em memória se o armazenamento estiver indisponível.
+    }
+  }, [state.itens]);
 
   const adicionar = useCallback((produto: ProdutoLoja) => {
     dispatch({ type: "ADICIONAR", produto });
