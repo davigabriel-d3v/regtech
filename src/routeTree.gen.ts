@@ -72,6 +72,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
+  '/carrinho': typeof CarrinhoRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/conta': typeof AuthenticatedContaRoute
 }
@@ -98,6 +99,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/shop'
+    | '/carrinho'
     | '/_authenticated/admin'
     | '/_authenticated/conta'
   fileRoutesById: FileRoutesById
@@ -146,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrinho': {
+      id: '/carrinho'
+      path: '/carrinho'
+      fullPath: '/carrinho'
+      preLoaderRoute: typeof CarrinhoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
