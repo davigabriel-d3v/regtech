@@ -119,7 +119,7 @@ export function BannerPrincipal({
   onEscolher: Escolher;
   banners?: BannerPrincipal[];
 }) {
-  const activeBanners = banners.filter((banner) => banner.active);
+  const activeBanners = (banners.length ? banners : DEFAULT_BANNERS).filter((banner) => banner.active);
   const [atual, setAtual] = useState(0);
   const [pausa, setPausa] = useState(false);
 
