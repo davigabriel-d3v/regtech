@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Package, Users, Plus, Eye, EyeOff, Star, Pencil, Trash2, ArrowLeft, Loader2,
+  Package, Users, Plus, Eye, EyeOff, Star, Pencil, Trash2, ArrowLeft, ArrowRight, ImageIcon, Loader2,
   LayoutDashboard, ShoppingBag, Boxes, Settings, Menu, X, LogOut, Inbox, Search,
   Truck, CheckCircle2, XCircle, PackageCheck, PackageX, Activity, UserPlus, FilePen, FilePlus2, RefreshCw, Bell,
 } from "lucide-react";
@@ -77,6 +77,7 @@ type Pedido = {
 type Atividade = { id: string; tipo: string; descricao: string; criado_em: string };
 type StatusPedido = "novo" | "analise" | "andamento" | "concluido" | "cancelado";
 type Secao = "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "acesso_plus" | "config";
+type ConfiguracaoSecao = "inicio" | "banners";
 
 const statusInfo: Record<StatusPedido, { label: string; cls: string }> = {
   novo: { label: "Novo", cls: "bg-primary/15 text-primary" },
@@ -137,6 +138,7 @@ function Admin() {
   const [secao, setSecao] = useState<Secao>("dashboard");
   const [criarAcessoRequest, setCriarAcessoRequest] = useState(0);
   const [criarProdutoRequest, setCriarProdutoRequest] = useState(0);
+  const [configuracaoSecao, setConfiguracaoSecao] = useState<ConfiguracaoSecao>("inicio");
   const [menuAberto, setMenuAberto] = useState(false);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [clientes, setClientes] = useState<any[]>([]);
@@ -284,7 +286,7 @@ function Admin() {
     return () => { void supabase.removeChannel(channel); };
   }, [user.id]);
 
-  function ir(s: Secao) { setSecao(s); setMenuAberto(false); }
+  function ir(s: Secao) { setSecao(s); setMenuAberto(false); if (s !== "config") setConfiguracaoSecao("inicio"); }
   function novo() {
     setCriarProdutoRequest((request) => request + 1);
     ir("produtos");
@@ -500,13 +502,66 @@ function Admin() {
               <p className="mt-2 text-sm text-muted-foreground">O controle de estoque está disponível nesta área.</p>
             </div>
           ) : secao === "config" ? (
-            <div className="space-y-6">
-              <div>
-                <h2 className="font-display text-2xl font-bold text-foreground">Configurações</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Personalize a experiência da loja sem precisar alterar o código.</p>
+            configuracaoSecao === "banners" ? (
+              <div className="space-y-5">
+                <button
+                  type="button"
+                  onClick={() => setConfiguracaoSecao("inicio")}
+                  className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Voltar para Configurações
+                </button>
+                <BannerPrincipalAdmin />
               </div>
-              <BannerPrincipalAdmin />
-            </div>
+            ) : (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="font-display text-2xl font-bold text-foreground">Configurações</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Organize e personalize a loja por áreas. Escolha uma configuração para abrir o painel correspondente.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={() => setConfiguracaoSecao("banners")}
+                    className="group rounded-3xl border border-border bg-card p-6 text-left transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-lg"
+                  >
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/15 text-primary">
+                      <ImageIcon className="h-6 w-6" />
+                    </span>
+                    <h3 className="mt-4 font-display text-xl font-bold text-foreground">Configurar Banners</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      Crie, edite, publique, pause, reordene e personalize os banners principais do /shop.
+                    </p>
+                    <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                      Abrir configuração <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </button>
+
+                  <div className="rounded-3xl border border-dashed border-border bg-card/40 p-6 opacity-80">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-secondary text-muted-foreground">
+                      <ShoppingBag className="h-6 w-6" />
+                    </span>
+                    <h3 className="mt-4 font-display text-xl font-bold text-foreground">Loja e catálogo</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      Área preparada para futuras configurações de catálogo, ofertas e organização da vitrine.
+                    </p>
+                  </div>
+
+                  <div className="rounded-3xl border border-dashed border-border bg-card/40 p-6 opacity-80">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-secondary text-muted-foreground">
+                      <Settings className="h-6 w-6" />
+                    </span>
+                    <h3 className="mt-4 font-display text-xl font-bold text-foreground">Sistema</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      Área preparada para configurações gerais, notificações, segurança e integrações.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )
           ) : null}
         </main>
       </div>
