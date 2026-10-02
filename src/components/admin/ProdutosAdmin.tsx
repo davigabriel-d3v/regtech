@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Copy, Eye, ImagePlus, Loader2, Pencil, Plus, Save, Star, Trash2, Upload, X } from "lucide-react";
+import { Check, Copy, Eye, ImagePlus, Loader2, Pencil, Plus, Save, Share2, Star, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -21,6 +21,11 @@ const emptyForm = {
 
 const pageSize = 10;
 const money = (v: number | null) => v == null ? "—" : Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const productShareLink = (productCode: string) =>
+  typeof window === "undefined"
+    ? `/produto/${encodeURIComponent(productCode)}`
+    : `${window.location.origin}/produto/${encodeURIComponent(productCode)}`;
+
 
 export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: number }) {
   const [products, setProducts] = useState<Product[]>([]);
@@ -296,7 +301,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
               <td className="p-3"><button className="inline-flex items-center gap-1 font-mono text-xs text-primary" onClick={() => navigator.clipboard.writeText(p.product_code).then(()=>toast.success("ID copiado!"))}>{p.product_code}<Copy className="h-3.5 w-3.5" /></button></td>
               <td className="p-3">{money(p.promotional_price ?? p.price)}</td><td className="p-3">{p.stock}</td>
               <td className="p-3"><span className={`rounded-full px-2.5 py-1 text-xs ${p.status === "active" ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"}`}>{p.status === "active" ? "Ativo" : "Inativo"}</span></td>
-              <td className="p-3"><div className="flex gap-1"><button title="Visualizar" onClick={()=>setViewing(p)} className="rounded-lg p-2 hover:bg-secondary"><Eye className="h-4 w-4"/></button><button title="Editar" onClick={()=>openEdit(p)} className="rounded-lg p-2 hover:bg-secondary"><Pencil className="h-4 w-4"/></button><button title="Excluir" onClick={()=>setDeleteTarget(p)} className="rounded-lg p-2 text-destructive hover:bg-secondary"><Trash2 className="h-4 w-4"/></button></div></td>
+              <td className="p-3"><div className="flex gap-1"><button title="Visualizar" onClick={()=>setViewing(p)} className="rounded-lg p-2 hover:bg-secondary"><Eye className="h-4 w-4"/></button><button title="Copiar link de compartilhamento" onClick={()=>{ const link=productShareLink(p.product_code); void navigator.clipboard.writeText(link).then(()=>toast.success("Link de compartilhamento copiado!")).catch(()=>toast.error("Não foi possível copiar o link.")); }} className="rounded-lg p-2 text-primary hover:bg-secondary"><Share2 className="h-4 w-4"/></button><button title="Editar" onClick={()=>openEdit(p)} className="rounded-lg p-2 hover:bg-secondary"><Pencil className="h-4 w-4"/></button><button title="Excluir" onClick={()=>setDeleteTarget(p)} className="rounded-lg p-2 text-destructive hover:bg-secondary"><Trash2 className="h-4 w-4"/></button></div></td>
             </tr>)}
           </tbody>
         </table>
@@ -352,7 +357,20 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
       </div>
     </div>}
 
-    {viewing && <div className="fixed inset-0 z-[70] flex items-center justify-center bg-background/80 p-4 backdrop-blur"><div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-border bg-card p-6"><div className="flex justify-between"><h3 className="font-display text-xl font-bold">{viewing.name}</h3><button onClick={()=>setViewing(null)}><X/></button></div><p className="mt-1 font-mono text-sm text-primary">{viewing.product_code}</p><div className="mt-5 grid gap-4 sm:grid-cols-2">{(viewing.product_images??[]).sort((a,b)=>a.display_order-b.display_order).map(i=><img key={i.id} src={i.image_url} className="aspect-square w-full rounded-xl object-cover"/> )}</div><div className="mt-5 grid grid-cols-2 gap-3 text-sm"><p><b>Preço:</b> {money(viewing.price)}</p><p><b>Estoque:</b> {viewing.stock}</p><p><b>Status:</b> {viewing.status==="active"?"Ativo":"Inativo"}</p><p><b>SKU:</b> {viewing.sku||"—"}</p></div><p className="mt-4 text-sm text-muted-foreground">{viewing.description||"Sem descrição."}</p></div></div>}
+    {viewing && <div className="fixed inset-0 z-[70] flex items-center justify-center bg-background/80 p-4 backdrop-blur"><div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-border bg-card p-6"><div className="flex justify-between"><h3 className="font-display text-xl font-bold">{viewing.name}</h3><button onClick={()=>setViewing(null)}><X/></button></div><p className="mt-1 font-mono text-sm text-primary">{viewing.product_code}</p>
+<div className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+  <div className="flex items-start gap-3">
+    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary"><Share2 className="h-5 w-5" /></span>
+    <div className="min-w-0 flex-1">
+      <p className="text-xs font-semibold uppercase tracking-wider text-primary">Link de compartilhamento</p>
+      <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{productShareLink(viewing.product_code)}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" onClick={()=>{ const link=productShareLink(viewing.product_code); void navigator.clipboard.writeText(link).then(()=>toast.success("Link copiado!")).catch(()=>toast.error("Não foi possível copiar o link.")); }} className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground"><Copy className="h-3.5 w-3.5" /> Copiar link</button>
+        <a href={productShareLink(viewing.product_code)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-semibold hover:bg-secondary"><Eye className="h-3.5 w-3.5" /> Abrir página</a>
+      </div>
+    </div>
+  </div>
+</div><div className="mt-5 grid gap-4 sm:grid-cols-2">{(viewing.product_images??[]).sort((a,b)=>a.display_order-b.display_order).map(i=><img key={i.id} src={i.image_url} className="aspect-square w-full rounded-xl object-cover"/> )}</div><div className="mt-5 grid grid-cols-2 gap-3 text-sm"><p><b>Preço:</b> {money(viewing.price)}</p><p><b>Estoque:</b> {viewing.stock}</p><p><b>Status:</b> {viewing.status==="active"?"Ativo":"Inativo"}</p><p><b>SKU:</b> {viewing.sku||"—"}</p></div><p className="mt-4 text-sm text-muted-foreground">{viewing.description||"Sem descrição."}</p></div></div>}
 
     {deleteTarget && <div className="fixed inset-0 z-[80] flex items-center justify-center bg-background/80 p-4 backdrop-blur"><div className="w-full max-w-md rounded-3xl border border-border bg-card p-6"><h3 className="font-display text-lg font-bold">Excluir produto</h3><p className="mt-2 text-sm text-muted-foreground">Tem certeza que deseja excluir este produto?</p><div className="mt-6 flex justify-end gap-2"><button onClick={()=>setDeleteTarget(null)} className="rounded-full border px-4 py-2 text-sm">Cancelar</button><button onClick={removeProduct} disabled={saving} className="rounded-full bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground">Excluir</button></div></div></div>}
   </section>;
