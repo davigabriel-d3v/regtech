@@ -45,7 +45,6 @@ import { whatsappComMensagem } from "@/lib/contato";
 import { listarConfiguracoesLoja } from "@/lib/loja-settings.functions";
 import { DEFAULT_LOJA_SETTINGS } from "@/lib/loja-settings";
 import { useCarrinho } from "@/components/loja/CarrinhoContext";
-import { useCarrinho } from "@/components/loja/CarrinhoContext";
 
 export const lojaProdutosQueryOptions = queryOptions({
   queryKey: ["loja", "produtos"],
