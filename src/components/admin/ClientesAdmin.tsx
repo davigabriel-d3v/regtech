@@ -26,8 +26,7 @@ const dateTime = (v: string) => new Date(v).toLocaleString("pt-BR", { dateStyle:
 const inputClass = "w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50";
 
 export function ClientesAdmin() {
-  const [customers, setCustomers] = useState<Customer[]>([]);\n  const [profiles, setProfiles] = useState<any[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);\n  const [orders, setOrders] = useState<Order[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
