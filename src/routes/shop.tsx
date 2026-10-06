@@ -89,7 +89,8 @@ export const lojaBannersQueryOptions = queryOptions({
       }));
     }
 
-    const fallback = await listarBanners().catch(() => null);\n    return fallback && fallback.length ? fallback : DEFAULT_BANNERS;
+    const fallback = await listarBanners().catch(() => null);
+    return fallback && fallback.length ? fallback : DEFAULT_BANNERS;
   },
 });
 
@@ -181,7 +182,9 @@ function Shop() {
   );
   const [filtro, setFiltro] = useState<string>("todas");
   const [busca, setBusca] = useState("");
-  const [menuAberto, setMenuAberto] = useState(false);\n  const [ordenacao, setOrdenacao] = useState("relevancia");\n  const [somenteEstoque, setSomenteEstoque] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false);
+  const [ordenacao, setOrdenacao] = useState("relevancia");
+  const [somenteEstoque, setSomenteEstoque] = useState(false);
 
   const escolherCategoria = (slug: string) => {
     setFiltro(slug);
