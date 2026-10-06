@@ -15,6 +15,7 @@ import { ClientesAdmin } from "@/components/admin/ClientesAdmin";
 import { BannerPrincipalAdmin } from "@/components/admin/BannerPrincipalAdmin";
 import { CuponsAdmin } from "@/components/admin/CuponsAdmin";
 import { LojaCatalogoAdmin } from "@/components/admin/LojaCatalogoAdmin";
+import { ConfiguracoesAdmin } from "@/components/admin/ConfiguracoesAdmin";
 import { EstoqueAdmin } from "@/components/admin/EstoqueAdmin";
 
 // Acesso + é um módulo administrativo real e deve ser renderizado pela seção acesso_plus.
@@ -80,7 +81,7 @@ type Pedido = {
 type Atividade = { id: string; tipo: string; descricao: string; criado_em: string };
 type StatusPedido = "novo" | "analise" | "andamento" | "concluido" | "cancelado";
 type Secao = "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "cupons" | "acesso_plus" | "config";
-type ConfiguracaoSecao = "inicio" | "banners" | "loja";
+type ConfiguracaoSecao = "inicio" | "banners" | "loja" | "sistema";
 
 const statusInfo: Record<StatusPedido, { label: string; cls: string }> = {
   novo: { label: "Novo", cls: "bg-primary/15 text-primary" },
@@ -505,7 +506,7 @@ function Admin() {
           ) : secao === "estoque" ? (
             <EstoqueAdmin />
           ) : secao === "config" ? (
-            configuracaoSecao === "loja" ? (
+            configuracaoSecao === "sistema" ? (<div className="space-y-5"><button type="button" onClick={() => setConfiguracaoSecao("inicio")} className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium hover:bg-secondary"><ArrowLeft className="h-4 w-4" /> Voltar para Configurações</button><ConfiguracoesAdmin /></div>) : configuracaoSecao === "loja" ? (
               <div className="space-y-5">
                 <button
                   type="button"
@@ -571,15 +572,7 @@ function Admin() {
                     </span>
                   </button>
 
-                  <div className="rounded-3xl border border-dashed border-border bg-card/40 p-6 opacity-80">
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-secondary text-muted-foreground">
-                      <Settings className="h-6 w-6" />
-                    </span>
-                    <h3 className="mt-4 font-display text-xl font-bold text-foreground">Sistema</h3>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      Área preparada para configurações gerais, notificações, segurança e integrações.
-                    </p>
-                  </div>
+                  <button type="button" onClick={() => setConfiguracaoSecao("sistema")} className="group rounded-3xl border border-border bg-card p-6 text-left transition-all hover:border-primary/60"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-secondary text-muted-foreground"><Settings className="h-6 w-6" /></span><h3 className="mt-4 font-display text-xl font-bold text-foreground">Sistema</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">Nome da loja, contatos, disponibilidade, manutenção e mensagens de atendimento.</p><span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">Abrir configuração <ArrowRight className="h-4 w-4" /></span></button>
                 </div>
               </div>
             )
