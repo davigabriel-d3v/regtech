@@ -16,6 +16,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CarrinhoProvider } from "@/components/loja/CarrinhoContext";
 import { FavoritosProvider } from "@/components/loja/FavoritosContext";
+import { AtendimentoChat } from "@/components/atendimento/AtendimentoChat";
 
 function NotFoundComponent() {
   return (
@@ -152,6 +153,7 @@ function RootComponent() {
       <CarrinhoProvider>
         <FavoritosProvider>
           <Outlet />
+          <AtendimentoChat />
           <Toaster />
         </FavoritosProvider>
       </CarrinhoProvider>
