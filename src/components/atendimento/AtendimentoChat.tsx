@@ -51,7 +51,7 @@ export function AtendimentoChat() {
 
   async function loadChat(currentUser = user) {
     if (!currentUser) return;
-    const { data: existing, error } = await supabase
+    const { data: existing, error } = await (supabase as any)
       .from("chat_conversations")
       .select("*")
       .eq("user_id", currentUser.id)
