@@ -17,6 +17,7 @@ import { CuponsAdmin } from "@/components/admin/CuponsAdmin";
 import { LojaCatalogoAdmin } from "@/components/admin/LojaCatalogoAdmin";
 import { ConfiguracoesAdmin } from "@/components/admin/ConfiguracoesAdmin";
 import { EstoqueAdmin } from "@/components/admin/EstoqueAdmin";
+import { ChatAdmin } from "@/components/admin/ChatAdmin";
 
 // Acesso + é um módulo administrativo real e deve ser renderizado pela seção acesso_plus.
 
@@ -80,7 +81,7 @@ type Pedido = {
 };
 type Atividade = { id: string; tipo: string; descricao: string; criado_em: string };
 type StatusPedido = "novo" | "analise" | "andamento" | "concluido" | "cancelado";
-type Secao = "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "cupons" | "acesso_plus" | "config";
+type Secao = "dashboard" | "produtos" | "pedidos" | "clientes" | "estoque" | "cupons" | "chat" | "acesso_plus" | "config";
 type ConfiguracaoSecao = "inicio" | "banners" | "loja" | "sistema";
 
 const statusInfo: Record<StatusPedido, { label: string; cls: string }> = {
@@ -108,6 +109,7 @@ const menu: { id: Secao; label: string; icon: typeof Activity }[] = [
   { id: "clientes", label: "Clientes", icon: Users },
   { id: "estoque", label: "Estoque", icon: Boxes },
   { id: "cupons", label: "Cupons", icon: TicketPercent },
+  { id: "chat", label: "Chat", icon: MessageCircle },
   { id: "acesso_plus", label: "Acesso +", icon: UserPlus },
   { id: "config", label: "Configurações", icon: Settings },
 ];
@@ -316,7 +318,10 @@ function Admin() {
 
   const allowed = (id: Secao) =>
     isAdmin ||
-    (isOperator && id !== "acesso_plus" && id !== "config" && (id === "dashboard" || permissions.includes(id === "produtos" ? "produtos" : id)));
+    (isOperator &&
+      id !== "acesso_plus" &&
+      id !== "config" &&
+      (id === "dashboard" || permissions.includes(id === "produtos" ? "produtos" : id)));
 
   if (accessDenied) {
     return (
@@ -505,6 +510,8 @@ function Admin() {
             <AcessoMaisAdmin openCreateRequest={criarAcessoRequest} />
           ) : secao === "estoque" ? (
             <EstoqueAdmin />
+          ) : secao === "chat" ? (
+            <ChatAdmin />
           ) : secao === "config" ? (
             configuracaoSecao === "sistema" ? (<div className="space-y-5"><button type="button" onClick={() => setConfiguracaoSecao("inicio")} className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium hover:bg-secondary"><ArrowLeft className="h-4 w-4" /> Voltar para Configurações</button><ConfiguracoesAdmin /></div>) : configuracaoSecao === "loja" ? (
               <div className="space-y-5">
