@@ -26,7 +26,8 @@ const dateTime = (v: string) => new Date(v).toLocaleString("pt-BR", { dateStyle:
 const inputClass = "w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50";
 
 export function ClientesAdmin() {
-  const [customers, setCustomers] = useState<Customer[]>([]);\n  const [orders, setOrders] = useState<Order[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -46,7 +47,7 @@ export function ClientesAdmin() {
       supabase.from("orders").select("id,order_number,customer_id,status,created_at,updated_at").order("created_at", { ascending: false }),
     ]);
     if (c.error) toast.error("Não foi possível carregar os clientes: " + c.error.message);
-    if (o.error) toast.error("Não foi possível carregar os pedidos: " + o.error.message);\n    if (p.error) toast.error("Não foi possível carregar os perfis: " + p.error.message);
+    if (o.error) toast.error("Não foi possível carregar os pedidos: " + o.error.message);
     setCustomers((c.data ?? []) as Customer[]);
     setOrders((o.data ?? []) as Order[]);
     setLoading(false);
