@@ -7,6 +7,10 @@ import {
   Heart,
   Menu,
   Package,
+  SlidersHorizontal,
+  Truck,
+  ShieldCheck,
+  Zap,
   Search,
   ShoppingCart,
   Star,
@@ -82,6 +86,8 @@ function Shop() {
   const [menu, setMenu] = useState(false);
   const [banner, setBanner] = useState(0);
   const [favoritos, setFavoritos] = useState<string[]>([]);
+  const [somenteEstoque, setSomenteEstoque] = useState(false);
+  const [ordenacao, setOrdenacao] = useState("destaques");
 
   const ativos = (banners.length ? banners : DEFAULT_BANNERS).filter((b) => b.active);
   const atual = ativos[banner] ?? ativos[0];
@@ -94,9 +100,11 @@ function Shop() {
         p.categoria === categoria ||
         (categoria === "celulares" && ["apple", "samsung", "xiaomi", "realme"].includes(p.categoria));
       const texto = [p.titulo, p.marca, p.descricao, p.categoria].join(" ").toLowerCase();
-      return cat && (!termo || texto.includes(termo));
+      return cat && (!termo || texto.includes(termo)) && (!somenteEstoque || p.emEstoque);
     });
-  }, [produtos, categoria, busca]);
+  }, [produtos, categoria, busca, somenteEstoque]);
+
+  const ordenados = useMemo(() => [...filtrados].sort((a, b) => { if (ordenacao === "menor") return (a.preco ?? Infinity) - (b.preco ?? Infinity); if (ordenacao === "maior") return (b.preco ?? -Infinity) - (a.preco ?? -Infinity); if (ordenacao === "avaliacao") return b.avaliacao - a.avaliacao; return Number(b.destaque) - Number(a.destaque); }), [filtrados, ordenacao]);
 
   const alternarFavorito = (id: string) => {
     setFavoritos((old) => (old.includes(id) ? old.filter((x) => x !== id) : [...old, id]));
@@ -278,7 +286,7 @@ function Shop() {
 
           <div className="mt-8 flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {filtrados.length} {filtrados.length === 1 ? "produto encontrado" : "produtos encontrados"}
+              {ordenados.length} {ordenados.length === 1 ? "produto encontrado" : "produtos encontrados"}
             </p>
             {(busca || categoria !== "todas") && (
               <button type="button" onClick={() => { setBusca(""); setCategoria("todas"); }} className="text-sm font-semibold text-primary">
@@ -294,15 +302,15 @@ function Shop() {
               <p className="mt-2 text-sm text-muted-foreground">Tente outra busca ou categoria.</p>
             </div>
           ) : (
-            <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {filtrados.map((produto) => {
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {ordenados.map((produto) => {
                 const fav = favoritos.includes(produto.id);
                 const desconto =
                   produto.preco && produto.precoAntigo && produto.precoAntigo > produto.preco
                     ? Math.round((1 - produto.preco / produto.precoAntigo) * 100)
                     : null;
                 return (
-                  <article key={produto.id} className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:border-primary/60 hover:shadow-xl">
+                  <article key={produto.id} className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/5">
                     <div className="relative aspect-square overflow-hidden bg-secondary">
                       {produto.imagemUrl ? (
                         <img src={produto.imagemUrl} alt={produto.titulo} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
@@ -339,7 +347,7 @@ function Shop() {
                             window.open(`https://wa.me/${lojaSettings.whatsappPhone}?text=${encodeURIComponent(`Olá! Quero solicitar: ${produto.titulo}`)}`, "_blank");
                           }
                         }}
-                        className="mt-3 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-3 py-2.5 text-xs font-bold text-primary-foreground hover:bg-accent"
+                        className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-xs font-bold text-primary-foreground transition hover:bg-accent active:scale-[.98]"
                       >
                         <ShoppingCart className="h-4 w-4" />
                         {produto.preco != null && produto.emEstoque ? "Adicionar ao carrinho" : "Solicitar pedido"}
