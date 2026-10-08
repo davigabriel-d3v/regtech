@@ -30,6 +30,7 @@ import {
   Star,
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
+import { RodapeRegTech } from "@/components/RodapeRegTech";
 import { CookieConsent } from "@/components/CookieConsent";
 import { toast } from "sonner";
 import logo from "@/assets/regtech-logo.png";
@@ -811,34 +812,7 @@ function Index() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/60">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-10 text-center sm:px-6 md:flex-row md:justify-between md:text-left">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="Logo da RegTech" className="h-8 w-8 rounded-full" />
-            <span className="font-display font-bold">
-              Reg<span className="text-primary">Tech</span>
-            </span>
-          </div>
-          <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4" />
-            Tucumã-PA / Ourilândia-PA · Referência em Tecnologia há +14 anos
-          </p>
-          <div className="flex flex-col items-center gap-3 sm:items-end">
-            <a href="https://www.instagram.com/_davhz.xn/" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground transition-colors hover:text-foreground hover:underline">
-              By @_davhz.xn
-            </a>
-            <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:justify-end">
-              <Link to="/termos" className="text-muted-foreground hover:text-foreground hover:underline">Termos de Uso</Link>
-            <Link to="/privacidade" className="text-muted-foreground hover:text-foreground hover:underline">Privacidade</Link>
-            <Link to="/cookies" className="text-muted-foreground hover:text-foreground hover:underline">Cookies</Link>
-              <p className="text-xs text-muted-foreground">
-                © {new Date().getFullYear()} RegTech. Todos os direitos reservados.
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <RodapeRegTech />
       <CookieConsent />
     </div>
   );
