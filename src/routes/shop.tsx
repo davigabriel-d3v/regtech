@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
   Apple,
   ArrowLeft,
@@ -41,7 +40,6 @@ import {
 import logo from "@/assets/regtech-logo.png";
 import { listarMarcas, listarProdutos, type ProdutoLoja } from "@/lib/produtos.functions";
 import { listarBanners } from "@/lib/banners.functions";
-import { supabase } from "@/integrations/supabase/client";
 import type { BannerPrincipal as BannerPrincipalData } from "@/lib/banners";
 import { whatsappComMensagem } from "@/lib/contato";
 import { listarConfiguracoesLoja } from "@/lib/loja-settings.functions";
@@ -49,66 +47,16 @@ import { DEFAULT_LOJA_SETTINGS } from "@/lib/loja-settings";
 import { DEFAULT_BANNERS } from "@/lib/banners";
 import { useCarrinho } from "@/components/loja/CarrinhoContext";
 
-export const lojaProdutosQueryOptions = queryOptions({
-  queryKey: ["loja", "produtos"],
-  queryFn: async () => (await listarProdutos().catch(() => null)) ?? [],
-});
-
-export const lojaMarcasQueryOptions = queryOptions({
-  queryKey: ["loja", "marcas"],
-  queryFn: async () => (await listarMarcas().catch(() => null)) ?? [],
-});
-
-export const lojaBannersQueryOptions = queryOptions({
-  queryKey: ["loja", "banners"],
-  queryFn: async () => {
-    const { data, error } = await supabase
-      .from("shop_banners")
-      .select(
-        "id,title,subtitle,badge,button_label,action_type,action_value,icon_name,background_image_url,background_mobile_image_url,overlay_opacity,text_align,active,display_order,autoplay_seconds",
-      )
-      .eq("active", true)
-      .order("display_order", { ascending: true });
-
-    if (!error && data?.length) {
-      return data.map((row) => ({
-        id: row.id,
-        title: row.title,
-        subtitle: row.subtitle,
-        badge: row.badge,
-        buttonLabel: row.button_label,
-        actionType: row.action_type as BannerPrincipalData["actionType"],
-        actionValue: row.action_value,
-        iconName: row.icon_name,
-        backgroundImageUrl: row.background_image_url,
-        backgroundMobileImageUrl: row.background_mobile_image_url,
-        overlayOpacity: Number(row.overlay_opacity),
-        textAlign: row.text_align as BannerPrincipalData["textAlign"],
-        active: row.active,
-        displayOrder: row.display_order,
-        autoplaySeconds: row.autoplay_seconds,
-      }));
-    }
-
-    const fallback = await listarBanners().catch(() => null);
-    return fallback && fallback.length ? fallback : DEFAULT_BANNERS;
-  },
-});
-
-export const lojaSettingsQueryOptions = queryOptions({
-  queryKey: ["loja", "settings"],
-  queryFn: async () => (await listarConfiguracoesLoja().catch(() => null)) ?? DEFAULT_LOJA_SETTINGS,
-});
-
-
 export const Route = createFileRoute("/shop")({
-  loader: async ({ context: { queryClient } }) => {
-    await Promise.all([
-      queryClient.ensureQueryData(lojaProdutosQueryOptions),
-      queryClient.ensureQueryData(lojaMarcasQueryOptions),
-      queryClient.ensureQueryData(lojaBannersQueryOptions),
-      queryClient.ensureQueryData(lojaSettingsQueryOptions),
+  loader: async () => {
+    const [produtos, marcas, banners, lojaSettings] = await Promise.all([
+      listarProdutos().catch(() => []),
+      listarMarcas().catch(() => []),
+      listarBanners().catch(() => DEFAULT_BANNERS),
+      listarConfiguracoesLoja().catch(() => DEFAULT_LOJA_SETTINGS),
     ]);
+
+    return { produtos, marcas, banners, lojaSettings };
   },
   head: () => ({
     meta: [
@@ -163,10 +111,7 @@ function precoTexto(preco: number | null): string {
 
 function Shop() {
   const { totalItens } = useCarrinho();
-  const { data: produtos } = useSuspenseQuery(lojaProdutosQueryOptions);
-  const { data: marcas } = useSuspenseQuery(lojaMarcasQueryOptions);
-  const { data: banners } = useSuspenseQuery(lojaBannersQueryOptions);
-  const { data: lojaSettings } = useSuspenseQuery(lojaSettingsQueryOptions);
+  const { produtos, marcas, banners, lojaSettings } = Route.useLoaderData();
   const ofertas = useMemo(() => produtos.filter((p) => p.emOferta).slice(0, lojaSettings.offersLimit), [produtos, lojaSettings.offersLimit]);
   const destaques = useMemo(() => produtos.filter((p) => p.destaque).slice(0, lojaSettings.featuredLimit), [produtos, lojaSettings.featuredLimit]);
   const maisVendidos = useMemo(() => [...produtos].sort((a, b) => b.avaliacoes - a.avaliacoes).slice(0, 10), [produtos]);
