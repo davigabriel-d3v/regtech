@@ -24,6 +24,7 @@ import {
   TicketPercent,
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
+import { RodapeRegTech } from "@/components/RodapeRegTech";
 import {
   BannerPrincipal,
   BannersSecundarios,
@@ -211,6 +212,16 @@ function Shop() {
       return bateCategoria && bateBusca;
     });
   }, [produtos, filtro, busca]);
+
+  const produtosOrdenados = useMemo(() => {
+    const filtrados = visiveis.filter((produto) => !somenteEstoque || (produto.estoque ?? 0) > 0);
+    return [...filtrados].sort((a, b) => {
+      if (ordenacao === "menor-preco") return (a.preco ?? Infinity) - (b.preco ?? Infinity);
+      if (ordenacao === "maior-preco") return (b.preco ?? -Infinity) - (a.preco ?? -Infinity);
+      if (ordenacao === "avaliacao") return b.avaliacoes - a.avaliacoes;
+      return Number(b.destaque) - Number(a.destaque);
+    });
+  }, [visiveis, somenteEstoque, ordenacao]);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -416,24 +427,7 @@ function Shop() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/60">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-10 text-center sm:px-6 md:flex-row md:justify-between md:text-left">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="Logo da RegTech" className="h-8 w-8 rounded-full" />
-            <span className="font-display font-bold">
-              Reg<span className="text-primary">Tech</span>
-            </span>
-          </div>
-          <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4" />
-            Tucumã-PA / Ourilândia-PA · Referência em Tecnologia há +14 anos
-          </p>
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} RegTech. Todos os direitos reservados.
-          </p>
-        </div>
-      </footer>
+      <RodapeRegTech />
     </div>
   );
 }
