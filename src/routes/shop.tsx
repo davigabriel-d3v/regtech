@@ -214,7 +214,7 @@ function Shop() {
   }, [produtos, filtro, busca]);
 
   const produtosOrdenados = useMemo(() => {
-    const filtrados = visiveis.filter((produto) => !somenteEstoque || (produto.estoque ?? 0) > 0);
+    const filtrados = visiveis.filter((produto) => !somenteEstoque || produto.emEstoque);
     return [...filtrados].sort((a, b) => {
       if (ordenacao === "menor-preco") return (a.preco ?? Infinity) - (b.preco ?? Infinity);
       if (ordenacao === "maior-preco") return (b.preco ?? -Infinity) - (a.preco ?? -Infinity);
