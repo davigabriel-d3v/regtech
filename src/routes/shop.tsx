@@ -15,19 +15,10 @@ import {
   ShoppingCart,
   Star,
   X,
-  Smartphone,
-  Laptop,
-  Headphones,
-  Watch,
-  Camera,
-  Plug,
-  SatelliteDish,
-  Bike,
-  Plane,
-  Tv,
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
 import { RodapeRegTech } from "@/components/RodapeRegTech";
+import { CompreCategoria, grupos } from "@/components/loja/Secoes";
 import { useCarrinho } from "@/components/loja/CarrinhoContext";
 import { listarMarcas, listarProdutos, type ProdutoLoja } from "@/lib/produtos.functions";
 import { listarBanners } from "@/lib/banners.functions";
@@ -54,31 +45,7 @@ const categorias = [
   ["realme", "Realme"],
 ] as const;
 
-const categoriasVisuais = [
-  { id: "celulares", nome: "Celulares", descricao: "Smartphones e marcas", icone: Smartphone },
-  { id: "informatica", nome: "Informática", descricao: "Computadores e notebooks", icone: Laptop },
-  { id: "audio", nome: "Áudio", descricao: "Fones e acessórios de som", icone: Headphones },
-  { id: "smartwatches", nome: "Smartwatches", descricao: "Relógios inteligentes", icone: Watch },
-  { id: "tvs", nome: "TVs e telas", descricao: "Entretenimento e imagem", icone: Tv },
-  { id: "acessorios", nome: "Acessórios", descricao: "Capas, cabos e mais", icone: Plug },
-  { id: "cameras", nome: "Câmeras e drones", descricao: "Imagem e captura aérea", icone: Camera },
-  { id: "conectividade", nome: "Conectividade", descricao: "Internet e Starlink", icone: SatelliteDish },
-  { id: "mobilidade", nome: "Mobilidade elétrica", descricao: "Motos elétricas", icone: Bike },
-  { id: "eletronicos", nome: "Eletrônicos", descricao: "Tecnologia para seu dia", icone: Plane },
-] as const;
-
-const categoriasPorGrupo: Record<string, string[]> = {
-  celulares: ["celulares", "apple", "samsung", "xiaomi", "realme"],
-  informatica: ["informatica"],
-  audio: ["acessorios", "audio"],
-  smartwatches: ["smartwatches", "xiaomi", "apple"],
-  tvs: ["tvs", "samsung"],
-  acessorios: ["acessorios"],
-  cameras: ["cameras", "dji"],
-  conectividade: ["starlink", "informatica"],
-  mobilidade: ["motos-eletricas"],
-  eletronicos: ["eletronicos", "dji", "motos-eletricas"],
-};
+const categoriasPorGrupo = grupos;
 
 function brl(value: number | null) {
   if (value == null) return "Sob consulta";
@@ -281,43 +248,12 @@ function Shop() {
           </section>
         )}
 
-        <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-wider text-primary">Explore a Shop</p>
-              <h2 className="mt-1 font-display text-2xl font-bold sm:text-3xl">Compre por categoria</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Encontre rapidamente o tipo de produto que você procura.</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => { setCategoria("todas"); document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" }); }}
-              className="text-sm font-semibold text-primary transition-colors hover:underline"
-            >
-              Ver todos os produtos
-            </button>
-          </div>
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {categoriasVisuais.map((item) => {
-              const IconeCategoria = item.icone;
-              const selecionada = categoria === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => { setCategoria(item.id); document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" }); }}
-                  aria-pressed={selecionada}
-                  className={`group flex min-h-36 flex-col items-start rounded-2xl border p-4 text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 ${selecionada ? "border-primary bg-primary/10 ring-1 ring-primary/30" : "border-border bg-card/70 hover:border-primary/60"}`}
-                >
-                  <span className={`grid h-12 w-12 place-items-center rounded-xl transition-colors ${selecionada ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground"}`}>
-                    <IconeCategoria className="h-6 w-6" />
-                  </span>
-                  <span className="mt-3 font-semibold">{item.nome}</span>
-                  <span className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.descricao}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <CompreCategoria
+          onEscolher={(chave) => {
+            setCategoria(chave);
+            document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
+          }}
+        />
 
         <section className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 py-6 sm:grid-cols-4 sm:px-6">
           {[
