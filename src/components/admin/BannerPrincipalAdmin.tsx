@@ -39,7 +39,8 @@ const emptyForm = {
   iconName: "Tag",
   backgroundImageUrl: "",
   backgroundMobileImageUrl: "",
-  overlayOpacity: 0.35,
+  overlayOpacity: 0.12,
+  backgroundColor: "#073b8c",
   textAlign: "left" as BannerRow["textAlign"],
   active: true,
   displayOrder: 0,
@@ -58,6 +59,7 @@ function toForm(item: BannerRow) {
     backgroundImageUrl: item.backgroundImageUrl ?? "",
     backgroundMobileImageUrl: item.backgroundMobileImageUrl ?? "",
     overlayOpacity: item.overlayOpacity,
+    backgroundColor: item.backgroundColor ?? "#073b8c",
     textAlign: item.textAlign,
     active: item.active,
     displayOrder: item.displayOrder,
@@ -80,7 +82,7 @@ export function BannerPrincipalAdmin() {
     setLoading(true);
     const { data, error } = await supabase
       .from("shop_banners")
-      .select("id,title,subtitle,badge,button_label,action_type,action_value,icon_name,background_image_url,background_mobile_image_url,overlay_opacity,text_align,active,display_order,autoplay_seconds")
+      .select("id,title,subtitle,badge,button_label,action_type,action_value,icon_name,background_image_url,background_mobile_image_url,overlay_opacity,background_color,text_align,active,display_order,autoplay_seconds")
       .order("display_order", { ascending: true });
 
     if (error) {
@@ -101,6 +103,7 @@ export function BannerPrincipalAdmin() {
       backgroundImageUrl: row.background_image_url,
       backgroundMobileImageUrl: row.background_mobile_image_url,
       overlayOpacity: Number(row.overlay_opacity),
+      backgroundColor: row.background_color || "#073b8c",
       textAlign: row.text_align as BannerRow["textAlign"],
       active: row.active,
       displayOrder: row.display_order,
@@ -180,6 +183,7 @@ export function BannerPrincipalAdmin() {
       background_image_url: form.backgroundImageUrl.trim() || null,
       background_mobile_image_url: form.backgroundMobileImageUrl.trim() || null,
       overlay_opacity: Number(form.overlayOpacity),
+      background_color: form.backgroundColor,
       text_align: form.textAlign,
       active: form.active,
       display_order: Number(form.displayOrder),
@@ -225,6 +229,7 @@ export function BannerPrincipalAdmin() {
       background_image_url: item.backgroundImageUrl,
       background_mobile_image_url: item.backgroundMobileImageUrl,
       overlay_opacity: item.overlayOpacity,
+      background_color: item.backgroundColor ?? "#073b8c",
       text_align: item.textAlign,
       active: false,
       display_order: sorted.length,
@@ -291,9 +296,9 @@ export function BannerPrincipalAdmin() {
                   {item.backgroundImageUrl ? (
                     <img src={item.backgroundImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
                   ) : (
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,var(--color-brand),transparent_70%)]" />
+                    <div className="absolute inset-0" style={{ background: `linear-gradient(115deg, #061536 0%, ${item.backgroundColor ?? "#073b8c"} 58%, #12b8d5 120%)` }} />
                   )}
-                  <div className="absolute inset-0" style={{ background: `rgba(0,0,0,${Math.max(0.18, item.overlayOpacity)})` }} />
+                  <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(2,12,36,.78), transparent), rgba(0,0,0,${Math.max(0.04, item.overlayOpacity * 0.45)})` }} />
                   <div className={`relative z-10 flex h-full min-h-[220px] items-center p-7 ${
                     item.textAlign === "center" ? "justify-center text-center" :
                     item.textAlign === "right" ? "justify-end text-right" : "justify-start text-left"
@@ -368,6 +373,7 @@ export function BannerPrincipalAdmin() {
                   <label className="block space-y-1.5 text-sm"><span className="font-semibold">Troca (s)</span><input type="number" min={2} max={30} value={form.autoplaySeconds} onChange={e => update("autoplaySeconds", Number(e.target.value))} className="w-full rounded-xl border border-border bg-background px-3 py-2.5" /></label>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
+                  <label className="block space-y-1.5 text-sm"><span className="font-semibold">Cor do banner</span><div className="flex items-center gap-2"><input type="color" value={form.backgroundColor} onChange={e => update("backgroundColor", e.target.value)} className="h-11 w-14 cursor-pointer rounded-lg border border-border bg-background p-1" /><input value={form.backgroundColor} onChange={e => update("backgroundColor", e.target.value)} className="min-w-0 flex-1 rounded-xl border border-border bg-background px-3 py-2.5 uppercase" maxLength={7} /></div><span className="text-xs text-muted-foreground">Padrão RegTech: azul #073B8C</span></label>
                   <label className="block space-y-1.5 text-sm"><span className="font-semibold">Alinhamento</span><select value={form.textAlign} onChange={e => update("textAlign", e.target.value as BannerRow["textAlign"])} className="w-full rounded-xl border border-border bg-background px-3 py-2.5"><option value="left">Esquerda</option><option value="center">Centro</option><option value="right">Direita</option></select></label>
                   <label className="block space-y-1.5 text-sm"><span className="font-semibold">Opacidade do overlay</span><input type="range" min={0} max={1} step={0.05} value={form.overlayOpacity} onChange={e => update("overlayOpacity", Number(e.target.value))} className="mt-3 w-full" /><span className="text-xs text-muted-foreground">{Math.round(form.overlayOpacity * 100)}%</span></label>
                 </div>
@@ -391,8 +397,8 @@ export function BannerPrincipalAdmin() {
 
                 <div className="overflow-hidden rounded-2xl border border-border bg-secondary">
                   <div className="relative min-h-[280px] overflow-hidden p-6">
-                    {form.backgroundImageUrl ? <img src={form.backgroundImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,var(--color-brand),transparent_70%)]" />}
-                    <div className="absolute inset-0 bg-black" style={{ opacity: Math.max(0.18, form.overlayOpacity) }} />
+                    {form.backgroundImageUrl ? <img src={form.backgroundImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0" style={{ background: `linear-gradient(115deg, #061536 0%, ${form.backgroundColor} 58%, #12b8d5 120%)` }} />}
+                    <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(2,12,36,.78), transparent), rgba(0,0,0,${Math.max(0.04, form.overlayOpacity * 0.45)})` }} />
                     <div className={`relative z-10 flex min-h-[240px] items-center ${
                       form.textAlign === "center" ? "justify-center text-center" :
                       form.textAlign === "right" ? "justify-end text-right" : "justify-start text-left"
@@ -423,8 +429,8 @@ export function BannerPrincipalAdmin() {
           <div className="w-full max-w-6xl overflow-hidden rounded-3xl border border-border bg-card" onMouseDown={e => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-border px-5 py-4"><div><p className="text-xs font-semibold uppercase tracking-wider text-primary">Prévia</p><h3 className="font-display font-bold">{preview.title}</h3></div><button onClick={() => setPreview(null)} className="rounded-lg p-2 hover:bg-secondary"><X /></button></div>
             <div className="relative min-h-[380px] overflow-hidden">
-              {preview.backgroundImageUrl ? <img src={preview.backgroundImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,var(--color-brand),transparent_70%)]" />}
-              <div className="absolute inset-0 bg-black" style={{ opacity: Math.max(0.18, preview.overlayOpacity) }} />
+              {preview.backgroundImageUrl ? <img src={preview.backgroundImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0" style={{ background: `linear-gradient(115deg, #061536 0%, ${preview.backgroundColor ?? "#073b8c"} 58%, #12b8d5 120%)` }} />}
+              <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(2,12,36,.78), transparent), rgba(0,0,0,${Math.max(0.04, preview.overlayOpacity * 0.45)})` }} />
               <div className={`relative z-10 flex min-h-[380px] p-10 ${
                 preview.textAlign === "center" ? "items-center justify-center text-center" :
                 preview.textAlign === "right" ? "items-center justify-end text-right" : "items-center justify-start text-left"
