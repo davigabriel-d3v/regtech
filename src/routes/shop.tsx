@@ -187,19 +187,19 @@ function Shop() {
       <main>
         {atual && (
           <section className="mx-auto max-w-7xl px-4 pt-5 sm:px-6">
-            <div className="relative min-h-[300px] overflow-hidden rounded-3xl border border-border bg-card sm:min-h-[380px]">
-              {atual.backgroundImageUrl ? (
+            <div className="group relative min-h-[300px] overflow-hidden rounded-3xl border border-primary/25 bg-[#071b46] shadow-xl shadow-blue-950/15 sm:min-h-[380px]">
+              <div className="absolute inset-0 bg-[linear-gradient(115deg,#061536_0%,#073b8c_42%,#0879c9_72%,#12b8d5_100%)]" />
+              {atual.backgroundImageUrl && (
                 <img
                   src={atual.backgroundImageUrl}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover opacity-55 mix-blend-screen transition-transform duration-700 group-hover:scale-[1.02]"
                 />
-              ) : (
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_40%,hsl(var(--primary)/.45),transparent_45%),linear-gradient(135deg,hsl(var(--card)),hsl(var(--background)))]" />
               )}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_78%_25%,rgba(56,189,248,.42),transparent_38%),linear-gradient(90deg,rgba(2,12,36,.82)_0%,rgba(3,28,71,.52)_52%,rgba(3,25,55,.18)_100%)]" />
               <div
                 className="absolute inset-0 bg-black"
-                style={{ opacity: Math.max(0.15, Math.min(0.75, Number(atual.overlayOpacity ?? 0.35))) }}
+                style={{ opacity: Math.max(0.04, Math.min(0.28, Number(atual.overlayOpacity ?? 0.12) * 0.45)) }}
               />
               <div className="relative z-10 flex min-h-[300px] max-w-2xl items-center px-7 py-10 sm:min-h-[380px] sm:px-14">
                 <div className="text-white">
