@@ -495,6 +495,17 @@ function Index() {
                   <br />
                   Tucumã-PA
                 </p>
+                <div className="mt-6 overflow-hidden rounded-xl border border-border shadow-md">
+                  <iframe
+                    title="Mapa da RegTech CellShop em Tucumã"
+                    src="https://maps.google.com/maps?q=-6.7503213,-51.1506949&z=17&output=embed"
+                    className="h-56 w-full sm:h-64"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    allowFullScreen
+                  />
+                </div>
                 <a
                   href="https://www.google.com/maps/place/RegTech+CellShop+-+Celulares,+Inform%C3%A1tica,+Assist%C3%AAncia+t%C3%A9cnica+em+Tucum%C3%A3/@-6.7500265,-51.1510822,19z/data=!4m6!3m5!1s0x92e68f71c76f26bd:0x3b61a313b7591b0e!8m2!3d-6.7503213!4d-51.1506949!16s%2Fg%2F11c3k2wc6l?entry=ttu&g_ep=EgoyMDI2MDkyMy4wIKXMDSoASAFQAw%3D%3D"
                   target="_blank"
