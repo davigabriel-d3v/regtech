@@ -10,6 +10,7 @@ export type BannerPrincipal = {
   backgroundImageUrl: string | null;
   backgroundMobileImageUrl: string | null;
   overlayOpacity: number;
+  backgroundColor: string;
   textAlign: "left" | "center" | "right";
   active: boolean;
   displayOrder: number;
@@ -28,7 +29,8 @@ export const DEFAULT_BANNERS: BannerPrincipal[] = [
     iconName: "Tag",
     backgroundImageUrl: null,
     backgroundMobileImageUrl: null,
-    overlayOpacity: 0.35,
+    overlayOpacity: 0.12,
+    backgroundColor: "#073b8c",
     textAlign: "left",
     active: true,
     displayOrder: 0,
