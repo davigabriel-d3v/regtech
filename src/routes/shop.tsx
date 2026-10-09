@@ -248,13 +248,6 @@ function Shop() {
           </section>
         )}
 
-        <CompreCategoria
-          onEscolher={(chave) => {
-            setCategoria(chave);
-            document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
-          }}
-        />
-
         <section className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 py-6 sm:grid-cols-4 sm:px-6">
           {[
             ["Entrega e suporte", "Atendimento local RegTech"],
@@ -268,6 +261,13 @@ function Shop() {
             </div>
           ))}
         </section>
+
+        <CompreCategoria
+          onEscolher={(chave) => {
+            setCategoria(chave);
+            document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
+          }}
+        />
 
         <section id="produtos" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-5 sm:px-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
