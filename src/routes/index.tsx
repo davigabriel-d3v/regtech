@@ -520,30 +520,55 @@ function Index() {
 
             <div className="overflow-hidden rounded-2xl border border-border bg-card text-center shadow-lg shadow-primary/10">
               <div className="bg-gradient-to-r from-primary/80 to-accent/80 px-6 py-1.5" />
-              <div className="px-6 py-8">
-                <h3 className="font-display text-2xl font-bold tracking-wide uppercase">
-                  Nos avalie
-                </h3>
-                <p className="mx-auto mt-4 max-w-xs text-lg font-medium leading-relaxed">
-                  A sua avaliação sobre o atendimento é muito importante para
-                  nós!
-                </p>
-                <a
-                  href="https://search.google.com/local/writereview?placeid=ChIJvSZvx3GP5pIRDhtZtxOjYTs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105"
-                >
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-                    <path fill="currentColor" d="M21.35 11.1H12v2.9h5.35c-.5 2.4-2.55 3.9-5.35 3.9a5.9 5.9 0 1 1 0-11.8c1.5 0 2.85.55 3.9 1.45l2.15-2.15A8.9 8.9 0 0 0 12 3a9 9 0 1 0 0 18c5.2 0 8.65-3.65 8.65-8.8 0-.35-.05-.75-.3-1.1Z" />
-                  </svg>
-                  Avaliar no Google
-                </a>
-                <div className="mt-3 flex items-center justify-center gap-1">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
-                  ))}
+              <div className="flex min-h-full flex-col items-center px-6 py-8">
+                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+                  <Star className="h-7 w-7 fill-amber-400 text-amber-400" />
                 </div>
+                <h3 className="font-display text-2xl font-bold tracking-wide uppercase">
+                  Avaliações no Google
+                </h3>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  A opinião de quem já comprou com a gente
+                </p>
+                <div className="mt-5 flex items-center justify-center gap-3">
+                  <span className="font-display text-5xl font-bold tracking-tight text-foreground">4,5</span>
+                  <div className="text-left">
+                    <div className="flex items-center gap-0.5" aria-label="Nota média 4,5 de 5 estrelas">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <Star key={i} className={`h-4 w-4 ${i < 4 ? "fill-amber-400 text-amber-400" : "fill-amber-400/50 text-amber-400/50"}`} />
+                      ))}
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">de 5 estrelas</p>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm font-medium text-muted-foreground">
+                  Mais de <span className="font-bold text-foreground">44 avaliações</span> no Google
+                </p>
+                <div className="mt-6 flex w-full flex-col items-center gap-3">
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=RegTech+CellShop+Tucum%C3%A3+PA"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    Ver avaliações
+                  </a>
+                  <a
+                    href="https://search.google.com/local/writereview?placeid=ChIJvSZvx3GP5pIRDhtZtxOjYTs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-[1.02]"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+                      <path fill="currentColor" d="M21.35 11.1H12v2.9h5.35c-.5 2.4-2.55 3.9-5.35 3.9a5.9 5.9 0 1 1 0-11.8c1.5 0 2.85.55 3.9 1.45l2.15-2.15A8.9 8.9 0 0 0 12 3a9 9 0 1 0 0 18c5.2 0 8.65-3.65 8.65-8.8 0-.35-.05-.75-.3-1.1Z" />
+                    </svg>
+                    Avaliar a RegTech
+                  </a>
+                </div>
+                <p className="mt-4 max-w-xs text-xs leading-relaxed text-muted-foreground">
+                  Sua avaliação ajuda outras pessoas a conhecerem nossa loja.
+                </p>
               </div>
             </div>
           </div>
