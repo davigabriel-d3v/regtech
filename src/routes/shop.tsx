@@ -188,7 +188,7 @@ function Shop() {
         {atual && (
           <section className="mx-auto max-w-7xl px-4 pt-5 sm:px-6">
             <div className="group relative min-h-[300px] overflow-hidden rounded-3xl border border-primary/25 bg-[#071b46] shadow-xl shadow-blue-950/15 sm:min-h-[380px]">
-              <div className="absolute inset-0 bg-[linear-gradient(115deg,#061536_0%,#073b8c_42%,#0879c9_72%,#12b8d5_100%)]" />
+              <div className="absolute inset-0" style={{ background: `linear-gradient(115deg, #061536 0%, ${atual.backgroundColor || "#073b8c"} 48%, #0879c9 78%, #12b8d5 120%)` }} />
               {atual.backgroundImageUrl && (
                 <img
                   src={atual.backgroundImageUrl}
