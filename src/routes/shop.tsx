@@ -171,23 +171,14 @@ function Shop() {
         </div>
 
         {menu && (
-          <div className="border-t border-border bg-card">
-            <div className="mx-auto flex max-w-7xl flex-wrap gap-2 px-4 py-3 sm:px-6">
-              {categorias.map(([id, nome]) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => {
-                    setCategoria(id);
-                    setMenu(false);
-                    document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className={`rounded-full border px-4 py-2 text-sm font-medium ${categoria === id ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-secondary"}`}
-                >
-                  {nome}
-                </button>
-              ))}
-            </div>
+          <div className="border-t border-border bg-card py-3">
+            <CompreCategoria
+              onEscolher={(chave) => {
+                setCategoria(chave);
+                setMenu(false);
+                document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            />
           </div>
         )}
       </header>
