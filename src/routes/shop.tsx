@@ -5,7 +5,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Heart,
-  Menu,
   LayoutGrid,
   ChevronDown,
   Store,
@@ -30,7 +29,6 @@ import {
   Search,
   ShoppingCart,
   Star,
-  X,
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
 import { RodapeRegTech } from "@/components/RodapeRegTech";
