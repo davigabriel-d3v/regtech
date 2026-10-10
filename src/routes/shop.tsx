@@ -6,6 +6,22 @@ import {
   ChevronRight,
   Heart,
   Menu,
+  LayoutGrid,
+  ChevronDown,
+  Store,
+  Bike,
+  SatelliteDish,
+  Apple,
+  Smartphone,
+  MonitorSmartphone,
+  Wifi,
+  Camera,
+  Globe,
+  Building2,
+  Headset,
+  Plane,
+  Watch,
+  Tv,
   Package,
   SlidersHorizontal,
   Truck,
@@ -127,15 +143,18 @@ function Shop() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
-          <button
-            type="button"
-            onClick={() => setMenu(!menu)}
-            className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-2 text-sm font-semibold hover:bg-secondary"
-            aria-label="Abrir categorias"
-          >
-            {menu ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            <span className="hidden sm:inline">Categorias</span>
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              aria-expanded={menu}
+              onClick={() => setMenu((open) => !open)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary sm:px-4"
+            >
+              <LayoutGrid className="h-4 w-4 text-accent" />
+              <span className="hidden sm:inline">Categorias</span>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${menu ? "rotate-180" : ""}`} />
+            </button>
+          </div>
 
           <Link to="/shop" className="flex items-center gap-2">
             <img src={logo} alt="RegTech" className="h-9 w-9 rounded-full" />
@@ -171,15 +190,53 @@ function Shop() {
         </div>
 
         {menu && (
-          <div className="border-t border-border bg-card py-3">
-            <CompreCategoria
-              onEscolher={(chave) => {
-                setCategoria(chave);
-                setMenu(false);
-                document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
-              }}
-            />
-          </div>
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setMenu(false)} />
+            <nav className="absolute left-4 top-full z-50 mt-2 max-h-[70vh] w-60 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-xl shadow-primary/10 sm:left-6">
+              <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Links rápidos</p>
+              {[
+                { label: "Início", href: "/#inicio" },
+                { label: "Quem somos", href: "/#quem-somos" },
+                { label: "Serviços", href: "/#servicos" },
+                { label: "Contato", href: "/#contato" },
+                { label: "Resgatar", href: "/resgatar" },
+              ].map((link) => (
+                <a key={link.href} href={link.href} onClick={() => setMenu(false)} className="block rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-primary/15 hover:text-primary">
+                  {link.label}
+                </a>
+              ))}
+              <Link to="/shop" onClick={() => setMenu(false)} className="mt-1 flex items-center gap-2.5 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20">
+                <Store className="h-4 w-4" /> Shop RegTech
+              </Link>
+              <p className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Categorias</p>
+              {[
+                { icon: MonitorSmartphone, slug: "assistencia-tecnica", title: "Assistência Técnica" },
+                { icon: Wifi, slug: "redes-e-internet", title: "Redes e Internet" },
+                { icon: Camera, slug: "cameras-e-seguranca", title: "Câmeras e Segurança" },
+                { icon: Globe, slug: "sites-e-sistemas", title: "Sites e Sistemas" },
+                { icon: Building2, slug: "suporte-empresarial", title: "Suporte Empresarial" },
+                { icon: Headset, slug: "atendimento-local", title: "Atendimento Local" },
+              ].map((item) => (
+                <a key={item.slug} href={`/#${item.slug}`} onClick={() => setMenu(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-primary/15 hover:text-primary">
+                  <item.icon className="h-4 w-4 text-primary" /> {item.title}
+                </a>
+              ))}
+              <p className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Produtos e marcas</p>
+              {[
+                { icon: Bike, slug: "motos-eletricas", title: "Motos Elétricas" },
+                { icon: SatelliteDish, slug: "starlink", title: "Starlink" },
+                { icon: Apple, slug: "apple", title: "Apple" },
+                { icon: Smartphone, slug: "realme", title: "Realme" },
+                { icon: Plane, slug: "dji", title: "DJI" },
+                { icon: Watch, slug: "xiaomi", title: "Xiaomi" },
+                { icon: Tv, slug: "samsung", title: "Samsung" },
+              ].map((item) => (
+                <a key={item.slug} href={`/#${item.slug}`} onClick={() => setMenu(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-primary/15 hover:text-primary">
+                  <item.icon className="h-4 w-4 text-primary" /> {item.title}
+                </a>
+              ))}
+            </nav>
+          </>
         )}
       </header>
 
