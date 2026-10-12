@@ -149,3 +149,59 @@
     color: var(--color-foreground);
   }
 }
+
+
+/* Motion system: animações leves e consistentes em telas grandes e pequenas. */
+@keyframes rt-fade-up {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes rt-banner-enter {
+  from { opacity: 0; transform: translate3d(0, 8px, 0) scale(.995); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes rt-soft-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 rgb(12 71 227 / 0)); }
+  50% { filter: drop-shadow(0 4px 14px rgb(12 71 227 / .16)); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  main > section {
+    animation: rt-fade-up .65s cubic-bezier(.2, .7, .2, 1) both;
+  }
+  main > section:nth-child(2) { animation-delay: .06s; }
+  main > section:nth-child(3) { animation-delay: .12s; }
+  main > section:nth-child(4) { animation-delay: .18s; }
+
+  main button,
+  main a,
+  header button,
+  header a {
+    transition: color .2s ease, background-color .2s ease, border-color .2s ease,
+      box-shadow .25s ease, transform .25s ease;
+  }
+  main button:hover,
+  main a:hover,
+  header button:hover,
+  header a:hover {
+    transform: translateY(-1px);
+  }
+  .rt-banner-enter {
+    animation: rt-banner-enter .55s cubic-bezier(.2, .7, .2, 1) both;
+  }
+  main img {
+    transition: transform .45s ease, filter .45s ease;
+  }
+  main img:hover {
+    filter: saturate(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
