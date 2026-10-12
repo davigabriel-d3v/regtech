@@ -205,3 +205,83 @@
     transition-duration: .01ms !important;
   }
 }
+
+/* Transições globais do RegTech: navegação, componentes, formulários e overlays. */
+@keyframes rt-page-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes rt-overlay-enter {
+  from { opacity: 0; transform: translateY(8px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes rt-image-reveal {
+  from { opacity: .65; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+
+  body { animation: rt-page-enter .35s ease-out both; }
+
+  /* Interações consistentes em botões, links, campos e controles. */
+  button, a, input, textarea, select, [role="button"], [role="tab"],
+  [role="menuitem"], summary {
+    transition:
+      color .2s ease,
+      background-color .2s ease,
+      border-color .2s ease,
+      box-shadow .25s ease,
+      opacity .2s ease,
+      transform .22s ease,
+      filter .25s ease;
+  }
+
+  button:active, [role="button"]:active {
+    transform: scale(.98);
+  }
+
+  input:focus-visible, textarea:focus-visible, select:focus-visible,
+  button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
+    outline: 2px solid var(--brand-light);
+    outline-offset: 3px;
+  }
+
+  /* Cards e blocos clicáveis ganham profundidade sem interferir no layout. */
+  main [class*="rounded-"][class*="border"],
+  main [data-slot="card"],
+  [role="dialog"], [data-state="open"][data-side] {
+    transition: border-color .25s ease, box-shadow .25s ease, background-color .25s ease;
+  }
+
+  main [class*="rounded-"][class*="border"]:hover,
+  main [data-slot="card"]:hover {
+    border-color: color-mix(in oklab, var(--brand-light) 35%, transparent);
+  }
+
+  dialog[open], [role="dialog"], [data-state="open"][data-side],
+  [data-radix-popper-content-wrapper] {
+    animation: rt-overlay-enter .22s cubic-bezier(.2, .7, .2, 1) both;
+  }
+
+  main img, main video, main picture {
+    animation: rt-image-reveal .35s ease-out both;
+  }
+
+  /* Feedback visual para cartões de produto e elementos que funcionam como links. */
+  main article, main [data-clickable="true"] {
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  main article:hover, main [data-clickable="true"]:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 639px) and (prefers-reduced-motion: no-preference) {
+  main > section { animation-duration: .45s; }
+  main button:hover, main a:hover, header button:hover, header a:hover {
+    transform: none;
+  }
+}
+
