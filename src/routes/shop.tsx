@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
@@ -111,6 +111,16 @@ function Shop() {
 
   const ativos = (banners.length ? banners : DEFAULT_BANNERS).filter((b) => b.active);
   const atual = ativos[banner] ?? ativos[0];
+
+  // Cada banner respeita seu próprio tempo de exibição configurado no admin.
+  useEffect(() => {
+    if (ativos.length < 2 || !atual) return;
+    const segundos = Math.max(1, Number(atual.autoplaySeconds) || 5);
+    const timer = window.setTimeout(() => {
+      setBanner((indice) => (indice + 1) % ativos.length);
+    }, segundos * 1000);
+    return () => window.clearTimeout(timer);
+  }, [banner, ativos.length, atual?.id, atual?.autoplaySeconds]);
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -241,14 +251,17 @@ function Shop() {
       <main>
         {atual && (
           <section className="mx-auto max-w-7xl px-4 pt-5 sm:px-6">
-            <div className="group relative min-h-[300px] overflow-hidden rounded-3xl border border-primary/25 bg-[#071b46] shadow-xl shadow-blue-950/15 sm:min-h-[380px]">
+            <div key={atual.id} className="rt-banner-enter group relative min-h-[300px] overflow-hidden rounded-3xl border border-primary/25 bg-[#071b46] shadow-xl shadow-blue-950/15 sm:min-h-[380px]">
               <div className="absolute inset-0" style={{ background: `linear-gradient(115deg, #061536 0%, ${atual.backgroundColor || "#073b8c"} 48%, #0879c9 78%, #12b8d5 120%)` }} />
-              {atual.backgroundImageUrl && (
-                <img
-                  src={atual.backgroundImageUrl}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover opacity-55 mix-blend-screen transition-transform duration-700 group-hover:scale-[1.02]"
-                />
+              {(atual.backgroundImageUrl || atual.backgroundMobileImageUrl) && (
+                <picture className="absolute inset-0">
+                  {atual.backgroundMobileImageUrl && <source media="(max-width: 639px)" srcSet={atual.backgroundMobileImageUrl} />}
+                  <img
+                    src={atual.backgroundImageUrl || atual.backgroundMobileImageUrl || ""}
+                    alt=""
+                    className="h-full w-full object-cover opacity-55 mix-blend-screen transition-transform duration-700 group-hover:scale-[1.02]"
+                  />
+                </picture>
               )}
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_78%_25%,rgba(56,189,248,.42),transparent_38%),linear-gradient(90deg,rgba(2,12,36,.82)_0%,rgba(3,28,71,.52)_52%,rgba(3,25,55,.18)_100%)]" />
               <div
