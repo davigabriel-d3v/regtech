@@ -14,11 +14,14 @@ function createReader(): SupabaseClient<Database> {
 export async function fetchBanners(): Promise<BannerPrincipal[]> {
   const { data, error } = await createReader()
     .from("shop_banners")
-    .select("id,title,subtitle,badge,button_label,action_type,action_value,icon_name,background_image_url,background_mobile_image_url,overlay_opacity,text_align,active,display_order,autoplay_seconds")
+    .select("id,title,subtitle,badge,button_label,action_type,action_value,icon_name,background_image_url,background_mobile_image_url,overlay_opacity,background_color,text_align,active,display_order,autoplay_seconds")
     .eq("active", true)
     .order("display_order", { ascending: true });
 
-  if (error) return DEFAULT_BANNERS;
+  if (error) {
+    console.error("[shop_banners] Falha ao carregar banners públicos:", error.message);
+    return DEFAULT_BANNERS;
+  }
   return data.map((row) => ({
     id: row.id,
     title: row.title,
@@ -31,6 +34,7 @@ export async function fetchBanners(): Promise<BannerPrincipal[]> {
     backgroundImageUrl: row.background_image_url,
     backgroundMobileImageUrl: row.background_mobile_image_url,
     overlayOpacity: Number(row.overlay_opacity),
+    backgroundColor: row.background_color || "#073b8c",
     textAlign: row.text_align as BannerPrincipal["textAlign"],
     active: row.active,
     displayOrder: row.display_order,
