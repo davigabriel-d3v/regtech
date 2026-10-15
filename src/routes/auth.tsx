@@ -83,7 +83,8 @@ function AuthPage() {
 
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session?.user) {
-        void finalizarLogin(session.user.id);
+        // Defer database work until Supabase finishes its auth-state callback.
+        window.setTimeout(() => void finalizarLogin(session.user.id), 0);
       }
     });
 
