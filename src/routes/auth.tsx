@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -38,6 +38,65 @@ function AuthPage() {
   const [enviando, setEnviando] = useState(false);
   const [aceitaTermos, setAceitaTermos] = useState(false);
   const termosVersao = "2026-10-02";
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = params.get("error_description") || params.get("error");
+
+    if (oauthError) {
+      toast.error("Não foi possível entrar com Google. Verifique a configuração do provedor e tente novamente.");
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
+    if (params.get("oauth") !== "google") return;
+
+    let ativo = true;
+    let processando = false;
+
+    const finalizarLogin = async (userId: string) => {
+      if (processando) return;
+      processando = true;
+
+      try {
+        const { data: roleRows, error: roleError } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId);
+
+        if (roleError) throw roleError;
+        if (!ativo) return;
+
+        const isAdmin = roleRows?.some((row) => row.role === "admin");
+        const isOperator = roleRows?.some((row) => row.role === "operator");
+
+        toast.success("Login com Google realizado com sucesso.");
+        window.history.replaceState({}, document.title, window.location.pathname);
+        await navigate({ to: isAdmin || isOperator ? "/admin" : "/conta", replace: true });
+      } catch (error) {
+        processando = false;
+        if (ativo) {
+          toast.error(error instanceof Error ? error.message : "Não foi possível concluir o login.");
+        }
+      }
+    };
+
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        void finalizarLogin(session.user.id);
+      }
+    });
+
+    // Covers cases where Supabase has already restored the session when this page mounts.
+    void supabase.auth.getSession().then(({ data: sessionData }) => {
+      if (sessionData.session?.user) void finalizarLogin(sessionData.session.user.id);
+    });
+
+    return () => {
+      ativo = false;
+      data.subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   async function enviar(event: React.FormEvent) {
     event.preventDefault();
@@ -120,7 +179,7 @@ function AuthPage() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: window.location.origin },
+        options: { redirectTo: `${window.location.origin}/auth?oauth=google` },
       });
       if (error) throw error;
     } catch (error) {
