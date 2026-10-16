@@ -18,6 +18,7 @@ import { CarrinhoProvider } from "@/components/loja/CarrinhoContext";
 import { FavoritosProvider } from "@/components/loja/FavoritosContext";
 import { AtendimentoChat } from "@/components/atendimento/AtendimentoChat";
 import { StoreMotion } from "@/components/loja/StoreMotion";
+import { PageTransitionLoader } from "@/components/loja/PageTransitionLoader";
 
 function NotFoundComponent() {
   return (
@@ -154,6 +155,7 @@ function RootComponent() {
       <CarrinhoProvider>
         <FavoritosProvider>
           <StoreMotion />
+          <PageTransitionLoader />
           <Outlet />
           <AtendimentoChat />
           <Toaster />
