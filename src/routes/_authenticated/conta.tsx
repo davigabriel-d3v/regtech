@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Bell, Camera, Heart, LogOut, Package, ShieldCheck, Store, Trash2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Bell, Camera, Heart, LogOut, Package, ShieldCheck, Store, Trash2, CheckCircle2, TicketPercent, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,6 +36,8 @@ function Conta() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [orders, setOrders] = useState<Array<{ id: string; order_number: number; status: string; created_at: string }>>([]);
   const [notifications, setNotifications] = useState<Array<{ id: string; title: string; message: string; type: string; read_at: string | null; created_at: string }>>([]);
+  const [myCoupons, setMyCoupons] = useState<Array<any>>([]);
+  const [couponWhatsapp, setCouponWhatsapp] = useState("");
   const { favs } = useFavoritos();
 
   useEffect(() => {
@@ -53,15 +55,27 @@ function Conta() {
     Promise.all([
       supabase.from("orders").select("id,order_number,status,created_at").order("created_at", { ascending: false }).limit(8),
       (supabase as any).from("user_notifications").select("id,title,message,type,read_at,created_at").order("created_at", { ascending: false }).limit(8),
-    ]).then(([ordersResult, notificationsResult]) => {
+      (supabase as any).rpc("get_my_coupon_redemptions"),
+      supabase.from("shop_settings").select("whatsapp_phone").eq("id", "default").maybeSingle(),
+    ]).then(([ordersResult, notificationsResult, couponsResult, settingsResult]) => {
       if (!ativo) return;
       setOrders((ordersResult.data ?? []) as typeof orders);
       setNotifications((notificationsResult.data ?? []) as typeof notifications);
+      setMyCoupons((couponsResult.data ?? []) as Array<any>);
+      setCouponWhatsapp((settingsResult.data as any)?.whatsapp_phone ?? "");
     });
     return () => { ativo = false; };
   }, [user.id]);
 
   const unreadCount = useMemo(() => notifications.filter((n) => !n.read_at).length, [notifications]);
+
+  function usarCupom(redemption: any) {
+    const coupon = redemption;
+    const phone = couponWhatsapp.replace(/\D/g, "");
+    if (!phone) { toast.error("O WhatsApp para cupons ainda não foi configurado pelo administrador."); return; }
+    const message = `Olá! Quero usar meu cupom ${coupon?.code ?? ""} (${coupon?.name ?? "RegTech"}). Meu e-mail da conta é ${user.email ?? user.id}.`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+  }
 
   async function marcarNotificacao(id: string) {
     const now = new Date().toISOString();
@@ -170,6 +184,30 @@ function Conta() {
             <div className="rounded-2xl border border-border bg-secondary/20 p-4"><div className="flex items-center gap-2 text-primary"><Heart className="h-4 w-4" /><span className="text-xs font-semibold uppercase">Favoritos</span></div><p className="mt-2 text-2xl font-bold">{favs.length}</p><p className="text-xs text-muted-foreground">produtos salvos</p></div>
             <div className="rounded-2xl border border-border bg-secondary/20 p-4"><div className="flex items-center gap-2 text-primary"><Bell className="h-4 w-4" /><span className="text-xs font-semibold uppercase">Notificações</span></div><p className="mt-2 text-2xl font-bold">{unreadCount}</p><p className="text-xs text-muted-foreground">não lidas</p></div>
           </div>
+
+          <section className="mt-8 rounded-2xl border border-border p-5">
+            <div className="flex items-center gap-2"><TicketPercent className="h-5 w-5 text-primary" /><h2 className="font-display text-lg font-bold">Meus cupons</h2></div>
+            <p className="mt-1 text-xs text-muted-foreground">Os cupons resgatados ficam salvos nesta conta. Use o botão para abrir o WhatsApp com a mensagem pronta.</p>
+            <div className="mt-4 space-y-3">
+              {myCoupons.length ? myCoupons.map((redemption) => {
+                const coupon = redemption;
+                const currentCycle = redemption.redemption_cycle === redemption.current_redemption_cycle;
+                const reward = coupon.reward_type === "percent_discount"
+                  ? `${Number(coupon.reward_value).toLocaleString("pt-BR")}% de desconto`
+                  : coupon.reward_type === "fixed_discount" || coupon.reward_type === "credit"
+                    ? `R$ ${Number(coupon.reward_value).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                    : coupon.reward_text || "Recompensa";
+                return <div key={redemption.id} className="rounded-xl border border-border bg-secondary/20 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0"><p className="font-mono text-sm font-bold">{coupon.code}</p><p className="mt-1 text-sm font-semibold">{coupon.name}</p><p className="mt-1 text-xs text-muted-foreground">{reward}</p><p className="mt-1 text-[11px] text-muted-foreground">Resgatado em {new Date(redemption.redeemed_at).toLocaleString("pt-BR")}</p></div>
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${currentCycle ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground"}`}>{currentCycle ? "Cupom resgatado" : "Ciclo anterior"}</span>
+                  </div>
+                  {currentCycle && <button type="button" onClick={() => usarCupom(redemption)} className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground"><MessageCircle className="h-4 w-4" /> Usar cupom no WhatsApp</button>}
+                </div>;
+              }) : <p className="py-4 text-sm text-muted-foreground">Você ainda não resgatou cupons. <Link to="/resgatar" className="font-semibold text-primary hover:underline">Resgatar um cupom</Link></p>}
+            </div>
+            <Link to="/resgatar" className="mt-4 inline-flex items-center gap-2 rounded-xl border border-primary/40 px-4 py-2.5 text-sm font-semibold text-primary"><TicketPercent className="h-4 w-4" /> Resgatar novo cupom</Link>
+          </section>
 
           <section className="mt-8 rounded-2xl border border-border p-5">
             <h2 className="font-display text-lg font-bold">Meus pedidos</h2><p className="text-xs text-muted-foreground">Acompanhe seus pedidos recentes.</p>

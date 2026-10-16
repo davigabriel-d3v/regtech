@@ -77,13 +77,15 @@ export function CuponsAdmin() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Coupon | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [whatsappPhone, setWhatsappPhone] = useState("");
+  const [savingPhone, setSavingPhone] = useState(false);
 
   async function load() {
     setLoading(true);
     const [{ data: coupons, error: couponsError }, { data: redemptions, error: redemptionsError }] =
       await Promise.all([
         supabase.from("coupons").select("*").order("created_at", { ascending: false }),
-        supabase.from("coupon_redemptions").select("coupon_id"),
+        (supabase as any).from("coupon_redemptions").select("coupon_id,redemption_cycle"),
       ]);
 
     if (couponsError) {
@@ -101,7 +103,24 @@ export function CuponsAdmin() {
     setLoading(false);
   }
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+    supabase.from("shop_settings").select("whatsapp_phone").eq("id", "default").maybeSingle()
+      .then(({ data, error }) => {
+        if (error) toast.error("Não foi possível carregar o WhatsApp: " + error.message);
+        else setWhatsappPhone(data?.whatsapp_phone ?? "");
+      });
+  }, []);
+
+  async function saveWhatsappPhone() {
+    const digits = whatsappPhone.replace(/\D/g, "");
+    if (digits.length < 10 || digits.length > 15) return void toast.error("Informe um número de WhatsApp válido com DDI e DDD.");
+    setSavingPhone(true);
+    const { error } = await supabase.from("shop_settings").update({ whatsapp_phone: digits }).eq("id", "default");
+    setSavingPhone(false);
+    if (error) toast.error("Não foi possível salvar o WhatsApp: " + error.message);
+    else { setWhatsappPhone(digits); toast.success("WhatsApp para resgates salvo."); }
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -190,9 +209,9 @@ export function CuponsAdmin() {
   async function reset(item: Coupon) {
     if (!item.resettable) return void toast.error("Este cupom está configurado para não permitir reset.");
     if (!confirm(`Resetar os resgates de "${item.code}"? O cupom poderá ser usado novamente conforme as regras configuradas.`)) return;
-    const { error } = await supabase.from("coupon_redemptions").delete().eq("coupon_id", item.id);
+    const { error } = await (supabase as any).rpc("reset_coupon_redemptions", { p_coupon_id: item.id });
     if (error) toast.error(error.message);
-    else { toast.success("Resgates resetados."); await load(); }
+    else { toast.success("Cupom resetado. O histórico foi preservado e um novo ciclo foi aberto."); await load(); }
   }
 
   async function remove(item: Coupon) {
@@ -227,6 +246,14 @@ export function CuponsAdmin() {
   return (
     <section className="space-y-6">
       <div className="rounded-3xl border border-border bg-card p-6">
+        <div className="mb-6 rounded-2xl border border-border bg-background/50 p-4">
+          <h3 className="font-semibold">WhatsApp para resgate de cupons</h3>
+          <p className="mt-1 text-sm text-muted-foreground">O botão “Usar cupom” na conta do cliente abrirá uma conversa para este número. Inclua DDI e DDD, somente números.</p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <input value={whatsappPhone} onChange={(e) => setWhatsappPhone(e.target.value)} inputMode="tel" placeholder="Ex.: 5594999999999" maxLength={20} className="min-w-0 flex-1 rounded-xl border border-border bg-background px-4 py-3 text-sm" />
+            <button onClick={() => void saveWhatsappPhone()} disabled={savingPhone} className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50">{savingPhone ? "Salvando..." : "Salvar WhatsApp"}</button>
+          </div>
+        </div>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Marketing → Cupons</p>
