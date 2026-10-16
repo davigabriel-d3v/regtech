@@ -187,6 +187,12 @@ Deno.serve(async (req) => {
 
       const userId = created.user.id;
       try {
+        const { error: clearRoleError } = await adminClient
+          .from("user_roles")
+          .delete()
+          .eq("user_id", userId);
+        if (clearRoleError) throw clearRoleError;
+
         const { error: roleError } = await adminClient
           .from("user_roles")
           .insert({ user_id: userId, role });
@@ -226,6 +232,20 @@ Deno.serve(async (req) => {
 
       const role = normalizeRole(body.role, body.is_admin);
       const permissions = cleanPermissions(body.permissions, role);
+
+      const { data: existingRole, error: existingRoleError } = await adminClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (existingRoleError) throw existingRoleError;
+      if (!existingRole || existingRole.role === "user") {
+        return json(
+          { error: "Usuários comuns não podem ser promovidos por esta tela. Para criar um operador, use Novo acesso no Acesso +." },
+          400,
+          origin,
+        );
+      }
 
       if (userId === callerId && role !== "admin") {
         return json(
@@ -275,14 +295,21 @@ Deno.serve(async (req) => {
         return json({ error: "Não é permitido remover o próprio acesso." }, 400, origin);
       }
 
-      const { data: targetRole } = await adminClient
+      const { data: targetRole, error: targetRoleError } = await adminClient
         .from("user_roles")
         .select("role")
         .eq("user_id", userId)
-        .eq("role", "admin")
         .maybeSingle();
+      if (targetRoleError) throw targetRoleError;
+      if (!targetRole || targetRole.role === "user") {
+        return json(
+          { error: "Usuários comuns não podem ser removidos pelo Acesso +." },
+          400,
+          origin,
+        );
+      }
 
-      if (targetRole?.role === "admin") {
+      if (targetRole.role === "admin") {
         const { count } = await adminClient
           .from("user_roles")
           .select("user_id", { count: "exact", head: true })
