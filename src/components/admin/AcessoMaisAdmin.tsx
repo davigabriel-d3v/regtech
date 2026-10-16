@@ -67,10 +67,10 @@ export function AcessoMaisAdmin({ openCreateRequest = 0 }: { openCreateRequest?:
   }
 
   async function removeAccess(userId: string) {
-    if (!confirm("Remover este acesso? O usuário não poderá mais entrar no painel.")) return;
+    if (!confirm("Excluir este usuário permanentemente? A conta de autenticação e seus acessos serão removidos. Essa ação não pode ser desfeita.")) return;
     const { data, error } = await call({ action: "remove", user_id: userId });
     if (error || data?.error) toast.error(data?.error || error?.message || "Não foi possível remover.");
-    else { toast.success("Acesso removido."); await load(); }
+    else { toast.success("Usuário excluído."); await load(); }
   }
 
   return <section className="space-y-6">
@@ -82,7 +82,7 @@ export function AcessoMaisAdmin({ openCreateRequest = 0 }: { openCreateRequest?:
     {loading ? <div className="flex justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div> :
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{items.map((item) => <div key={item.user_id} className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{item.email}</p><span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs text-primary">{item.role === "admin" ? <><ShieldCheck className="h-3.5 w-3.5" /> Administrador</> : item.role === "operator" ? <><KeyRound className="h-3.5 w-3.5" /> Operador</> : <><UserRound className="h-3.5 w-3.5" /> Usuário</>}</span></div>
-          <div className="flex gap-1"><button onClick={() => setEditing(item)} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground" title="Editar função e permissões"><Pencil className="h-4 w-4" /></button>{item.role !== "user" && <button onClick={() => removeAccess(item.user_id)} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Remover acesso"><Trash2 className="h-4 w-4" /></button>}</div></div>
+          <div className="flex gap-1"><button onClick={() => setEditing(item)} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground" title="Editar função e permissões"><Pencil className="h-4 w-4" /></button><button onClick={() => removeAccess(item.user_id)} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Excluir usuário permanentemente"><Trash2 className="h-4 w-4" /></button></div></div>
         {item.role === "operator" && <div className="mt-4 flex flex-wrap gap-2">{item.permissions.map((p) => <span key={p} className="rounded-full border border-border px-2.5 py-1 text-xs">{modules.find(([id]) => id === p)?.[1] ?? p}</span>)}</div>}
       </div>)}</div>}
 
