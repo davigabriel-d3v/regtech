@@ -219,3 +219,73 @@
   }
   .rt-reveal { opacity: 1; translate: none; }
 }
+
+
+/* Responsive safety net shared by storefront, account and administration. */
+@layer base {
+  html {
+    width: 100%;
+    min-width: 320px;
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: 1rem;
+  }
+
+  body {
+    width: 100%;
+    min-width: 320px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: clip;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  img, video, canvas, svg {
+    max-width: 100%;
+  }
+
+  input, textarea, select, button {
+    font: inherit;
+  }
+
+  input, textarea, select {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  button, [role="button"], a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]) {
+    touch-action: manipulation;
+  }
+}
+
+/* Small screens: avoid squeezed forms and clipped action groups. */
+@media (max-width: 640px) {
+  [role="dialog"], [data-radix-dialog-content] {
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  table {
+    max-width: 100%;
+  }
+
+  :where(main, section, article, aside, header, footer) {
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+}
