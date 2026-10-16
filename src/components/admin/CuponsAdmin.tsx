@@ -85,7 +85,7 @@ export function CuponsAdmin() {
     const [{ data: coupons, error: couponsError }, { data: redemptions, error: redemptionsError }] =
       await Promise.all([
         supabase.from("coupons").select("*").order("created_at", { ascending: false }),
-        supabase.from("coupon_redemptions").select("coupon_id,redemption_cycle"),
+        (supabase as any).from("coupon_redemptions").select("coupon_id,redemption_cycle"),
       ]);
 
     if (couponsError) {
