@@ -76,7 +76,7 @@ function CarrinhoPage() {
           <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
             <section className="space-y-3">
               {itens.map(({ produto, quantidade }) => (
-                <article key={produto.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3 sm:gap-5 sm:p-4">
+                <article key={produto.id} className="rt-cart-item flex gap-3 rounded-2xl border border-border bg-card p-3 sm:gap-5 sm:p-4">
                   <Link to="/produto/$productCode" params={{ productCode: produto.productCode }} className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-secondary sm:h-28 sm:w-28">
                     {produto.imagemUrl ? (
                       <img src={produto.imagemUrl} alt={produto.titulo} className="h-full w-full object-cover" />
@@ -99,7 +99,7 @@ function CarrinhoPage() {
                         <button type="button" aria-label={`Diminuir quantidade de ${produto.titulo}`} onClick={() => alterarQuantidade(produto.id, quantidade - 1)} className="grid h-9 w-9 place-items-center hover:bg-secondary">
                           <Minus className="h-4 w-4" />
                         </button>
-                        <span className="w-9 text-center text-sm font-semibold tabular-nums">{quantidade}</span>
+                        <span key={quantidade} className="rt-cart-feedback w-9 text-center text-sm font-semibold tabular-nums" aria-live="polite">{quantidade}</span>
                         <button type="button" aria-label={`Aumentar quantidade de ${produto.titulo}`} onClick={() => alterarQuantidade(produto.id, quantidade + 1)} className="grid h-9 w-9 place-items-center hover:bg-secondary">
                           <Plus className="h-4 w-4" />
                         </button>
