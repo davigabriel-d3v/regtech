@@ -182,9 +182,7 @@ function AuthPage() {
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth?oauth=google`,
-          // Prefill the intended Google account while still allowing account switching.
           queryParams: {
-            login_hint: "davigabriel.d3v@gmail.com",
             prompt: "select_account",
           },
         },
