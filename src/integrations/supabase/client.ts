@@ -32,9 +32,9 @@ function createSupabaseClient() {
   // The production app is intentionally pinned to the new REGTECH CELLSHOP
   // Supabase project. Environment variables remain supported, but stale
   // values from an older/deleted project are ignored.
-  const configuredUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  const configuredUrl = import.meta.env['VITE_SUPABASE_URL'] as string | undefined;
   const configuredKey =
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+    import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] as string | undefined;
 
   const supabaseUrl =
     configuredUrl === SUPABASE_PROJECT_URL

@@ -5,6 +5,10 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/termos")({
   head: () => ({ meta: [
     { title: "Termos de Uso | RegTech" },
+      { property: "og:title", content: "Termos de Uso | RegTech" },
+      { property: "og:description", content: "Termos de Uso da RegTech Cell Shop." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     { name: "description", content: "Termos de Uso da RegTech Cell Shop." },
   ]}),
   component: Termos,

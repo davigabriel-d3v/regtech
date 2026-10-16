@@ -511,6 +511,7 @@ export type Database = {
           action_value: string | null
           active: boolean
           autoplay_seconds: number
+          background_color: string | null
           background_image_url: string | null
           background_mobile_image_url: string | null
           badge: string
@@ -530,6 +531,7 @@ export type Database = {
           action_value?: string | null
           active?: boolean
           autoplay_seconds?: number
+          background_color?: string | null
           background_image_url?: string | null
           background_mobile_image_url?: string | null
           badge?: string
@@ -549,6 +551,7 @@ export type Database = {
           action_value?: string | null
           active?: boolean
           autoplay_seconds?: number
+          background_color?: string | null
           background_image_url?: string | null
           background_mobile_image_url?: string | null
           badge?: string

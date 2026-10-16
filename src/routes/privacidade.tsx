@@ -5,6 +5,10 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/privacidade")({
   head: () => ({ meta: [
     { title: "Política de Privacidade | RegTech" },
+      { property: "og:title", content: "Política de Privacidade | RegTech" },
+      { property: "og:description", content: "Política de Privacidade e proteção de dados da RegTech Cell Shop." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     { name: "description", content: "Política de Privacidade e proteção de dados da RegTech Cell Shop." },
   ]}),
   component: Privacidade,

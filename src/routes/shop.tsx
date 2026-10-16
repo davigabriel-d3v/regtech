@@ -88,6 +88,10 @@ export const Route = createFileRoute("/shop")({
   head: () => ({
     meta: [
       { title: "Shop RegTech — Tecnologia, mobilidade e conectividade" },
+      { property: "og:title", content: "Shop RegTech — Tecnologia, mobilidade e conectividade" },
+      { property: "og:description", content: "Compre tecnologia, motos elétricas, Starlink, Apple, Samsung, Xiaomi, DJI e acessórios na RegTech." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         name: "description",
         content:

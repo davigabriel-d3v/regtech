@@ -10,6 +10,10 @@ import logo from "@/assets/regtech-logo.png";
 export const Route = createFileRoute("/preview")({
   head: () => ({ meta: [
     { title: "Preview — RegTech Shop" },
+      { property: "og:title", content: "Preview — RegTech Shop" },
+      { property: "og:description", content: "Prévia visual do novo Shop RegTech com catálogo demonstrativo." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     { name: "description", content: "Prévia visual do novo Shop RegTech com catálogo demonstrativo." },
   ]}),
   component: Preview,

@@ -5,6 +5,10 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/cookies")({
   head: () => ({ meta: [
     { title: "Política de Cookies | RegTech" },
+      { property: "og:title", content: "Política de Cookies | RegTech" },
+      { property: "og:description", content: "Política de Cookies da RegTech Cell Shop." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     { name: "description", content: "Política de Cookies da RegTech Cell Shop." },
   ]}),
   component: Cookies,

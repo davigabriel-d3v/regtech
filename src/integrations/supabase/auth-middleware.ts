@@ -25,8 +25,8 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       throw new Error("Unauthorized: Invalid token");
     }
 
-    const configuredUrl = process.env.SUPABASE_URL;
-    const configuredKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+    const configuredUrl = process.env['SUPABASE_URL'];
+    const configuredKey = process.env['SUPABASE_PUBLISHABLE_KEY'];
     const url =
       configuredUrl === SUPABASE_PROJECT_URL
         ? configuredUrl

@@ -139,16 +139,16 @@ export function CuponsAdmin() {
 
   async function save() {
     const code = normalizeCode(form.code);
-    if (code.length < 3) return toast.error("O cupom precisa ter pelo menos 3 caracteres.");
-    if (!form.name.trim()) return toast.error("Informe o nome do cupom.");
+    if (code.length < 3) return void toast.error("O cupom precisa ter pelo menos 3 caracteres.");
+    if (!form.name.trim()) return void toast.error("Informe o nome do cupom.");
     if (form.reward_type === "percent_discount" && (form.reward_value <= 0 || form.reward_value > 100)) {
-      return toast.error("O desconto percentual deve ficar entre 0 e 100.");
+      return void toast.error("O desconto percentual deve ficar entre 0 e 100.");
     }
     if ((form.reward_type === "gift" || form.reward_type === "custom") && !form.reward_text.trim()) {
-      return toast.error("Descreva a recompensa.");
+      return void toast.error("Descreva a recompensa.");
     }
     if (form.expires_at && form.starts_at && new Date(form.expires_at) <= new Date(form.starts_at)) {
-      return toast.error("A data final precisa ser posterior à inicial.");
+      return void toast.error("A data final precisa ser posterior à inicial.");
     }
 
     setSaving(true);
@@ -188,7 +188,7 @@ export function CuponsAdmin() {
   }
 
   async function reset(item: Coupon) {
-    if (!item.resettable) return toast.error("Este cupom está configurado para não permitir reset.");
+    if (!item.resettable) return void toast.error("Este cupom está configurado para não permitir reset.");
     if (!confirm(`Resetar os resgates de "${item.code}"? O cupom poderá ser usado novamente conforme as regras configuradas.`)) return;
     const { error } = await supabase.from("coupon_redemptions").delete().eq("coupon_id", item.id);
     if (error) toast.error(error.message);

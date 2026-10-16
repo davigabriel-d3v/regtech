@@ -69,6 +69,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "RegTech — Sua Loja de Tecnologia Online" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "description", content: "Os melhores produtos de tecnologia: celulares, notebooks, eletrônicos, e muito mais com os melhores preços." },
       { property: "og:title", content: "RegTech — Sua Loja de Tecnologia Online" },
       { property: "og:description", content: "Descubra os melhores produtos de tecnologia com preços imperdíveis." },

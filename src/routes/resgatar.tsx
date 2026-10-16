@@ -36,6 +36,10 @@ export const Route = createFileRoute("/resgatar")({
   head: () => ({
     meta: [
       { title: "Resgatar cupom | RegTech" },
+      { property: "og:title", content: "Resgatar cupom | RegTech" },
+      { property: "og:description", content: "Resgate seu cupom e confira a recompensa da RegTech." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "description", content: "Resgate seu cupom e confira a recompensa da RegTech." },
     ],
   }),

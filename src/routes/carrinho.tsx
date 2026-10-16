@@ -9,6 +9,10 @@ export const Route = createFileRoute("/carrinho")({
   head: () => ({
     meta: [
       { title: "Carrinho | RegTech Shop" },
+      { property: "og:title", content: "Carrinho | RegTech Shop" },
+      { property: "og:description", content: "Revise seus produtos e envie seu pedido para a RegTech." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "description", content: "Revise seus produtos e envie seu pedido para a RegTech." },
     ],
   }),

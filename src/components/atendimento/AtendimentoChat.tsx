@@ -96,7 +96,7 @@ export function AtendimentoChat() {
     const channel = supabase
       .channel("chat-customer-" + conversation.id)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: "conversation_id=eq." + conversation.id }, (payload) => {
-        setMessages((current) => current.some((m) => m.id === payload.new.id) ? current : [...current, payload.new as ChatMessage]);
+        setMessages((current) => current.some((m) => m.id === payload.new['id']) ? current : [...current, payload.new as ChatMessage]);
       })
       .subscribe();
     return () => { void supabase.removeChannel(channel); };

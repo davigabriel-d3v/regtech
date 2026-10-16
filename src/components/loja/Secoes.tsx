@@ -30,6 +30,7 @@ import {
   Bike,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useFavoritos } from "@/hooks/useFavoritos";
 import { supabase } from "@/integrations/supabase/client";
 import { whatsappComMensagem } from "@/lib/contato";
 import { SolicitarPedidoModal } from "@/components/loja/SolicitarPedidoModal";
@@ -602,7 +603,7 @@ export function Newsletter() {
       return;
     }
     setEnviando(true);
-    const { error } = await supabase.from("newsletter").insert({ email: valor });
+    const { error } = await (supabase as any).from("newsletter").insert({ email: valor });
     setEnviando(false);
     if (error && error.code !== "23505") {
       toast.error("Não foi possível cadastrar agora. Tente novamente.");
