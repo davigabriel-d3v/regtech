@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Barcode, Copy, Eye, ImagePlus, Loader2, Pencil, Plus, Save, Share2, Star, Trash2, Upload, X } from "lucide-react";
+import { Barcode, Copy, Eye, ImagePlus, Loader2, Pencil, Plus, Save, Share2, Star, Trash2, Upload, Video, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,6 +20,7 @@ const emptyForm = {
 };
 
 const pageSize = 10;
+const isVideoMedia = (url: string) => /\.(mp4|webm|mov|m4v|ogv)(?:[?#]|$)/i.test(url);
 const money = (v: number | null) => v == null ? "—" : Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const productShareLink = (productCode: string) =>
   typeof window === "undefined"
@@ -121,8 +122,14 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
 
   function onFiles(selected: FileList | null) {
     if (!selected) return;
-    const accepted = Array.from(selected).filter(f => f.type.startsWith("image/"));
-    setFiles(prev => [...prev, ...accepted]);
+    const selectedFiles = Array.from(selected);
+    const accepted = selectedFiles.filter(f => f.type.startsWith("image/") || f.type.startsWith("video/"));
+    const rejected = selectedFiles.length - accepted.length;
+    const tooLarge = accepted.filter(f => f.size > 100 * 1024 * 1024);
+    const valid = accepted.filter(f => f.size <= 100 * 1024 * 1024);
+    if (rejected) toast.error("Alguns arquivos foram ignorados. Use fotos ou vídeos.");
+    if (tooLarge.length) toast.error("Cada arquivo deve ter no máximo 100 MB.");
+    setFiles(prev => [...prev, ...valid]);
   }
 
   async function uploadImage(productId: string, file: File, order: number, primary: boolean) {
@@ -270,7 +277,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
       <div className="flex-1">
         <h2 className="font-display text-2xl font-bold">Gerenciamento de produtos</h2>
-        <p className="text-sm text-muted-foreground">Cadastro, fotos, preços e status. O ID é gerado automaticamente.</p>
+        <p className="text-sm text-muted-foreground">Cadastro, fotos, vídeos, preços e status. O ID é gerado automaticamente.</p>
       </div>
       <button onClick={openCreate} className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground">
         <Plus className="h-4 w-4" /> Cadastrar produto
@@ -296,7 +303,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
           </tr></thead>
           <tbody>
             {rows.map(p => <tr key={p.id} className="border-b border-border last:border-0">
-              <td className="p-3">{p.product_images?.sort((a,b)=>a.display_order-b.display_order)[0]?.image_url ? <img src={p.product_images.sort((a,b)=>a.display_order-b.display_order)[0]!.image_url} className="h-11 w-11 rounded-lg object-cover" /> : <div className="h-11 w-11 rounded-lg bg-secondary" />}</td>
+              <td className="p-3">{p.product_images?.sort((a,b)=>a.display_order-b.display_order)[0]?.image_url ? (isVideoMedia(p.product_images.sort((a,b)=>a.display_order-b.display_order)[0]!.image_url) ? <video src={p.product_images.sort((a,b)=>a.display_order-b.display_order)[0]!.image_url} className="h-11 w-11 rounded-lg object-cover" muted playsInline /> : <img src={p.product_images.sort((a,b)=>a.display_order-b.display_order)[0]!.image_url} alt={p.name} className="h-11 w-11 rounded-lg object-cover" />) : <div className="h-11 w-11 rounded-lg bg-secondary" />}</td>
               <td className="p-3"><div className="font-semibold">{p.name}</div></td>
               <td className="p-3"><button className="inline-flex items-center gap-1 font-mono text-xs text-primary" onClick={() => navigator.clipboard.writeText(p.product_code).then(()=>toast.success("ID copiado!"))}>{p.product_code}<Copy className="h-3.5 w-3.5" /></button></td>
               <td className="p-3">{money(p.promotional_price ?? p.price)}</td><td className="p-3">{p.stock}</td>
@@ -359,20 +366,20 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
             <label className="block space-y-1.5 text-sm"><span className="font-medium">Observações</span><textarea value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} rows={4} className="w-full rounded-xl border border-border bg-background px-3 py-2.5 outline-none focus:border-primary"/></label>
             <label className="block space-y-1.5 text-sm"><span className="font-medium">Status</span><select value={form.status} onChange={e=>setForm({...form,status:e.target.value as "active"|"inactive"})} className="w-full rounded-xl border border-border bg-background px-3 py-2.5"><option value="active">Ativo</option><option value="inactive">Inativo</option></select></label>
             <div className="rounded-2xl border border-border p-4">
-              <div className="mb-3 flex items-center justify-between"><div><p className="font-semibold">Fotos do produto</p><p className="text-xs text-muted-foreground">Arraste, ordene e defina a principal.</p></div><button type="button" onClick={()=>fileInput.current?.click()} className="rounded-lg border px-3 py-2 text-sm"><ImagePlus className="mr-1 inline h-4 w-4"/>Adicionar</button></div>
-              <input ref={fileInput} hidden type="file" accept="image/*" multiple onChange={e=>onFiles(e.target.files)}/>
+              <div className="mb-3 flex items-center justify-between"><div><p className="font-semibold">Fotos e vídeos do produto</p><p className="text-xs text-muted-foreground">Adicione imagens ou vídeos (até 100 MB cada), ordene e defina a imagem principal.</p></div><button type="button" onClick={()=>fileInput.current?.click()} className="rounded-lg border px-3 py-2 text-sm"><ImagePlus className="mr-1 inline h-4 w-4"/>Adicionar</button></div>
+              <input ref={fileInput} hidden type="file" accept="image/*,video/*" multiple onChange={e=>{onFiles(e.target.files);e.currentTarget.value="";}}/>
               <div onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();onFiles(e.dataTransfer.files)}} className="rounded-xl border border-dashed border-border p-3">
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                   {images.map((img,i)=><div key={img.id} draggable onDragStart={()=>dragIndex.current=i} onDragOver={e=>e.preventDefault()} onDrop={()=>{if(dragIndex.current!==null){reorder(dragIndex.current,i);dragIndex.current=null}}} className="group relative overflow-hidden rounded-xl border border-border">
-                    <img src={img.image_url} className="aspect-square w-full object-cover"/>
+                    {isVideoMedia(img.image_url) ? <video src={img.image_url} controls playsInline className="aspect-square w-full object-cover" /> : <img src={img.image_url} alt="Mídia do produto" className="aspect-square w-full object-cover"/>}
                     {img.is_primary && <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] text-primary-foreground">Principal</span>}
                     <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-background/80 p-1 opacity-0 transition group-hover:opacity-100"><button type="button" onClick={()=>setPrimary(img)} title="Principal"><Star className="h-3.5 w-3.5"/></button><button type="button" onClick={()=>{setReplaceTarget(img);replaceInput.current?.click()}} title="Substituir"><Upload className="h-3.5 w-3.5"/></button><button type="button" onClick={()=>removeImage(img)} title="Excluir"><Trash2 className="h-3.5 w-3.5 text-destructive"/></button></div>
                   </div>)}
-                  {files.map((f,i)=><div key={f.name+i} className="relative overflow-hidden rounded-xl border border-dashed border-primary/40 p-2 text-xs"><img src={URL.createObjectURL(f)} alt={f.name} className="aspect-square w-full rounded-lg object-cover"/><p className="truncate mt-1">{f.name}</p></div>)}
+                  {files.map((f,i)=><div key={f.name+i} className="relative overflow-hidden rounded-xl border border-dashed border-primary/40 p-2 text-xs">{f.type.startsWith("video/") ? <video src={URL.createObjectURL(f)} controls playsInline className="aspect-square w-full rounded-lg object-cover" /> : <img src={URL.createObjectURL(f)} alt={f.name} className="aspect-square w-full rounded-lg object-cover"/>}<p className="truncate mt-1">{f.name}</p></div>)}
                 </div>
-                {!images.length && !files.length && <div className="py-8 text-center text-sm text-muted-foreground">Selecione ou arraste fotos para cá.</div>}
+                {!images.length && !files.length && <div className="py-8 text-center text-sm text-muted-foreground">Selecione ou arraste fotos e vídeos para cá.</div>}
               </div>
-              <input ref={replaceInput} hidden type="file" accept="image/*" onChange={e=>{const f=e.target.files?.[0];if(f&&replaceTarget)replaceImage(replaceTarget,f);e.currentTarget.value="";}}/>
+              <input ref={replaceInput} hidden type="file" accept="image/*,video/*" onChange={e=>{const f=e.target.files?.[0];if(f&&replaceTarget)replaceImage(replaceTarget,f);e.currentTarget.value="";}}/>
             </div>
             <div className="rounded-xl bg-secondary/60 p-3 text-xs text-muted-foreground">ID único: <strong className="font-mono text-foreground">{editing?.product_code ?? "Será gerado ao salvar"}</strong>{editing && <button type="button" className="ml-2 text-primary" onClick={()=>navigator.clipboard.writeText(editing.product_code).then(()=>toast.success("ID copiado!"))}>Copiar ID</button>}</div>
           </div>
@@ -394,7 +401,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
       </div>
     </div>
   </div>
-</div><div className="mt-5 grid gap-4 sm:grid-cols-2">{(viewing.product_images??[]).sort((a,b)=>a.display_order-b.display_order).map(i=><img key={i.id} src={i.image_url} className="aspect-square w-full rounded-xl object-cover"/> )}</div><div className="mt-5 grid grid-cols-2 gap-3 text-sm"><p><b>Preço:</b> {money(viewing.price)}</p><p><b>Estoque:</b> {viewing.stock}</p><p><b>Status:</b> {viewing.status==="active"?"Ativo":"Inativo"}</p></div><p className="mt-4 text-sm text-muted-foreground">{viewing.description||"Sem descrição."}</p></div></div>}
+</div><div className="mt-5 grid gap-4 sm:grid-cols-2">{(viewing.product_images??[]).sort((a,b)=>a.display_order-b.display_order).map(i=><div key={i.id}>{isVideoMedia(i.image_url) ? <video src={i.image_url} controls playsInline className="aspect-square w-full rounded-xl object-cover" /> : <img src={i.image_url} alt={viewing.name} className="aspect-square w-full rounded-xl object-cover"/>}</div>)}</div><div className="mt-5 grid grid-cols-2 gap-3 text-sm"><p><b>Preço:</b> {money(viewing.price)}</p><p><b>Estoque:</b> {viewing.stock}</p><p><b>Status:</b> {viewing.status==="active"?"Ativo":"Inativo"}</p></div><p className="mt-4 text-sm text-muted-foreground">{viewing.description||"Sem descrição."}</p></div></div>}
 
     {deleteTarget && <div className="fixed inset-0 z-[80] flex items-center justify-center bg-background/80 p-4 backdrop-blur"><div className="w-full max-w-md rounded-3xl border border-border bg-card p-6"><h3 className="font-display text-lg font-bold">Excluir produto</h3><p className="mt-2 text-sm text-muted-foreground">Tem certeza que deseja excluir este produto?</p><div className="mt-6 flex justify-end gap-2"><button onClick={()=>setDeleteTarget(null)} className="rounded-full border px-4 py-2 text-sm">Cancelar</button><button onClick={removeProduct} disabled={saving} className="rounded-full bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground">Excluir</button></div></div></div>}
   </section>;
