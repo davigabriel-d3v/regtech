@@ -29,6 +29,8 @@ import {
   Search,
   ShoppingCart,
   Star,
+  Gift,
+  ArrowUpRight,
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
 import { RodapeRegTech } from "@/components/RodapeRegTech";
@@ -213,7 +215,25 @@ function Shop() {
                 { label: "Serviços", href: "/#servicos" },
                 { label: "Contato", href: "/#contato" },
                 { label: "Resgatar", href: "/resgatar" },
-              ].map((link) => (
+              ].map((link) => link.label === "Resgatar" ? (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenu(false)}
+                  className="group/resgatar relative my-2 flex items-center justify-between overflow-hidden rounded-xl border border-emerald-400/50 bg-gradient-to-r from-emerald-500/20 via-emerald-400/10 to-cyan-400/10 px-3 py-3 text-sm font-bold text-emerald-300 shadow-md shadow-emerald-950/20 ring-1 ring-emerald-400/10 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:from-emerald-500/30 hover:to-cyan-400/20 hover:shadow-lg hover:shadow-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <span className="grid h-9 w-9 place-items-center rounded-lg bg-emerald-400/20 text-emerald-300 transition-transform duration-200 group-hover/resgatar:scale-110">
+                      <Gift className="h-5 w-5" />
+                    </span>
+                    <span className="flex flex-col gap-0.5">
+                      <span>Resgatar</span>
+                      <span className="text-[11px] font-medium text-emerald-100/70">Seus cupons e benefícios</span>
+                    </span>
+                  </span>
+                  <ArrowUpRight className="h-4 w-4 shrink-0 text-emerald-300 transition-transform duration-200 group-hover/resgatar:translate-x-0.5 group-hover/resgatar:-translate-y-0.5" />
+                </a>
+              ) : (
                 <a key={link.href} href={link.href} onClick={() => setMenu(false)} className="block rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-primary/15 hover:text-primary">
                   {link.label}
                 </a>
