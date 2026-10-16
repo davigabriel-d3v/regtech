@@ -5,6 +5,9 @@ alter table public.coupon_redemptions
   add column if not exists user_id uuid references auth.users(id) on delete set null,
   add column if not exists redemption_cycle integer not null default 1;
 
+-- Keep historical anonymous redemptions out of the new account-bound cycle.
+update public.coupon_redemptions set redemption_cycle = 0 where user_id is null;
+
 create index if not exists coupon_redemptions_user_idx
   on public.coupon_redemptions(user_id, redeemed_at desc);
 
