@@ -239,14 +239,6 @@ Deno.serve(async (req) => {
         .eq("user_id", userId)
         .maybeSingle();
       if (existingRoleError) throw existingRoleError;
-      if (!existingRole || existingRole.role === "user") {
-        return json(
-          { error: "Usuários comuns não podem ser promovidos por esta tela. Para criar um operador, use Novo acesso no Acesso +." },
-          400,
-          origin,
-        );
-      }
-
       if (userId === callerId && role !== "admin") {
         return json(
           { error: "O administrador atual não pode remover o próprio perfil de administrador." },
@@ -301,14 +293,6 @@ Deno.serve(async (req) => {
         .eq("user_id", userId)
         .maybeSingle();
       if (targetRoleError) throw targetRoleError;
-      if (!targetRole || targetRole.role === "user") {
-        return json(
-          { error: "Usuários comuns não podem ser removidos pelo Acesso +." },
-          400,
-          origin,
-        );
-      }
-
       if (targetRole.role === "admin") {
         const { count } = await adminClient
           .from("user_roles")

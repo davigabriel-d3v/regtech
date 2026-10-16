@@ -60,7 +60,7 @@ export function AcessoMaisAdmin({ openCreateRequest = 0 }: { openCreateRequest?:
   async function saveEdit() {
     if (!editing) return;
     setSaving(true);
-    const { data, error } = await call({ action: "update", user_id: editing.user_id, role: editing.role, permissions: editing.role === "admin" ? modules.map(([id]) => id) : editing.permissions.filter((p) => !["acesso_plus", "configuracoes"].includes(p)) });
+    const { data, error } = await call({ action: "update", user_id: editing.user_id, role: editing.role, permissions: editing.role === "admin" ? modules.map(([id]) => id) : editing.role === "user" ? [] : editing.permissions.filter((p) => !["acesso_plus", "configuracoes"].includes(p)) });
     setSaving(false);
     if (error || data?.error) { toast.error(data?.error || error?.message || "Não foi possível atualizar."); return; }
     toast.success("Permissões atualizadas."); setEditing(null); await load();
@@ -82,7 +82,7 @@ export function AcessoMaisAdmin({ openCreateRequest = 0 }: { openCreateRequest?:
     {loading ? <div className="flex justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div> :
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{items.map((item) => <div key={item.user_id} className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{item.email}</p><span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs text-primary">{item.role === "admin" ? <><ShieldCheck className="h-3.5 w-3.5" /> Administrador</> : item.role === "operator" ? <><KeyRound className="h-3.5 w-3.5" /> Operador</> : <><UserRound className="h-3.5 w-3.5" /> Usuário</>}</span></div>
-          {item.role !== "user" && <div className="flex gap-1"><button onClick={() => setEditing(item)} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground" title="Editar permissões"><Pencil className="h-4 w-4" /></button><button onClick={() => removeAccess(item.user_id)} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Remover acesso"><Trash2 className="h-4 w-4" /></button></div>}</div>
+          <div className="flex gap-1"><button onClick={() => setEditing(item)} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground" title="Editar função e permissões"><Pencil className="h-4 w-4" /></button>{item.role !== "user" && <button onClick={() => removeAccess(item.user_id)} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Remover acesso"><Trash2 className="h-4 w-4" /></button>}</div></div>
         {item.role === "operator" && <div className="mt-4 flex flex-wrap gap-2">{item.permissions.map((p) => <span key={p} className="rounded-full border border-border px-2.5 py-1 text-xs">{modules.find(([id]) => id === p)?.[1] ?? p}</span>)}</div>}
       </div>)}</div>}
 
@@ -114,11 +114,12 @@ export function AcessoMaisAdmin({ openCreateRequest = 0 }: { openCreateRequest?:
           <label className="block rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">
             <span className="font-semibold">Função</span>
             <select value={editing.role} onChange={(e) => setEditing({ ...editing, role: e.target.value as Role })} className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2">
+              <option value="user">Usuário</option>
               <option value="operator">Operador</option>
               <option value="admin">Administrador</option>
             </select>
           </label>
-          {editing.role !== "admin" && <div>
+          {editing.role === "operator" && <div>
             <p className="mb-2 text-sm font-semibold">Permissões</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {modules.filter(([id]) => !["acesso_plus", "configuracoes"].includes(id)).map(([id, label]) => <label key={id} className="flex items-center gap-2 rounded-xl border border-border p-3 text-sm">
@@ -130,7 +131,7 @@ export function AcessoMaisAdmin({ openCreateRequest = 0 }: { openCreateRequest?:
         </div>
         <div className="mt-6 flex justify-end gap-2">
           <button type="button" onClick={() => setEditing(null)} className="rounded-full border border-border px-5 py-2.5">Cancelar</button>
-          <button type="button" onClick={saveEdit} disabled={saving || (editing.role !== "admin" && editing.permissions.length === 0)} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-semibold text-primary-foreground disabled:opacity-60">
+          <button type="button" onClick={saveEdit} disabled={saving || (editing.role === "operator" && editing.permissions.length === 0)} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-semibold text-primary-foreground disabled:opacity-60">
             {saving && <Loader2 className="h-4 w-4 animate-spin" />} Salvar alterações
           </button>
         </div>
