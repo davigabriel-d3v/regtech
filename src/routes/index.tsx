@@ -26,6 +26,9 @@ import {
   X,
   Landmark,
   Star,
+  Wrench,
+  SearchCheck,
+  ShieldCheck,
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
 import { RodapeRegTech } from "@/components/RodapeRegTech";
@@ -98,6 +101,13 @@ const services = [
     title: "Atendimento Local",
     description:
       "Equipe presente em Tucumã-PA e Ourilândia-PA, perto de você.",
+  },
+  {
+    icon: Wrench,
+    slug: "diagnostico-e-reparo",
+    title: "Diagnóstico e Reparo Técnico",
+    description:
+      "Avaliação de falhas em computadores e notebooks, com explicação do problema e orientação sobre o reparo.",
   },
 ];
 
@@ -763,6 +773,51 @@ function Index() {
             </div>
           ))}
         </div>
+
+        {/* Por que escolher a RegTech */}
+        <section
+          id="por-que-regtech"
+          className="mt-20 rounded-3xl border border-border bg-card/50 px-5 py-12 sm:px-10"
+        >
+          <div className="mx-auto max-w-3xl text-center">
+            <h3 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+              Por que escolher a <span className="text-primary">RegTech</span>?
+            </h3>
+            <p className="mt-3 text-muted-foreground">
+              Tecnologia com orientação clara, experiência e atendimento próximo de você.
+            </p>
+          </div>
+          <div className="mt-9 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-border bg-background p-5">
+              <Award className="mb-3 h-7 w-7 text-primary" />
+              <h4 className="font-display font-semibold">Mais de 14 anos</h4>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Experiência em tecnologia e assistência técnica na região.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-background p-5">
+              <MapPin className="mb-3 h-7 w-7 text-primary" />
+              <h4 className="font-display font-semibold">Atendimento regional</h4>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Presença em Tucumã e Ourilândia do Norte, no Pará.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-background p-5">
+              <SearchCheck className="mb-3 h-7 w-7 text-primary" />
+              <h4 className="font-display font-semibold">Diagnóstico honesto</h4>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Entenda o problema identificado e as opções antes de decidir pelo reparo.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-background p-5">
+              <ShieldCheck className="mb-3 h-7 w-7 text-primary" />
+              <h4 className="font-display font-semibold">Mais confiança</h4>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Orientação próxima para escolher soluções adequadas à sua necessidade.
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* Marcas e produtos */}
         <div className="mt-20 text-center">
