@@ -163,7 +163,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
         const { data, error } = await supabase.from("products").insert({
           name: form.name.trim(), description: form.description.trim() || null, category_id: form.category_id,
           brand_id: form.brand_id, price, promotional_price: promo, stock: Number(form.stock),
-          minimum_stock: Number(form.minimum_stock), sku: form.sku.trim() || null, barcode: form.barcode.trim() || null,
+          barcode: form.barcode.trim() || null,
           notes: form.notes.trim() || null, status: form.status,
         }).select().single();
         if (error) throw error;
@@ -349,7 +349,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
             <div className="space-y-1.5 text-sm">
               <span className="font-medium text-foreground">Código de barras</span>
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
-                <input inputMode="numeric" maxLength={7} value={form.barcode} onChange={e=>setForm({...form,barcode:e.target.value.replace(/\\D/g, "").slice(0,7)})} placeholder="7 números" className="min-w-0 w-full flex-1 rounded-xl border border-border bg-background px-3 py-2.5 outline-none focus:border-primary" />
+                <input inputMode="numeric" maxLength={7} value={form.barcode} onChange={e=>setForm({...form,barcode:e.target.value.replace(/\D/g, "").slice(0,7)})} placeholder="7 números" className="min-w-0 w-full flex-1 rounded-xl border border-border bg-background px-3 py-2.5 outline-none focus:border-primary" />
                 <button type="button" onClick={()=>setForm(prev=>({...prev,barcode:String(Math.floor(1000000 + Math.random()*9000000))}))} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" aria-label="Gerar código de barras aleatório de 7 dígitos">
                   <Barcode className="h-4 w-4" /> Gerar código
                 </button>
