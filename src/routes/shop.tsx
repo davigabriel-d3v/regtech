@@ -181,6 +181,24 @@ function Shop() {
             </span>
           </Link>
 
+          <label className="relative hidden min-w-0 flex-1 md:block md:max-w-[380px]">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar produto, marca..."
+              aria-label="Buscar produto, marca"
+              className="w-full rounded-full border border-border bg-card/80 py-2.5 pl-11 pr-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={() => document.getElementById("busca-shop-mobile")?.focus()}
+            aria-label="Buscar produtos"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border hover:bg-secondary md:hidden"
+          >
+            <Search className="h-4 w-4" />
+          </button>
           <div className="ml-auto flex items-center gap-2">
             <Link
               to="/carrinho"
@@ -359,12 +377,14 @@ function Shop() {
               <p className="text-sm font-semibold text-primary">CATÁLOGO REGTECH</p>
               <h2 className="font-display text-3xl font-bold">Encontre seu próximo upgrade</h2>
             </div>
-            <label className="relative md:ml-auto md:w-[380px]">
+            <label className="relative md:ml-auto md:hidden">
               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
+                id="busca-shop-mobile"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 placeholder="Buscar produto, marca..."
+                aria-label="Buscar produto, marca"
                 className="w-full rounded-full border border-border bg-card py-3 pl-11 pr-4 text-sm outline-none focus:border-primary"
               />
             </label>
