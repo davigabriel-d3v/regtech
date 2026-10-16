@@ -291,26 +291,35 @@
 }
 
 
-/* Minimal global route loading spinner. */
+/* Global route loading overlay with a soft branded backdrop. */
 .rt-page-loader {
   position: fixed;
   inset: 0;
   z-index: 9999;
   display: grid;
   place-items: center;
-  pointer-events: none;
+  background: color-mix(in oklch, var(--background) 88%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: rt-loader-backdrop-in 160ms ease-out both;
 }
 .rt-page-loader__spinner {
-  width: 30px;
-  height: 30px;
-  border: 3px solid color-mix(in oklch, var(--primary) 22%, transparent);
+  width: 34px;
+  height: 34px;
+  border: 3px solid color-mix(in oklch, var(--primary) 24%, transparent);
   border-top-color: var(--primary);
+  border-right-color: color-mix(in oklch, var(--primary) 65%, transparent);
   border-radius: 50%;
+  box-shadow: 0 0 22px color-mix(in oklch, var(--primary) 20%, transparent);
   animation: rt-loader-spin 700ms linear infinite;
+}
+@keyframes rt-loader-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes rt-loader-spin {
   to { transform: rotate(360deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .rt-page-loader__spinner { animation-duration: 1.5s; }
+  .rt-page-loader, .rt-page-loader__spinner { animation-duration: 1.5s; }
 }
