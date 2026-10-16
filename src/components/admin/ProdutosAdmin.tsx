@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Copy, Eye, ImagePlus, Loader2, Pencil, Plus, Save, Share2, Star, Trash2, Upload, X } from "lucide-react";
+import { Barcode, Copy, Eye, ImagePlus, Loader2, Pencil, Plus, Save, Share2, Star, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -89,7 +89,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
     return products.filter(p => {
       const categoryOk = categoryFilter === "all" || p.category_id === categoryFilter;
       const statusOk = statusFilter === "all" || p.status === statusFilter;
-      const textOk = !q || [p.name, p.product_code, p.sku ?? "", p.id].some(v => v.toLowerCase().includes(q));
+      const textOk = !q || [p.name, p.product_code, p.id].some(v => v.toLowerCase().includes(q));
       return categoryOk && statusOk && textOk;
     });
   }, [products, query, categoryFilter, statusFilter]);
@@ -155,7 +155,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
         const { error } = await supabase.from("products").update({
           name: form.name.trim(), description: form.description.trim() || null, category_id: form.category_id,
           brand_id: form.brand_id, price, promotional_price: promo, stock: Number(form.stock),
-          minimum_stock: Number(form.minimum_stock), sku: form.sku.trim() || null, barcode: form.barcode.trim() || null,
+          barcode: form.barcode.trim() || null,
           notes: form.notes.trim() || null, status: form.status,
         }).eq("id", editing.id);
         if (error) throw error;
@@ -278,7 +278,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
     </div>
 
     <div className="grid gap-3 md:grid-cols-[1fr_180px_150px]">
-      <input value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} placeholder="Buscar por nome, ID ou SKU" className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-primary" />
+      <input value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} placeholder="Buscar por nome ou ID" className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-primary" />
       <select value={categoryFilter} onChange={e => { setCategoryFilter(e.target.value); setPage(1); }} className="rounded-xl border border-border bg-card px-3 py-2.5 text-sm">
         <option value="all">Todas as categorias</option>
         {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -297,7 +297,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
           <tbody>
             {rows.map(p => <tr key={p.id} className="border-b border-border last:border-0">
               <td className="p-3">{p.product_images?.sort((a,b)=>a.display_order-b.display_order)[0]?.image_url ? <img src={p.product_images.sort((a,b)=>a.display_order-b.display_order)[0]!.image_url} className="h-11 w-11 rounded-lg object-cover" /> : <div className="h-11 w-11 rounded-lg bg-secondary" />}</td>
-              <td className="p-3"><div className="font-semibold">{p.name}</div><div className="text-xs text-muted-foreground">{p.sku || "Sem SKU"}</div></td>
+              <td className="p-3"><div className="font-semibold">{p.name}</div></td>
               <td className="p-3"><button className="inline-flex items-center gap-1 font-mono text-xs text-primary" onClick={() => navigator.clipboard.writeText(p.product_code).then(()=>toast.success("ID copiado!"))}>{p.product_code}<Copy className="h-3.5 w-3.5" /></button></td>
               <td className="p-3">{money(p.promotional_price ?? p.price)}</td><td className="p-3">{p.stock}</td>
               <td className="p-3"><span className={`rounded-full px-2.5 py-1 text-xs ${p.status === "active" ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"}`}>{p.status === "active" ? "Ativo" : "Inativo"}</span></td>
@@ -343,10 +343,19 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
             <label className="block space-y-1.5 text-sm"><span className="font-medium">Categoria</span><select value={form.category_id} onChange={e=>setForm({...form,category_id:e.target.value})} className="w-full rounded-xl border border-border bg-background px-3 py-2.5">{categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
             <label className="block space-y-1.5 text-sm"><span className="font-medium">Marca</span><select value={form.brand_id} onChange={e=>setForm({...form,brand_id:e.target.value})} className="w-full rounded-xl border border-border bg-background px-3 py-2.5"><option value="">Selecione</option>{brands.map(b=><option key={b.id} value={b.id}>{b.nome}</option>)}</select></label>
             <div className="grid grid-cols-2 gap-3">{field("Preço","price","number")}{field("Preço promocional","promotional_price","number")}</div>
-            <div className="grid grid-cols-2 gap-3">{field("Estoque","stock","number")}{field("Estoque mínimo","minimum_stock","number")}</div>
+            <div className="grid grid-cols-1 gap-3">{field("Estoque","stock","number")}</div>
           </div>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">{field("SKU","sku")}{field("Código de barras","barcode")}</div>
+            <div className="space-y-1.5 text-sm">
+              <span className="font-medium text-foreground">Código de barras</span>
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
+                <input inputMode="numeric" maxLength={7} value={form.barcode} onChange={e=>setForm({...form,barcode:e.target.value.replace(/\\D/g, "").slice(0,7)})} placeholder="7 números" className="min-w-0 w-full flex-1 rounded-xl border border-border bg-background px-3 py-2.5 outline-none focus:border-primary" />
+                <button type="button" onClick={()=>setForm(prev=>({...prev,barcode:String(Math.floor(1000000 + Math.random()*9000000))}))} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" aria-label="Gerar código de barras aleatório de 7 dígitos">
+                  <Barcode className="h-4 w-4" /> Gerar código
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">Gera um número aleatório de 7 dígitos. Você também pode digitar o código manualmente.</p>
+            </div>
             <label className="block space-y-1.5 text-sm"><span className="font-medium">Observações</span><textarea value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} rows={4} className="w-full rounded-xl border border-border bg-background px-3 py-2.5 outline-none focus:border-primary"/></label>
             <label className="block space-y-1.5 text-sm"><span className="font-medium">Status</span><select value={form.status} onChange={e=>setForm({...form,status:e.target.value as "active"|"inactive"})} className="w-full rounded-xl border border-border bg-background px-3 py-2.5"><option value="active">Ativo</option><option value="inactive">Inativo</option></select></label>
             <div className="rounded-2xl border border-border p-4">
@@ -385,7 +394,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
       </div>
     </div>
   </div>
-</div><div className="mt-5 grid gap-4 sm:grid-cols-2">{(viewing.product_images??[]).sort((a,b)=>a.display_order-b.display_order).map(i=><img key={i.id} src={i.image_url} className="aspect-square w-full rounded-xl object-cover"/> )}</div><div className="mt-5 grid grid-cols-2 gap-3 text-sm"><p><b>Preço:</b> {money(viewing.price)}</p><p><b>Estoque:</b> {viewing.stock}</p><p><b>Status:</b> {viewing.status==="active"?"Ativo":"Inativo"}</p><p><b>SKU:</b> {viewing.sku||"—"}</p></div><p className="mt-4 text-sm text-muted-foreground">{viewing.description||"Sem descrição."}</p></div></div>}
+</div><div className="mt-5 grid gap-4 sm:grid-cols-2">{(viewing.product_images??[]).sort((a,b)=>a.display_order-b.display_order).map(i=><img key={i.id} src={i.image_url} className="aspect-square w-full rounded-xl object-cover"/> )}</div><div className="mt-5 grid grid-cols-2 gap-3 text-sm"><p><b>Preço:</b> {money(viewing.price)}</p><p><b>Estoque:</b> {viewing.stock}</p><p><b>Status:</b> {viewing.status==="active"?"Ativo":"Inativo"}</p></div><p className="mt-4 text-sm text-muted-foreground">{viewing.description||"Sem descrição."}</p></div></div>}
 
     {deleteTarget && <div className="fixed inset-0 z-[80] flex items-center justify-center bg-background/80 p-4 backdrop-blur"><div className="w-full max-w-md rounded-3xl border border-border bg-card p-6"><h3 className="font-display text-lg font-bold">Excluir produto</h3><p className="mt-2 text-sm text-muted-foreground">Tem certeza que deseja excluir este produto?</p><div className="mt-6 flex justify-end gap-2"><button onClick={()=>setDeleteTarget(null)} className="rounded-full border px-4 py-2 text-sm">Cancelar</button><button onClick={removeProduct} disabled={saving} className="rounded-full bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground">Excluir</button></div></div></div>}
   </section>;
