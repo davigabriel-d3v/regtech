@@ -55,7 +55,7 @@ function Conta() {
     Promise.all([
       supabase.from("orders").select("id,order_number,status,created_at").order("created_at", { ascending: false }).limit(8),
       (supabase as any).from("user_notifications").select("id,title,message,type,read_at,created_at").order("created_at", { ascending: false }).limit(8),
-      (supabase as any).from("coupon_redemptions").select("id,redeemed_at,redemption_cycle,coupons(id,code,name,description,reward_type,reward_value,reward_text,redemption_cycle)").eq("user_id", user.id).order("redeemed_at", { ascending: false }),
+      (supabase as any).rpc("get_my_coupon_redemptions"),
       supabase.from("shop_settings").select("whatsapp_phone").eq("id", "default").maybeSingle(),
     ]).then(([ordersResult, notificationsResult, couponsResult, settingsResult]) => {
       if (!ativo) return;
