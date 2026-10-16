@@ -190,8 +190,7 @@ function Conta() {
             <p className="mt-1 text-xs text-muted-foreground">Os cupons resgatados ficam salvos nesta conta. Use o botão para abrir o WhatsApp com a mensagem pronta.</p>
             <div className="mt-4 space-y-3">
               {myCoupons.length ? myCoupons.map((redemption) => {
-                const coupon = Array.isArray(redemption.coupons) ? redemption.coupons[0] : redemption.coupons;
-                if (!coupon) return null;
+                const coupon = redemption;
                 const currentCycle = redemption.redemption_cycle === redemption.current_redemption_cycle;
                 const reward = coupon.reward_type === "percent_discount"
                   ? `${Number(coupon.reward_value).toLocaleString("pt-BR")}% de desconto`
