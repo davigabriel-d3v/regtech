@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 
-/**
- * A brief, branded loading layer for client-side route changes.
- * It never delays the router; it only gives the transition a visible finish.
- */
+/** Minimal spinner shown briefly during client-side route changes. */
 export function PageTransitionLoader() {
   const router = useRouter();
   const [visible, setVisible] = useState(false);
@@ -24,7 +21,7 @@ export function PageTransitionLoader() {
     });
 
     const unsubscribeResolved = router.subscribe("onResolved", () => {
-      const remaining = Math.max(0, 220 - (Date.now() - startedAt.current));
+      const remaining = Math.max(0, 180 - (Date.now() - startedAt.current));
       clearTimer();
       timer.current = setTimeout(() => {
         setVisible(false);
@@ -43,15 +40,7 @@ export function PageTransitionLoader() {
 
   return (
     <div className="rt-page-loader" role="status" aria-live="polite" aria-label="Carregando página">
-      <div className="rt-page-loader__content">
-        <div className="rt-page-loader__mark" aria-hidden="true">
-          <span>R</span>
-        </div>
-        <div className="rt-page-loader__track" aria-hidden="true">
-          <span />
-        </div>
-        <p>Preparando sua experiência</p>
-      </div>
+      <span className="rt-page-loader__spinner" aria-hidden="true" />
     </div>
   );
 }
