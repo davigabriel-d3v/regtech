@@ -61,7 +61,7 @@ export function LojaCatalogoAdmin() {
 
   async function saveSettings() {
     const phone = digits(settings.whatsapp_phone);
-    if (phone.length < 10 || phone.length > 15) return toast.error("Informe um número de WhatsApp válido com DDI e DDD.");
+    if (phone.length < 10 || phone.length > 15) return void toast.error("Informe um número de WhatsApp válido com DDI e DDD.");
     setSaving(true);
     const { error } = await supabase.from("shop_settings").update({
       whatsapp_phone:phone, offers_enabled:settings.offers_enabled, offers_title:settings.offers_title.trim() || "Ofertas do dia",
@@ -75,7 +75,7 @@ export function LojaCatalogoAdmin() {
 
   async function setOffer(product: Row, value: string) {
     const parsed = value.trim() === "" ? null : Number(value);
-    if (parsed != null && (!Number.isFinite(parsed) || parsed <= 0 || parsed >= product.price)) return toast.error("O preço de oferta deve ser maior que zero e menor que o preço original.");
+    if (parsed != null && (!Number.isFinite(parsed) || parsed <= 0 || parsed >= product.price)) return void toast.error("O preço de oferta deve ser maior que zero e menor que o preço original.");
     const { error } = await supabase.from("products").update({ promotional_price: parsed }).eq("id",product.id);
     if (error) toast.error(error.message); else { setProducts(cur => cur.map(p => p.id===product.id ? {...p,promotional_price:parsed} : p)); toast.success(parsed == null ? "Oferta removida." : "Preço de oferta atualizado."); }
   }
@@ -95,6 +95,7 @@ export function LojaCatalogoAdmin() {
     const index = featured.findIndex(p=>p.id===product.id), target = index + direction;
     if (index < 0 || target < 0 || target >= featured.length) return;
     const other=featured[target];
+    if (!other) return;
     const results=await Promise.all([
       supabase.from("products").update({catalog_order:other.catalog_order}).eq("id",product.id),
       supabase.from("products").update({catalog_order:product.catalog_order}).eq("id",other.id),

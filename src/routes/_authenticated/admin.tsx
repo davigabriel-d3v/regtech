@@ -25,6 +25,10 @@ export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
       { title: "Painel Admin | RegTech" },
+      { property: "og:title", content: "Painel Admin | RegTech" },
+      { property: "og:description", content: "Painel administrativo da RegTech Cell Shop" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "description", content: "Painel administrativo da RegTech Cell Shop" },
       { name: "robots", content: "noindex" },
     ],

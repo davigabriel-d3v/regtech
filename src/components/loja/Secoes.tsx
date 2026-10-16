@@ -30,6 +30,7 @@ import {
   Bike,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useFavoritos } from "@/hooks/useFavoritos";
 import { supabase } from "@/integrations/supabase/client";
 import { whatsappComMensagem } from "@/lib/contato";
 import { SolicitarPedidoModal } from "@/components/loja/SolicitarPedidoModal";
@@ -363,7 +364,7 @@ export function ProdutoCardLoja({ produto, whatsappPhone = "5594992989833" }: { 
       : null;
 
   return (
-    <article className="group relative flex h-full flex-col rounded-2xl border border-border bg-card/70 p-3 transition-all duration-300 hover:-translate-y-1 hover:border-primary/60 hover:shadow-xl hover:shadow-primary/10">
+    <article data-motion="product" className="group relative flex h-full flex-col rounded-2xl border border-border bg-card/70 p-3 transition-all duration-300 hover:-translate-y-1 hover:border-primary/60 hover:shadow-xl hover:shadow-primary/10">
       <div className="relative aspect-square overflow-hidden rounded-xl bg-secondary/50">
         {produto.imagemUrl ? (
           <img src={produto.imagemUrl} alt={produto.titulo} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -602,7 +603,7 @@ export function Newsletter() {
       return;
     }
     setEnviando(true);
-    const { error } = await supabase.from("newsletter").insert({ email: valor });
+    const { error } = await (supabase as any).from("newsletter").insert({ email: valor });
     setEnviando(false);
     if (error && error.code !== "23505") {
       toast.error("Não foi possível cadastrar agora. Tente novamente.");

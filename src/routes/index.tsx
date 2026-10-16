@@ -69,6 +69,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "RegTech — Sua Loja de Tecnologia Online" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "description", content: "Os melhores produtos de tecnologia: celulares, notebooks, eletrônicos, e muito mais com os melhores preços." },
       { property: "og:title", content: "RegTech — Sua Loja de Tecnologia Online" },
       { property: "og:description", content: "Descubra os melhores produtos de tecnologia com preços imperdíveis." },
@@ -265,6 +266,7 @@ function Index() {
           <div className="relative">
             <button
               type="button"
+              aria-label="Categorias"
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((open) => !open)}
               className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary sm:px-4"
@@ -282,7 +284,7 @@ function Index() {
                   className="fixed inset-0 z-40"
                   onClick={() => setMenuOpen(false)}
                 />
-                <nav className="absolute left-0 top-full z-50 mt-2 max-h-[70vh] w-60 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-xl shadow-primary/10">
+                <nav className="rt-menu-enter absolute left-0 top-full z-50 mt-2 max-h-[70vh] w-60 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-xl shadow-primary/10">
                   <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Links rápidos
                   </p>

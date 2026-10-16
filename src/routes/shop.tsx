@@ -88,6 +88,10 @@ export const Route = createFileRoute("/shop")({
   head: () => ({
     meta: [
       { title: "Shop RegTech — Tecnologia, mobilidade e conectividade" },
+      { property: "og:title", content: "Shop RegTech — Tecnologia, mobilidade e conectividade" },
+      { property: "og:description", content: "Compre tecnologia, motos elétricas, Starlink, Apple, Samsung, Xiaomi, DJI e acessórios na RegTech." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         name: "description",
         content:
@@ -154,6 +158,7 @@ function Shop() {
           <div className="relative">
             <button
               type="button"
+              aria-label="Categorias"
               aria-expanded={menu}
               onClick={() => setMenu((open) => !open)}
               className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary sm:px-4"
@@ -182,7 +187,7 @@ function Shop() {
             >
               <ShoppingCart className="h-4 w-4" />
               {totalItens > 0 && (
-                <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-primary px-1 text-center text-[10px] font-bold text-primary-foreground">
+                <span key={totalItens} className="rt-cart-feedback absolute -right-1 -top-1 min-w-5 rounded-full bg-primary px-1 text-center text-[10px] font-bold text-primary-foreground">
                   {totalItens > 99 ? "99+" : totalItens}
                 </span>
               )}
@@ -200,7 +205,7 @@ function Shop() {
         {menu && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setMenu(false)} />
-            <nav className="absolute left-4 top-full z-50 mt-2 max-h-[70vh] w-60 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-xl shadow-primary/10 sm:left-6">
+            <nav className="rt-menu-enter absolute left-4 top-full z-50 mt-2 max-h-[70vh] w-60 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-xl shadow-primary/10 sm:left-6">
               <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Links rápidos</p>
               {[
                 { label: "Início", href: "/#inicio" },
@@ -384,7 +389,7 @@ function Shop() {
                     ? Math.round((1 - produto.preco / produto.precoAntigo) * 100)
                     : null;
                 return (
-                  <article key={produto.id} className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/5">
+                  <article data-motion="product" key={produto.id} className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/5">
                     <div className="relative aspect-square overflow-hidden bg-secondary">
                       {produto.imagemUrl ? (
                         <img src={produto.imagemUrl} alt={produto.titulo} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />

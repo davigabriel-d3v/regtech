@@ -151,52 +151,65 @@
 }
 
 
-/* Motion system: animações leves e consistentes em telas grandes e pequenas. */
-@keyframes rt-fade-up {
-  from { opacity: 0; transform: translate3d(0, 14px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
+/* Storefront motion: short, transform-only entrances and progressive scroll reveals. */
+:root {
+  --motion-fast: 160ms;
+  --motion-normal: 240ms;
+  --motion-enter: 360ms;
+  --motion-ease: cubic-bezier(.2, .7, .2, 1);
 }
-@keyframes rt-banner-enter {
-  from { opacity: 0; transform: translate3d(0, 8px, 0) scale(.995); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+@keyframes rt-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-@keyframes rt-soft-glow {
-  0%, 100% { filter: drop-shadow(0 0 0 rgb(12 71 227 / 0)); }
-  50% { filter: drop-shadow(0 4px 14px rgb(12 71 227 / .16)); }
+@keyframes rt-feedback {
+  0%, 100% { transform: scale(1); }
+  45% { transform: scale(1.12); }
 }
-
 @media (prefers-reduced-motion: no-preference) {
-  main > section {
-    animation: rt-fade-up .65s cubic-bezier(.2, .7, .2, 1) both;
+  .rt-store-motion :is(button, a, input, textarea, select) {
+    transition: color var(--motion-fast) ease, background-color var(--motion-fast) ease,
+      border-color var(--motion-fast) ease, opacity var(--motion-fast) ease,
+      transform var(--motion-normal) var(--motion-ease), box-shadow var(--motion-normal) ease;
   }
-  main > section:nth-child(2) { animation-delay: .06s; }
-  main > section:nth-child(3) { animation-delay: .12s; }
-  main > section:nth-child(4) { animation-delay: .18s; }
-
-  main button,
-  main a,
-  header button,
-  header a {
-    transition: color .2s ease, background-color .2s ease, border-color .2s ease,
-      box-shadow .25s ease, transform .25s ease;
+  .rt-store-motion :is(button, [role="button"]):not(:disabled):active { scale: .98; }
+  .rt-store-motion [data-motion="product"] {
+    transition: transform var(--motion-normal) var(--motion-ease), border-color var(--motion-normal) ease,
+      box-shadow var(--motion-normal) ease;
   }
-  main button:hover,
-  main a:hover,
-  header button:hover,
-  header a:hover {
-    transform: translateY(-1px);
+  .rt-store-motion [data-motion="product"] img {
+    transition: transform var(--motion-enter) var(--motion-ease);
   }
-  .rt-banner-enter {
-    animation: rt-banner-enter .55s cubic-bezier(.2, .7, .2, 1) both;
+  .rt-reveal { opacity: 0; translate: 0 12px; }
+  .rt-reveal.rt-revealed {
+    opacity: 1; translate: 0 0;
+    transition: opacity var(--motion-enter) var(--motion-ease), translate var(--motion-enter) var(--motion-ease);
   }
-  main img {
-    transition: transform .45s ease, filter .45s ease;
+  .rt-menu-enter, .rt-cart-item, .rt-banner-enter {
+    animation: rt-enter var(--motion-normal) var(--motion-ease) both;
   }
-  main img:hover {
-    filter: saturate(1.06);
+  .rt-menu-enter { transform-origin: top left; }
+  .rt-cart-feedback { animation: rt-feedback var(--motion-normal) ease-out; }
+  .rt-store-motion [data-sonner-toast] {
+    /* Sonner owns enter/exit transforms and swipe gestures. */
+    --normal-transition: transform 240ms, opacity 240ms, height 240ms, box-shadow 160ms;
   }
+  .rt-store-motion [role="dialog"] { animation-duration: var(--motion-normal); }
 }
-
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .rt-store-motion [data-motion="product"]:hover { transform: translateY(-3px); }
+  .rt-store-motion [data-motion="product"]:hover img { transform: scale(1.035); }
+  .rt-store-motion :is(button, a)[class*="bg-primary"]:not(:disabled):hover { translate: 0 -1px; }
+  .rt-menu-enter :is(a, button):hover { translate: 2px 0; }
+}
+@media (hover: none) {
+  .rt-store-motion [data-motion="product"]:hover { transform: none; }
+  .rt-store-motion [data-motion="product"]:hover img { transform: none; }
+}
+/* Keyboard feedback remains visible with or without animation. */
+.rt-store-motion :is(button, a, input, textarea, select):focus-visible {
+  outline: 2px solid var(--ring); outline-offset: 3px;
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
@@ -204,84 +217,5 @@
     scroll-behavior: auto !important;
     transition-duration: .01ms !important;
   }
+  .rt-reveal { opacity: 1; translate: none; }
 }
-
-/* Transições globais do RegTech: navegação, componentes, formulários e overlays. */
-@keyframes rt-page-enter {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes rt-overlay-enter {
-  from { opacity: 0; transform: translateY(8px) scale(.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes rt-image-reveal {
-  from { opacity: .65; }
-  to { opacity: 1; }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  html { scroll-behavior: smooth; }
-
-  body { animation: rt-page-enter .35s ease-out both; }
-
-  /* Interações consistentes em botões, links, campos e controles. */
-  button, a, input, textarea, select, [role="button"], [role="tab"],
-  [role="menuitem"], summary {
-    transition:
-      color .2s ease,
-      background-color .2s ease,
-      border-color .2s ease,
-      box-shadow .25s ease,
-      opacity .2s ease,
-      transform .22s ease,
-      filter .25s ease;
-  }
-
-  button:active, [role="button"]:active {
-    transform: scale(.98);
-  }
-
-  input:focus-visible, textarea:focus-visible, select:focus-visible,
-  button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
-    outline: 2px solid var(--brand-light);
-    outline-offset: 3px;
-  }
-
-  /* Cards e blocos clicáveis ganham profundidade sem interferir no layout. */
-  main [class*="rounded-"][class*="border"],
-  main [data-slot="card"],
-  [role="dialog"], [data-state="open"][data-side] {
-    transition: border-color .25s ease, box-shadow .25s ease, background-color .25s ease;
-  }
-
-  main [class*="rounded-"][class*="border"]:hover,
-  main [data-slot="card"]:hover {
-    border-color: color-mix(in oklab, var(--brand-light) 35%, transparent);
-  }
-
-  dialog[open], [role="dialog"], [data-state="open"][data-side],
-  [data-radix-popper-content-wrapper] {
-    animation: rt-overlay-enter .22s cubic-bezier(.2, .7, .2, 1) both;
-  }
-
-  main img, main video, main picture {
-    animation: rt-image-reveal .35s ease-out both;
-  }
-
-  /* Feedback visual para cartões de produto e elementos que funcionam como links. */
-  main article, main [data-clickable="true"] {
-    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-  }
-  main article:hover, main [data-clickable="true"]:hover {
-    transform: translateY(-2px);
-  }
-}
-
-@media (max-width: 639px) and (prefers-reduced-motion: no-preference) {
-  main > section { animation-duration: .45s; }
-  main button:hover, main a:hover, header button:hover, header a:hover {
-    transform: none;
-  }
-}
-

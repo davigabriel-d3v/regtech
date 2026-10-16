@@ -4,8 +4,8 @@ import type { Database } from "@/integrations/supabase/types";
 import { DEFAULT_BANNERS, type BannerPrincipal } from "./banners";
 
 function createReader(): SupabaseClient<Database> {
-  const configuredUrl = process.env.SUPABASE_URL;
-  const configuredKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+  const configuredUrl = process.env['SUPABASE_URL'];
+  const configuredKey = process.env['SUPABASE_PUBLISHABLE_KEY'];
   const url = configuredUrl === SUPABASE_PROJECT_URL ? configuredUrl : SUPABASE_PROJECT_URL;
   const key = configuredKey === SUPABASE_PUBLISHABLE_KEY ? configuredKey : SUPABASE_PUBLISHABLE_KEY;
   return createClient<Database>(url, key, { auth: { persistSession: false, autoRefreshToken: false } });

@@ -17,6 +17,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CarrinhoProvider } from "@/components/loja/CarrinhoContext";
 import { FavoritosProvider } from "@/components/loja/FavoritosContext";
 import { AtendimentoChat } from "@/components/atendimento/AtendimentoChat";
+import { StoreMotion } from "@/components/loja/StoreMotion";
 
 function NotFoundComponent() {
   return (
@@ -152,6 +153,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <CarrinhoProvider>
         <FavoritosProvider>
+          <StoreMotion />
           <Outlet />
           <AtendimentoChat />
           <Toaster />

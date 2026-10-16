@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Storefront motion uses shared CSS and a single route-aware observer in StoreMotion; keep content visible by default and honor reduced motion to preserve accessibility and avoid animation dependencies.

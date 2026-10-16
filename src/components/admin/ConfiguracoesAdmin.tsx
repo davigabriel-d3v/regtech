@@ -51,7 +51,7 @@ export function ConfiguracoesAdmin() {
   useEffect(() => { void load(); }, []);
 
   async function save() {
-    if (!settings.store_name.trim()) return toast.error("Informe o nome da loja.");
+    if (!settings.store_name.trim()) return void toast.error("Informe o nome da loja.");
     setSaving(true);
     const { error } = await (supabase as any).from("shop_settings").upsert({
       id: "default",
