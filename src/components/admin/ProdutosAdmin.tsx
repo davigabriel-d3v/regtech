@@ -303,7 +303,7 @@ export function ProdutosAdmin({ openCreateRequest = 0 }: { openCreateRequest?: n
           </tr></thead>
           <tbody>
             {rows.map(p => <tr key={p.id} className="border-b border-border last:border-0">
-              <td className="p-3">{p.product_images?.sort((a,b)=>a.display_order-b.display_order)[0]?.image_url ? <img src={p.product_images.sort((a,b)=>a.display_order-b.display_order)[0]!.image_url} className="h-11 w-11 rounded-lg object-cover" /> : <div className="h-11 w-11 rounded-lg bg-secondary" />}</td>
+              <td className="p-3">{p.product_images?.sort((a,b)=>a.display_order-b.display_order)[0]?.image_url ? (isVideoMedia(p.product_images.sort((a,b)=>a.display_order-b.display_order)[0]!.image_url) ? <video src={p.product_images.sort((a,b)=>a.display_order-b.display_order)[0]!.image_url} className="h-11 w-11 rounded-lg object-cover" muted playsInline /> : <img src={p.product_images.sort((a,b)=>a.display_order-b.display_order)[0]!.image_url} alt={p.name} className="h-11 w-11 rounded-lg object-cover" />) : <div className="h-11 w-11 rounded-lg bg-secondary" />}</td>
               <td className="p-3"><div className="font-semibold">{p.name}</div></td>
               <td className="p-3"><button className="inline-flex items-center gap-1 font-mono text-xs text-primary" onClick={() => navigator.clipboard.writeText(p.product_code).then(()=>toast.success("ID copiado!"))}>{p.product_code}<Copy className="h-3.5 w-3.5" /></button></td>
               <td className="p-3">{money(p.promotional_price ?? p.price)}</td><td className="p-3">{p.stock}</td>
