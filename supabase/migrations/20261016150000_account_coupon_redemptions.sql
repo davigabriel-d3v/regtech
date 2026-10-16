@@ -140,4 +140,34 @@ $$;
 revoke all on function public.reset_coupon_redemptions(uuid) from public, anon, authenticated;
 grant execute on function public.reset_coupon_redemptions(uuid) to authenticated;
 
+create or replace function public.get_my_coupon_redemptions()
+returns table (
+  id uuid,
+  redeemed_at timestamptz,
+  redemption_cycle integer,
+  coupon_id uuid,
+  code text,
+  name text,
+  description text,
+  reward_type text,
+  reward_value numeric,
+  reward_text text,
+  current_redemption_cycle integer
+)
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select r.id, r.redeemed_at, r.redemption_cycle, c.id, c.code, c.name,
+         c.description, c.reward_type, c.reward_value, c.reward_text, c.redemption_cycle
+  from public.coupon_redemptions r
+  join public.coupons c on c.id = r.coupon_id
+  where r.user_id = auth.uid()
+  order by r.redeemed_at desc;
+$$;
+
+revoke all on function public.get_my_coupon_redemptions() from public, anon;
+grant execute on function public.get_my_coupon_redemptions() to authenticated;
+
 notify pgrst, 'reload schema';
