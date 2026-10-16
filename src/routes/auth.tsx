@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/regtech-logo.png";
+import { SeloVerificado } from "@/components/SeloVerificado";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -219,7 +220,7 @@ function AuthPage() {
                     : "Recuperar senha"}
               </h1>
               <p className="text-sm text-muted-foreground">
-                RegTech — seu upgrade começa aqui
+                <span className="inline-flex items-center">RegTech<SeloVerificado /></span> — seu upgrade começa aqui
               </p>
             </div>
           </div>

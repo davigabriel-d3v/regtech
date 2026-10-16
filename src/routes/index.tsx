@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
 import { RodapeRegTech } from "@/components/RodapeRegTech";
+import { SeloVerificado } from "@/components/SeloVerificado";
 import { CookieConsent } from "@/components/CookieConsent";
 import { toast } from "sonner";
 import logo from "@/assets/regtech-logo.png";
@@ -329,7 +330,7 @@ function Index() {
           <a href="#" className="flex items-center gap-2 sm:gap-3">
             <img src={logo} alt="Logo da RegTech" className="h-9 w-9 rounded-full" />
             <span className="font-display text-lg font-bold tracking-tight">
-              Reg<span className="text-primary">Tech</span>
+              Reg<span className="text-primary">Tech</span><SeloVerificado />
             </span>
           </a>
           <nav className="ml-auto hidden items-center gap-8 text-sm text-muted-foreground md:flex">

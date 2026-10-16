@@ -1,6 +1,7 @@
 import { Instagram, Mail, MapPin, MessageCircle, Phone, ShieldCheck, ShoppingBag } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/regtech-logo.png";
+import { SeloVerificado } from "@/components/SeloVerificado";
 
 const contatos = [
   { label: "Vendas • Tucumã", phone: "55 94 99298-9833", href: "https://api.whatsapp.com/send/?phone=5594992989833&text&type=phone_number&app_absent=0" },
@@ -18,7 +19,7 @@ export function RodapeRegTech() {
             <div className="flex items-center gap-3">
               <img src={logo} alt="Logo da RegTech" className="h-10 w-10 rounded-full" />
               <div>
-                <p className="font-display text-lg font-bold">Reg<span className="text-primary">Tech</span></p>
+                <p className="inline-flex items-center font-display text-lg font-bold">Reg<span className="text-primary">Tech</span><SeloVerificado /></p>
                 <p className="text-xs text-muted-foreground">Tecnologia que faz avançar</p>
               </div>
             </div>
