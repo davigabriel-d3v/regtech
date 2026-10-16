@@ -131,7 +131,7 @@ function ProdutoCompartilhado() {
           <div>
             <div className="relative aspect-square overflow-hidden rounded-3xl bg-secondary/50">
               {images.length ? (
-                {isVideoMedia(images[imageIndex] ?? images[0] ?? "") ? <video src={images[imageIndex] ?? images[0]} controls playsInline className="h-full w-full object-cover" /> : <img src={images[imageIndex] ?? images[0]} alt={product.titulo} className="h-full w-full object-cover" />}
+                isVideoMedia(images[imageIndex] ?? images[0] ?? "") ? <video src={images[imageIndex] ?? images[0]} controls playsInline className="h-full w-full object-cover" /> : <img src={images[imageIndex] ?? images[0]} alt={product.titulo} className="h-full w-full object-cover" />
               ) : (
                 <div className="grid h-full place-items-center"><Package className="h-20 w-20 text-muted-foreground/50" /></div>
               )}
