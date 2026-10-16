@@ -12,11 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as ShopRouteImport } from './routes/shop'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
+import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as PreviewRouteImport } from './routes/preview'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ResgatarRouteImport } from './routes/resgatar'
+import { Route as ShopRouteImport } from './routes/shop'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/conta'
+import { Route as ProdutoProductCodeRouteImport } from './routes/produto.$productCode'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -32,9 +38,34 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CarrinhoRoute = CarrinhoRouteImport.update({
+  id: '/carrinho',
+  path: '/carrinho',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewRoute = PreviewRouteImport.update({
+  id: '/preview',
+  path: '/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResgatarRoute = ResgatarRouteImport.update({
+  id: '/resgatar',
+  path: '/resgatar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShopRoute = ShopRouteImport.update({
@@ -42,9 +73,9 @@ const ShopRoute = ShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CarrinhoRoute = CarrinhoRouteImport.update({
-  id: '/carrinho',
-  path: '/carrinho',
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -57,60 +88,121 @@ const AuthenticatedContaRoute = AuthenticatedContaRouteImport.update({
   path: '/conta',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ProdutoProductCodeRoute = ProdutoProductCodeRouteImport.update({
+  id: '/produto/$productCode',
+  path: '/produto/$productCode',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/shop': typeof ShopRoute
   '/carrinho': typeof CarrinhoRoute
+  '/cookies': typeof CookiesRoute
+  '/preview': typeof PreviewRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/resgatar': typeof ResgatarRoute
+  '/shop': typeof ShopRoute
+  '/termos': typeof TermosRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/conta': typeof AuthenticatedContaRoute
+  '/produto/$productCode': typeof ProdutoProductCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/shop': typeof ShopRoute
   '/carrinho': typeof CarrinhoRoute
+  '/cookies': typeof CookiesRoute
+  '/preview': typeof PreviewRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/resgatar': typeof ResgatarRoute
+  '/shop': typeof ShopRoute
+  '/termos': typeof TermosRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/conta': typeof AuthenticatedContaRoute
+  '/produto/$productCode': typeof ProdutoProductCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/shop': typeof ShopRoute
   '/carrinho': typeof CarrinhoRoute
+  '/cookies': typeof CookiesRoute
+  '/preview': typeof PreviewRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/resgatar': typeof ResgatarRoute
+  '/shop': typeof ShopRoute
+  '/termos': typeof TermosRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/conta': typeof AuthenticatedContaRoute
+  '/produto/$productCode': typeof ProdutoProductCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/reset-password' | '/shop' | '/carrinho' | '/admin' | '/conta'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/carrinho'
+    | '/cookies'
+    | '/preview'
+    | '/privacidade'
+    | '/reset-password'
+    | '/resgatar'
+    | '/shop'
+    | '/termos'
+    | '/admin'
+    | '/conta'
+    | '/produto/$productCode'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/reset-password' | '/shop' | '/carrinho' | '/admin' | '/conta'
+  to:
+    | '/'
+    | '/auth'
+    | '/carrinho'
+    | '/cookies'
+    | '/preview'
+    | '/privacidade'
+    | '/reset-password'
+    | '/resgatar'
+    | '/shop'
+    | '/termos'
+    | '/admin'
+    | '/conta'
+    | '/produto/$productCode'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/reset-password'
-    | '/shop'
     | '/carrinho'
+    | '/cookies'
+    | '/preview'
+    | '/privacidade'
+    | '/reset-password'
+    | '/resgatar'
+    | '/shop'
+    | '/termos'
     | '/_authenticated/admin'
     | '/_authenticated/conta'
+    | '/produto/$productCode'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  ResetPasswordRoute: typeof ResetPasswordRoute
-  ShopRoute: typeof ShopRoute
   CarrinhoRoute: typeof CarrinhoRoute
+  CookiesRoute: typeof CookiesRoute
+  PreviewRoute: typeof PreviewRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  ResgatarRoute: typeof ResgatarRoute
+  ShopRoute: typeof ShopRoute
+  TermosRoute: typeof TermosRoute
+  ProdutoProductCodeRoute: typeof ProdutoProductCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -136,11 +228,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/carrinho': {
+      id: '/carrinho'
+      path: '/carrinho'
+      fullPath: '/carrinho'
+      preLoaderRoute: typeof CarrinhoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preview': {
+      id: '/preview'
+      path: '/preview'
+      fullPath: '/preview'
+      preLoaderRoute: typeof PreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resgatar': {
+      id: '/resgatar'
+      path: '/resgatar'
+      fullPath: '/resgatar'
+      preLoaderRoute: typeof ResgatarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shop': {
@@ -150,11 +277,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/carrinho': {
-      id: '/carrinho'
-      path: '/carrinho'
-      fullPath: '/carrinho'
-      preLoaderRoute: typeof CarrinhoRouteImport
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -170,6 +297,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/conta'
       preLoaderRoute: typeof AuthenticatedContaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/produto/$productCode': {
+      id: '/produto/$productCode'
+      path: '/produto/$productCode'
+      fullPath: '/produto/$productCode'
+      preLoaderRoute: typeof ProdutoProductCodeRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -191,9 +325,15 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  ResetPasswordRoute: ResetPasswordRoute,
-  ShopRoute: ShopRoute,
   CarrinhoRoute: CarrinhoRoute,
+  CookiesRoute: CookiesRoute,
+  PreviewRoute: PreviewRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  ResgatarRoute: ResgatarRoute,
+  ShopRoute: ShopRoute,
+  TermosRoute: TermosRoute,
+  ProdutoProductCodeRoute: ProdutoProductCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
