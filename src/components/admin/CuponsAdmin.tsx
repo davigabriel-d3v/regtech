@@ -113,7 +113,7 @@ export function CuponsAdmin() {
   }, []);
 
   async function saveWhatsappPhone() {
-    const digits = whatsappPhone.replace(/\\D/g, "");
+    const digits = whatsappPhone.replace(/\D/g, "");
     if (digits.length < 10 || digits.length > 15) return void toast.error("Informe um número de WhatsApp válido com DDI e DDD.");
     setSavingPhone(true);
     const { error } = await supabase.from("shop_settings").update({ whatsapp_phone: digits }).eq("id", "default");
