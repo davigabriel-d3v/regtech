@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { ContaBotao } from "@/components/ContaBotao";
 import { RodapeRegTech } from "@/components/RodapeRegTech";
+import { SeloVerificado } from "@/components/SeloVerificado";
 import { CompreCategoria, grupos } from "@/components/loja/Secoes";
 import { useCarrinho } from "@/components/loja/CarrinhoContext";
 import { listarMarcas, listarProdutos, type ProdutoLoja } from "@/lib/produtos.functions";
@@ -174,7 +175,7 @@ function Shop() {
           <Link to="/shop" className="flex items-center gap-2">
             <img src={logo} alt="RegTech" className="h-9 w-9 rounded-full" />
             <span className="font-display text-xl font-bold">
-              Reg<span className="text-primary">Tech</span>
+              Reg<span className="text-primary">Tech</span><SeloVerificado />
             </span>
             <span className="hidden rounded-full bg-primary/15 px-2.5 py-1 text-xs font-bold text-primary sm:inline">
               SHOP
