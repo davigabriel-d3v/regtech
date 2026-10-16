@@ -85,7 +85,7 @@ export function CuponsAdmin() {
     const [{ data: coupons, error: couponsError }, { data: redemptions, error: redemptionsError }] =
       await Promise.all([
         supabase.from("coupons").select("*").order("created_at", { ascending: false }),
-        supabase.from("coupon_redemptions").select("coupon_id"),
+        supabase.from("coupon_redemptions").select("coupon_id,redemption_cycle"),
       ]);
 
     if (couponsError) {
@@ -209,7 +209,7 @@ export function CuponsAdmin() {
   async function reset(item: Coupon) {
     if (!item.resettable) return void toast.error("Este cupom está configurado para não permitir reset.");
     if (!confirm(`Resetar os resgates de "${item.code}"? O cupom poderá ser usado novamente conforme as regras configuradas.`)) return;
-    const { error } = await supabase.rpc("reset_coupon_redemptions", { p_coupon_id: item.id });
+    const { error } = await (supabase as any).rpc("reset_coupon_redemptions", { p_coupon_id: item.id });
     if (error) toast.error(error.message);
     else { toast.success("Cupom resetado. O histórico foi preservado e um novo ciclo foi aberto."); await load(); }
   }
