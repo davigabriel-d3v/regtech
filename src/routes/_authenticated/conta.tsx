@@ -70,7 +70,7 @@ function Conta() {
   const unreadCount = useMemo(() => notifications.filter((n) => !n.read_at).length, [notifications]);
 
   function usarCupom(redemption: any) {
-    const coupon = Array.isArray(redemption.coupons) ? redemption.coupons[0] : redemption.coupons;
+    const coupon = redemption;
     const phone = couponWhatsapp.replace(/\D/g, "");
     if (!phone) { toast.error("O WhatsApp para cupons ainda não foi configurado pelo administrador."); return; }
     const message = `Olá! Quero usar meu cupom ${coupon?.code ?? ""} (${coupon?.name ?? "RegTech"}). Meu e-mail da conta é ${user.email ?? user.id}.`;
@@ -192,7 +192,7 @@ function Conta() {
               {myCoupons.length ? myCoupons.map((redemption) => {
                 const coupon = Array.isArray(redemption.coupons) ? redemption.coupons[0] : redemption.coupons;
                 if (!coupon) return null;
-                const currentCycle = redemption.redemption_cycle === coupon.redemption_cycle;
+                const currentCycle = redemption.redemption_cycle === redemption.current_redemption_cycle;
                 const reward = coupon.reward_type === "percent_discount"
                   ? `${Number(coupon.reward_value).toLocaleString("pt-BR")}% de desconto`
                   : coupon.reward_type === "fixed_discount" || coupon.reward_type === "credit"
